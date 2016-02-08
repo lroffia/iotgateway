@@ -15,7 +15,7 @@
  */
 
 
-package sofia_kp;
+package arces.unibo.KPI;
 
 import java.util.Vector;
 

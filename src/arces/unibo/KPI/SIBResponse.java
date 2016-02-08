@@ -1,4 +1,4 @@
-package sofia_kp;
+package arces.unibo.KPI;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
