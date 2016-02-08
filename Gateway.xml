@@ -1,0 +1,262 @@
+<updateSubscriptionProfile>
+  <prefixes>
+    <![CDATA[
+    PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+    PREFIX iot:<http://www.arces.unibo.it/IoTGateway#>
+    PREFIX owl:<http://www.w3.org/2002/07/owl#>
+    PREFIX fn:<http://www.w3.org/2005/xpath-functions#>
+    PREFIX sfn:<http://www.w3.org/ns/sparql#>
+    ]]>
+  </prefixes>
+  <updates>
+    <update n="1">
+    <forcedBindings>
+    <binding name="?protocol" value="" type="URI"/>
+    <binding name="?request" value="" type="URI"/>
+    <binding name="value" value="" type="literal"/>
+    </forcedBindings>
+      <!--MP Request (PROTOCOL ADAPTER)-->
+      <![CDATA[
+		INSERT DATA { 
+			?request rdf:type iot:MP-Request .
+			?request iot:hasProtocol ?protocol . 
+			?request iot:hasMPRequestString ?value }
+      ]]>
+    </update>
+      <update n="2">
+      <forcedBindings>
+    	<binding name="?network" value="" type="URI"/>
+    	<binding name="?response" value="" type="URI"/>
+    	<binding name="value" value="" type="literal"/>
+    </forcedBindings>
+      <!--MN Response (NETWORK ADAPTER)-->
+      <![CDATA[
+		INSERT DATA { 
+			?response rdf:type iot:MN-Response . 
+			?response iot:hasNetwork ?network . 
+			?response iot:hasMNResponseString ?value }
+      ]]>
+    </update>
+    <update n="3">
+      <!--MN Mapping insert (MANAGER)-->
+      <![CDATA[
+		 INSERT DATA { 
+			?mapping rdf:type iot:MN-Mapping . 
+			?mapping iot:hasNetwork ?network . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMNRequestPattern ?requestPattern . 
+			?mapping iot:hasMNResponsePattern ?responsePattern }
+      ]]>
+    </update>	
+    <update n="4">
+      <!--MP Mapping insert (MANAGER)-->
+      <![CDATA[
+		 INSERT DATA { 
+			?mapping rdf:type iot:MP-Mapping . 
+			?mapping iot:hasProtocol ?protocol . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMPRequestPattern ?requestPattern . 
+			?mapping iot:hasMPResponsePattern ?responsePattern }
+      ]]>
+    </update>	
+    <update n="5">
+      <!--MP Mapping delete (MANAGER)-->
+      <![CDATA[
+		 DELETE { 
+			?mapping rdf:type iot:MP-Mapping . 
+			?mapping iot:hasProtocol ?protocol . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMPRequestPattern ?requestPattern . 
+			?mapping iot:hasMPResponsePattern ?responsePattern } 
+		WHERE { 
+			?mapping rdf:type iot:MP-Mapping . 
+			?mapping iot:hasProtocol ?protocol . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMPRequestPattern ?requestPattern . 
+			?mapping iot:hasMPResponsePattern ?responsePattern }
+      ]]>
+    </update>	
+    <update n="6">
+      <!--MN Mapping delete (MANAGER)-->
+      <![CDATA[
+		 DELETE { 
+			?mapping rdf:type iot:MN-Mapping . 
+			?mapping iot:hasNetwork ?network . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMNRequestPattern ?requestPattern . 
+			?mapping iot:hasMNResponsePattern ?responsePattern } 
+		WHERE { 
+			?mapping rdf:type iot:MN-Mapping . 
+			?mapping iot:hasNetwork ?network . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMNRequestPattern ?requestPattern . 
+			?mapping iot:hasMNResponsePattern ?responsePattern }
+      ]]>
+    </update>
+    <update n="7">
+    <forcedBindings>
+    	<binding name="?action" value="" type="URI"/>
+    	<binding name="?request" value="" type="URI"/>
+    	<binding name="?context" value="" type="URI"/>
+    	<binding name="value" value="" type="literal"/>
+    </forcedBindings>
+      <!--IoT Request insert (MP DISPATCHER)-->
+      <![CDATA[
+		 INSERT DATA { 
+			?request rdf:type iot:IoT-Request . 
+			?request iot:hasValue ?value . 
+			?request iot:hasAction ?action . 
+			?request iot:hasContext ?context }	
+      ]]>
+    </update>
+    <update n="8">
+    <forcedBindings>
+    	<binding name="?request" value="" type="URI"/>
+    	<binding name="?response" value="" type="URI"/>
+    	<binding name="value" value="" type="literal"/>
+    </forcedBindings>
+      <!--MP Response insert (MP DISPATCHER)-->
+      <![CDATA[
+		  INSERT DATA { 
+			?request iot:hasMPResponse ?response . 
+			?response rdf:type iot:MP-Response . 
+			?response iot:hasMPResponseString ?value }	
+      ]]>
+    </update>	
+        <update n="9">
+        <forcedBindings>
+    	<binding name="?request" value="" type="URI"/>
+    	<binding name="?network" value="" type="URI"/>
+    	<binding name="value" value="" type="literal"/>
+    </forcedBindings>
+      <!--MN Request insert (MN DISPATCHER)-->
+      <![CDATA[
+    		INSERT DATA { 
+				?request rdf:type iot:MN-Request . 
+				?request iot:hasNetwork ?network . 
+				?request iot:hasMNRequestString ?value }		
+      ]]>
+    </update>
+        <update n="10">
+        <forcedBindings>
+    	<binding name="?response" value="" type="URI"/>
+    	<binding name="?action" value="" type="URI"/>
+    	<binding name="?context" value="" type="URI"/>
+    	<binding name="value" value="" type="literal"/>
+    </forcedBindings>
+      <!--IoT Response insert (MN DISPATCHER)-->
+      <![CDATA[
+    		INSERT DATA { 
+				?response rdf:type iot:IoT-Response . 
+				?response iot:hasAction ?action . 
+				?response iot:hasContext ?context . 
+				?response iot:hasValue ?value }	
+      ]]>
+    </update>	
+    </updates>
+  <subscribes>
+    <subscribe n="1">
+    <forcedBindings>
+    	<binding name="?protocol" value="" type="URI"/>
+    </forcedBindings>
+      <!--MP Response (PROTOCOL ADAPTER)-->
+      <![CDATA[
+		SELECT ?request ?value WHERE { 
+			?response rdf:type iot:MP-Response . 
+			?request iot:hasMPResponse ?response . 
+			?response iot:hasMPResponseString ?value . 
+			?request iot:hasProtocol ?protocol }
+      ]]>
+    </subscribe>
+      <subscribe n="2">
+      <forcedBindings>
+    	<binding name="?network" value="" type="URI"/>
+    </forcedBindings>
+      <!--MN Request (NETWORK ADAPTER)-->
+      <![CDATA[
+		SELECT ?value WHERE { 
+			?request rdf:type iot:MN-Request . 
+			?request iot:hasNetwork ?network . 
+			?request iot:hasMNRequestString ?value }
+      ]]>
+    </subscribe>
+      <subscribe n="3">
+      <!--MN Mapping (MN DISPATCHER)-->
+      <![CDATA[
+		SELECT ?network ?requestPattern ?responsePattern ?context ?action ?value WHERE { 
+			?mapping rdf:type iot:MN-Mapping . 
+			?mapping iot:hasNetwork ?network . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMNRequestPattern ?requestPattern . 
+			?mapping iot:hasMNResponsePattern ?responsePattern }
+      ]]>
+    </subscribe>
+    <subscribe n="4">
+      <!--MP Mapping (MP DISPATCHER)-->
+      <![CDATA[
+		SELECT ?protocol ?requestPattern ?responsePattern ?context ?action ?value WHERE {
+			?mapping rdf:type iot:MP-Mapping . 
+			?mapping iot:hasProtocol ?protocol . 
+			?mapping iot:hasContext ?context . 
+			?mapping iot:hasAction ?action . 
+			?mapping iot:hasValue ?value . 
+			?mapping iot:hasMPRequestPattern ?requestPattern .
+			?mapping iot:hasMPResponsePattern ?responsePattern }
+      ]]>
+    </subscribe>
+    <subscribe n="5">
+      <!--MP Request (MP DISPATCHER)-->
+      <![CDATA[
+		SELECT ?request ?protocol ?value WHERE { 
+			?request rdf:type iot:MP-Request . 
+			?request iot:hasProtocol ?protocol . 
+			?request iot:hasMPRequestString ?value }
+      ]]>
+    </subscribe>
+    <subscribe n="6">
+      <!--IoT Response (MP DISPATCHER)-->
+      <![CDATA[
+		SELECT ?action ?context ?value WHERE { 
+			?response rdf:type iot:IoT-Response . 
+			?response iot:hasAction ?action . 
+			?response iot:hasContext ?context . 
+			?response iot:hasValue ?value }	
+      ]]>
+    </subscribe>
+        <subscribe n="7">
+      <!--IoT Request (MN DISPATCHER)-->
+      <![CDATA[
+		SELECT ?value ?action ?context WHERE { 
+			?request rdf:type iot:IoT-Request . 
+			?request iot:hasValue ?value . 
+			?request iot:hasAction ?action . 
+			?request iot:hasContext ?context }
+      ]]>
+    </subscribe>
+     <subscribe n="8">
+      <!--MN Response (MN DISPATCHER)-->
+      <![CDATA[
+    	SELECT ?network ?value WHERE { 
+			?response rdf:type iot:MN-Response . 
+			?response iot:hasNetwork ?network . 
+			?response iot:hasMNResponseString ?value }
+      ]]>
+    </subscribe>			
+</subscribes>
+</updateSubscriptionProfile>

@@ -12,9 +12,6 @@ import com.sun.net.httpserver.*;
 
 import arces.unibo.gateway.adapters.protocol.HTTPAdapter.IoTHandler.Running;
 
-//action=GET&type=<typeURI>&location=<locationURI>
-//action=SET&type=<typeURI>&location=<locationURI>&value=<value>
-
 public class HTTPAdapter extends MPAdapter {
 	private static int HTTP_PORT = 8000; 
 	
@@ -97,9 +94,9 @@ public class HTTPAdapter extends MPAdapter {
 				nRequests++;
 				System.out.printf(nRequests + " HTTP ADAPTER: MP-Request<%s>\n",request);
 
+				//SEND MP-REQUEST
 				String mpRequest = mpRequest(request);
-				
-				
+							
 				if (mpRequest != null){
 					try {handlersMutex.acquire();} catch (InterruptedException e) {}
 					

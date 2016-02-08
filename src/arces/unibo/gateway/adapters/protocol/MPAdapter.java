@@ -46,7 +46,7 @@ public abstract class MPAdapter extends Aggregator implements IProtocolAdapter {
 		super(MP_RESPONSE,MP_REQUEST);
 	}
 	
-	protected String mpRequest(String value) {
+	protected final String mpRequest(String value) {
 		Bindings bindings = new Bindings();
 		String request = "iot:MP-Request_"+UUID.randomUUID().toString();
 		bindings.addBinding("?request", new BindingURIValue(request));

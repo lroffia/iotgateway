@@ -1,0 +1,33 @@
+*********************
+* Garbage Collector *
+*********************
+>> SUBSCRIBE 
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX iot:<http://www.arces.unibo.it/IoTGateway#>   
+SELECT ?mprequest ?iotrequest ?mnrequest ?mnresponse ?iotresponse ?mpresponse 
+?protocol ?mpRequestValue ?iotRequestValue ?action ?context ?network ?mnRequestValue 
+?mnResponseValue ?iotResponseValue ?mpResponseValue 
+WHERE { 
+?mprequest rdf:type iot:MP-Request . ?iotrequest rdf:type iot:IoT-Request . 
+?mnrequest rdf:type iot:MN-Request . ?mnresponse rdf:type iot:MN-Response . 
+?iotresponse rdf:type iot:IoT-Response . ?mpresponse rdf:type iot:MP-Response . 
+?mprequest iot:hasProtocol ?protocol . ?mprequest iot:hasMPRequestString ?mpRequestValue . 
+?mprequest iot:hasMPResponse ?mpresponse . ?iotrequest iot:hasValue ?iotRequestValue . 
+?iotrequest iot:hasAction ?action . ?iotrequest iot:hasContext ?context . 
+?mnrequest iot:hasNetwork ?network . ?mnrequest iot:hasMNRequestString ?mnRequestValue . 
+?mnresponse iot:hasNetwork ?network . ?mnresponse iot:hasMNResponseString ?mnResponseValue . 
+?iotresponse iot:hasAction ?action . ?iotresponse iot:hasContext ?context . 
+?iotresponse iot:hasValue ?iotResponseValue . ?mpresponse iot:hasMPResponseString ?mpResponseValue }
+
+****************************
+* Multi-Network Dispatcher *
+****************************
+>> SUBSCRIBE 
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+PREFIX iot:<http://www.arces.unibo.it/IoTGateway#>  
+SELECT ?network ?requestPattern ?responsePattern ?context ?action ?value 
+WHERE { ?mapping rdf:type iot:MN-Mapping . 
+?mapping iot:hasNetwork ?network . ?mapping iot:hasContext ?context . 
+?mapping iot:hasAction ?action . ?mapping iot:hasValue ?value . 
+?mapping iot:hasMNRequestPattern ?requestPattern . 
+?mapping iot:hasMNResponsePattern ?responsePattern }
