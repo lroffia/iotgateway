@@ -14,14 +14,12 @@
  * @version     %I%, %G%
  */
 
-package sofia_kp;
+package arces.unibo.KPI;
 
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane.RestoreAction;
 
 public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribeHandler
 {

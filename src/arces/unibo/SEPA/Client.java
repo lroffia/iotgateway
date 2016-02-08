@@ -13,7 +13,7 @@ public abstract class Client implements IClient{
 	protected SIBResponse ret;
 	private boolean joined = false;
 	
-	private String defaultIP = "127.0.0.1";//"192.168.56.101"; //"127.0.0.1";
+	private String defaultIP =  "mml.arces.unibo.it"; //"192.168.56.101"; //"127.0.0.1";
 	private int defaultPort = 7701;//10010;//7701;
 	private String defaultName ="SEPA Engine";
 	
