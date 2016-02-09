@@ -160,22 +160,35 @@ public class MNDispatcher {
 		System.out.println("* Multi-Network Dispatcher *");
 		System.out.println("****************************");
 		
-		if(!mnMapper.start()) return false;
-		if(!mnRequestDispatcher.start()) return false;
-		if(!mnResponseDispatcher.start()) return false;
+		if(!mnMapper.join()) return false;
+		if(!mnRequestDispatcher.join()) return false;
+		if(!mnResponseDispatcher.join()) return false;
 		
-		BindingsResults ret = mnMapper.subscribe();
-		if (ret == null) return false;
-		else mnMapper.notify(ret);
+		BindingsResults ret;
+		if (!mnMapper.subscribe()) return false;
+		else {
+			ret = mnMapper.getQueryResults();
+			mnMapper.notify(ret);
+		}
 		
-		ret = mnRequestDispatcher.subscribe();
-		if (ret == null) return false;
-		//else mnRequestDispatcher.notify(ret);
+		if (!mnRequestDispatcher.subscribe()) return false;
+		else {
+			ret = mnRequestDispatcher.getQueryResults();
+			mnRequestDispatcher.notify(ret);
+		}
 		
-		ret = mnResponseDispatcher.subscribe();
-		if (ret == null) return false;
-		//else mnResponseDispatcher.notify(ret);
+		if (!mnResponseDispatcher.subscribe()) return false;
+		else {
+			ret = mnResponseDispatcher.getQueryResults();
+			mnResponseDispatcher.notify(ret);
+		}
 		
 		return true;
+	}
+	
+	public void stop(){
+		mnResponseDispatcher.unsubscribe();
+		mnRequestDispatcher.unsubscribe();
+		mnMapper.unsubscribe();
 	}
 }

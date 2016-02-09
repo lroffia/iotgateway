@@ -37,7 +37,6 @@ public class KPIEventListener extends KPICore implements /*iKPIC,*/ iKPIC_subscr
 	private class subscriptionInfoStructure{
 		String subscriptionID;
 		iKPIC_subscribeHandler subscribeHandler;
-		String description;
 	}
 	
 	
@@ -119,7 +118,7 @@ public class KPIEventListener extends KPICore implements /*iKPIC,*/ iKPIC_subscr
 
 	public boolean addRDFsubscription(String s,String p,String o,String o_type,iKPIC_subscribeHandler2 sh)
 	{
-	 KPICore kp = new KPICore(HOST,PORT,SSNM);	
+	 new KPICore(HOST,PORT,SSNM);	
 		
      return false;		
 	}//public boolean addRDFquery(String s,String p,String o,String o_type)

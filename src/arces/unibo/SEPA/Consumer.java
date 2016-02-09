@@ -9,6 +9,7 @@ public class Consumer extends Client implements IConsumer {
 	private String SPARQL_SUBSCRIBE = "SELECT ?subject ?predicate ?object WHERE { ?subject ?predicate ?object }";
 	private String subID ="";
 	private NotificationHandler mHandler;
+	protected BindingsResults queryResults = null;
 	
 	public Consumer(String query) {
 		super();
@@ -25,23 +26,27 @@ public class Consumer extends Client implements IConsumer {
 		System.out.println("\n<---- NOTIFY\n"+notify.toString());
 	}
 
-	public BindingsResults subscribe(Bindings forcedBindings) {
+	public boolean subscribe(Bindings forcedBindings) {
+		if (!subID.equals("")) return false;
+		
 		String sparql = PREFIXES + replaceBindings(SPARQL_SUBSCRIBE,forcedBindings);
 		
 		System.out.println(">> SUBSCRIBE "+sparql);
 		
 		ret = kp.subscribeSPARQL(sparql, mHandler);
 		
-		if (ret == null) return null;		
+		if (ret == null) return false;		
 		subID = ret.subscription_id;
-		if(!ret.Status.equals("m3:Success")) return null;
+		if(!ret.isConfirmed()) return false;
 		
 		System.out.println("<< SUB ID: "+subID);
 		
-		return new BindingsResults(ret.sparqlquery_results,null,URI2PrefixMap);
+		queryResults = new BindingsResults(ret.sparqlquery_results,null,URI2PrefixMap);
+		
+		return true;
 	}
 	
-	public BindingsResults subscribe() {
+	public boolean subscribe() {
 		return subscribe(null);
 	}
 	
@@ -70,5 +75,10 @@ public class Consumer extends Client implements IConsumer {
 		public void kpic_ExceptionEventHandler(Throwable SocketException ){
 			
 		}
+	}
+
+	@Override
+	public BindingsResults getQueryResults() {
+		return queryResults;
 	}
 }

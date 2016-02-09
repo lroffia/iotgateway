@@ -31,7 +31,6 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	private Socket         kpSocket = null;
 	private PrintWriter    out      = null;
 	private BufferedReader in       = null;
-	private InputStream    is 	= null;
 	public String         HOST     = null;
 	public int            PORT     = -1;
 	public String         SMART_SPACE_NAME=null;
@@ -99,13 +98,6 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Thread to handle incoming events
 	 */
 	public Thread eventThread=null;
-
-	/**
-	 * This is just an event counter, it is completely pointless.
-	 * It is used to DEMO purpose
-	 */
-	private int    event_counter=0;
-
 
 	/**
 	 * Constants for use of protection at triple level. their use is currenlty not fully supported
@@ -192,7 +184,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	//this.nodeID="DEAD0000BEEF-"+(new Random()).nextInt(10);
 	this.nodeID=""+UUID.randomUUID();
 
-	this.event_counter=0;
+	
 
 	/*this.transaction_id =0;
         this.subscription_id=0;*/
@@ -205,10 +197,8 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	{
 		this.HOST="";
 		this.PORT=0;
-		this.SMART_SPACE_NAME=SMART_SPACE_NAME = "";
+		this.SMART_SPACE_NAME = "";
 		this.nodeID=""+UUID.randomUUID();
-		this.event_counter=0;
-		//	this.xmlTools = new SSAP_XMLTools(nodeID,SMART_SPACE_NAME,this.ANYURI);
 	}
 
 
@@ -257,7 +247,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 			out = new PrintWriter(kpSocket.getOutputStream(), true);
 			in = new BufferedReader(new InputStreamReader(
 					kpSocket.getInputStream()));
-			is = kpSocket.getInputStream();
+			kpSocket.getInputStream();
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host");
 			return this.ERR_UnknownHost;
@@ -417,7 +407,6 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 
 	public void sendSSAPMsgOneWay(String msg)
 	{
-		String ret="";
 		int err=0;
 
 		deb_print("KpCore:message to send:_"+msg.replace("\n", "")+"_");
@@ -1236,8 +1225,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 						//						System.out.println("1");
 						kpSocket.setKeepAlive(true);
 
-						Subscription s = new Subscription(kpSocket, handler);
-						//startEventHandlerThread(kpSocket,in,out);
+						new Subscription(kpSocket, handler);
 
 						return new SIBResponse(msg);
 					}//if(this.xmlTools.isSubscriptionConfirmed(ret))

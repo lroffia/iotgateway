@@ -1,16 +1,16 @@
 package arces.unibo.KPI;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.DebugGraphics;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 
@@ -90,8 +90,6 @@ public class SIBResponse {
 		if(sparql_response_document != null)
 		{
 			Element root = sparql_response_document.getRootElement();
-			Namespace ns;
-
 			//			GET ROOT CHILDREN ()
 			this.MessageType = root.getChildText("message_type");
 			this.transactionID = root.getChildText("transaction_id");
@@ -206,17 +204,15 @@ public class SIBResponse {
 	private static Document loadXMLFromString(String xml)
 	{
 		SAXBuilder builder = new SAXBuilder();
-		Document doc;
-		//System.out.println("xml = " + xml);
+		Document doc = null;
+
 		try
 		{
 			doc = builder.build(new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
-			
 		}
-		catch (Throwable e)
+		catch (JDOMException|IOException e)
 		{
-			doc = null;
-			e.printStackTrace();
+			System.err.println("ERROR: SIBResponse:loadXMLFromString " + e.getMessage() + "\nXML: \""+xml+"\"\n");
 		}
 		return doc;
 	}

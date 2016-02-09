@@ -44,14 +44,14 @@ public class ArcesServiceRegistry
 	
 	public Vector<Properties> search(Properties serviceProperties)
 	{String GETCommand="", ret="";
-     Vector<Properties> vSearchResult=new Vector();
+     Vector<Properties> vSearchResult=new Vector<Properties>();
      
 	
 		if(serviceProperties!=null && !serviceProperties.equals(""))
 		{
 			GETCommand="";
 			
-		    Enumeration e = serviceProperties.propertyNames();
+		    Enumeration<?> e = serviceProperties.propertyNames();
 
 		    while (e.hasMoreElements()) 
 		    {
@@ -144,7 +144,7 @@ public class ArcesServiceRegistry
 		{
 			GETCommand="";
 			
-		    Enumeration e = serviceProperties.propertyNames();
+		    Enumeration<?> e = serviceProperties.propertyNames();
 
 		    while (e.hasMoreElements()) 
 		    {
@@ -184,7 +184,7 @@ public class ArcesServiceRegistry
 		{
 			GETCommand="";
 			
-		    Enumeration e = serviceProperties.propertyNames();
+		    Enumeration<?> e = serviceProperties.propertyNames();
 
 		    while (e.hasMoreElements()) 
 		    {
@@ -200,24 +200,6 @@ public class ArcesServiceRegistry
 
 		return ret;
 	}//public Properties search()
-	
-	
-	
-	private Properties NewProperties(String params)
-	{Properties userServiceSearch=new Properties();
-	
-	   if(params!=null && !params.equals(""))
-		{
-	    	String serviceInfo[]=params.split("\\&");
-	
-	    	for(int i=0;i<serviceInfo.length;i++)
-	    	{ String param[]=serviceInfo[i].split("=");  int name=0, value=1;
-	    		userServiceSearch.setProperty(param[name], param[value]);
-	    	}
-		}	    	
-
-	   return userServiceSearch;
-	}//private Properties NewProperties(String params)
 	
 	
 	

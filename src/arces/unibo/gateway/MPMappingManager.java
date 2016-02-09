@@ -107,10 +107,15 @@ public class MPMappingManager {
 	}
 	
 	public boolean start(){
-		if(!creator.start()) return false;
-		if(!remover.start()) return false;
+		if(!creator.join()) return false;
+		if(!remover.join()) return false;
 		
 		return true;
+	}
+
+	public void stop() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

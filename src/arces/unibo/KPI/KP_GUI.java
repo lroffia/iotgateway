@@ -22,6 +22,10 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	/**
 	 * 
 	 */
+	private static final long serialVersionUID = -553136202695172061L;
+	/**
+	 * 
+	 */
 	KPICore kp = null;
 	String user_kp_id="";	
 	/**
@@ -79,7 +83,7 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	JTextField tfSerName;
 	JTextField otherParams;
 	JButton bSearchRService;
-	JComboBox cbSOFIADNSIPList;
+	JComboBox<?> cbSOFIADNSIPList;
 	String[] SOFIADNS_IP = new String[1];
 
 	//Synchronization
@@ -92,8 +96,8 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 	JTextArea taMemo;
 
-	JComboBox cbIPList;
-	JComboBox cbPortList;
+	JComboBox<?> cbIPList;
+	JComboBox<?> cbPortList;
 	/*String[] SIB_IP = {
             "127.0.0.1",
             "localhost",
@@ -127,10 +131,10 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 		/*-_________________________________________________________*/
 
-		cbIPList = new JComboBox(SIB_IP);    
+		cbIPList = new JComboBox<Object>(SIB_IP);    
 		cbIPList.setEditable(true);
 
-		cbPortList = new JComboBox(SIB_PORT);
+		cbPortList = new JComboBox<Object>(SIB_PORT);
 		cbPortList.setEditable(true);
 		/*-_________________________________________________________*/
 
@@ -166,7 +170,7 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 		SOFIADNS_IP[0]="http://mml.arces.unibo.it/sofia.service.registry";
 		tfSerName    = new JTextField("sib");
 		bSearchRService = new JButton("Search for Service");       bSearchRService.addActionListener(this);
-		cbSOFIADNSIPList = new JComboBox(SOFIADNS_IP); cbSOFIADNSIPList.setEditable(true);
+		cbSOFIADNSIPList = new JComboBox<Object>(SOFIADNS_IP); cbSOFIADNSIPList.setEditable(true);
 
 		cbSOFIADNSIPList.setSize(100, 20);
 		tfSerName.setColumns(10);
@@ -375,28 +379,7 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 	}//KP_GUI()
 
-	/**
-	 *  Just a friendly method to print results on the console!
-	 */
-	private void printResultsOnTaMEMO(Vector<Vector<String[]>> results_vector)
-	{
-		for (int i = 0; i < results_vector.size(); i++)
-		{
-			Vector<String[]> single_result_vector = results_vector.elementAt(i);
-			this.taMemo.append("\n----- Result "+i+":");
-			for (int j = 0; j < single_result_vector.size(); j++) 
-			{
-				this.taMemo.append("\n--- row "+j+":");
-				String[] row = single_result_vector.elementAt(j);
-				//				System.out.print("\nelement " + j + "=");
-
-				for (int k =0; k<row.length; k++ )
-				{
-					this.taMemo.append(" "+row[k]);
-				}
-			}
-		}
-	}
+	
 
 	//scroolbars: http://www.roseindia.net/java/java-tips/GUI/components/40textarea/25ex-textarea.shtml
 
@@ -1014,12 +997,6 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 	}//public void actionPerformed(ActionEvent e)
 
-
-	/*___________________________________________________________________*/
-	private void memo(String n)
-	{
-		taMemo.append(n);		
-	}
 
 	/*____________________________________________________________________*/
 	/**

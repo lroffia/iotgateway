@@ -27,16 +27,8 @@ public abstract class MPAdapter extends Aggregator implements IProtocolAdapter {
 						+ "?request iot:hasProtocol ?protocol"
 						+ " }";
 	
-	public boolean start() {
-		if(!super.start()) return false;
-		
-		BindingsResults ret = subscribe();
-		notify(ret);
-		
-		return true;
-	}
 	
-	public BindingsResults subscribe() {
+	public boolean subscribe() {
 		Bindings bindings = new Bindings();
 		bindings.addBinding("?protocol", new BindingURIValue(protocolURI()));
 		return super.subscribe(bindings);	

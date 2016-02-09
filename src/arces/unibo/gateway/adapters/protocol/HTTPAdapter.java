@@ -14,7 +14,7 @@ import arces.unibo.gateway.adapters.protocol.HTTPAdapter.IoTHandler.Running;
 
 public class HTTPAdapter extends MPAdapter {
 	private static int HTTP_PORT = 8000; 
-	
+	private static HttpServer server = null;
 	private static HashMap<String,ArrayList<IoTHandler.Running>> iotHandlers = new HashMap<String,ArrayList<IoTHandler.Running>>();
 	private static Semaphore handlersMutex = new Semaphore(1,true);
 	private static int nRequests = 0;
@@ -23,13 +23,10 @@ public class HTTPAdapter extends MPAdapter {
 		super();
 	}
 	
-	@Override
 	public boolean start(){
 		System.out.println("****************");
 		System.out.println("* HTTP Adapter *");
 		System.out.println("****************");
-		
-		HttpServer server = null;
 		
 		try {
 			server = HttpServer.create(new InetSocketAddress(HTTP_PORT), 0);
@@ -57,7 +54,14 @@ public class HTTPAdapter extends MPAdapter {
 	    System.out.println("<value>");
 	    System.out.println("--------------------------------------------------------------");
 	    
-	    return super.start();
+	    if(!super.join()) return false;
+	    if(!super.subscribe()) return false;
+	    return true;
+	}
+	
+	public void stop(){
+		super.unsubscribe();
+		server.stop(0);
 	}
 
 	@Override
@@ -96,7 +100,7 @@ public class HTTPAdapter extends MPAdapter {
 
 				//SEND MP-REQUEST
 				String mpRequest = mpRequest(request);
-							
+				
 				if (mpRequest != null){
 					try {handlersMutex.acquire();} catch (InterruptedException e) {}
 					
@@ -116,7 +120,7 @@ public class HTTPAdapter extends MPAdapter {
 				
 				try {handlersMutex.acquire();} catch (InterruptedException e) {}
 				
-				iotHandlers.get(mpRequest).remove(this);
+				if(mpRequest != null) iotHandlers.get(mpRequest).remove(this);
 				
 				handlersMutex.release();
 				

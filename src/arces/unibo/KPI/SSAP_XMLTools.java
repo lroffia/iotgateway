@@ -13,9 +13,7 @@
 package arces.unibo.KPI;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -87,7 +85,7 @@ public class SSAP_XMLTools
 	 * @param id array of all xml tag to find into the document 
 	 * @return an hashtable containing all the couple id-value
 	 */
-	public Hashtable SibXMLMessageParser(String xml, String id[])
+	public Hashtable<String,String> SibXMLMessageParser(String xml, String id[])
 	{   
 		if(xml==null)
 		{
@@ -114,7 +112,7 @@ public class SSAP_XMLTools
 			return null;
 		}
 
-		Hashtable hashtable = new Hashtable();
+		Hashtable<String,String> hashtable = new Hashtable<String,String>();
 
 		Element root = doc.getRootElement();
 		Namespace ns = root.getNamespace();
@@ -145,7 +143,7 @@ public class SSAP_XMLTools
 	 *          less then id array, it will return false.
 	 */
 	public boolean autoCheckSibMessage(String xml,String id[],String ref[])
-	{ Hashtable hashtable = SibXMLMessageParser(xml,id);
+	{ Hashtable<String,String> hashtable = SibXMLMessageParser(xml,id);
 
 	if(hashtable==null)return false;
 
@@ -178,7 +176,9 @@ public class SSAP_XMLTools
 			doc = builder.build(new ByteArrayInputStream(xml.getBytes()));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
+			System.out.println("SSAP\n"+xml+"\nAttribute: "+attribute+"\nValue: "+value+"\n");
+			return null;
 		} 
 
 		if(doc==null) {System.out.println("ERROR:SSAP_XMLTools:getParameterElement:doc is null");return null;}
@@ -541,7 +541,16 @@ public class SSAP_XMLTools
 	public String getSubscriptionID(String xml)
 	{   //<parameter name = "subscription_id">2</parameter>	  
 
-		return getParameterElement(xml,"name", "subscription_id").getValue();
+		//TODO (LR) Check if element is null
+		Element e = getParameterElement(xml,"name", "subscription_id");
+		
+		if (e == null) {
+			System.out.println("getSubscriptionID is null");
+			System.out.println(xml);
+			return "";
+		}
+		
+		return e.getValue();
 	}//public String getSubscriptionID(String xml)
 
 
@@ -1061,7 +1070,7 @@ public class SSAP_XMLTools
 	{++transaction_id;
 	subscription_id=transaction_id;
 
-	String ot=o==null?"URI":o_type;
+	//String ot=o==null?"URI":o_type;
 
 
 	return 
@@ -1214,7 +1223,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlPathExpressionTAG(path);
 
 	return 
-			this.queryWQLSurround(wql_query_nodes,this.WQL_VALUES);
+			this.queryWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_VALUES);
 	}//String queryWQL_VALUES()
 
 
@@ -1239,7 +1248,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlPathExpressionTAG(path);
 
 	return 
-			this.queryWQLSurround(wql_query_nodes,this.WQL_RELATED);
+			this.queryWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_RELATED);
 	}//String queryWQL_RELATED()
 
 
@@ -1259,7 +1268,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlNodeTAG(nodeURI);
 
 	return 
-			this.queryWQLSurround(wql_query_nodes,this.WQL_NODETYPES);
+			this.queryWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_NODETYPES);
 	}//String queryWQL_NODETYPES()
 
 
@@ -1281,7 +1290,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlNodeTAG("type", "", nodeType);
 
 	return 
-			this.queryWQLSurround(wql_query_nodes,this.WQL_ISTYPE);
+			this.queryWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_ISTYPE);
 	}//String queryWQL_ISTYPES()
 
 
@@ -1302,7 +1311,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlNodeTAG("supertype", "", superClassNodeURI);
 
 	return 
-			this.queryWQLSurround(wql_query_nodes,this.WQL_ISSUBTYPE);
+			this.queryWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_ISSUBTYPE);
 	}//String queryWQL_ISSUBTYPE()
 
 
@@ -1418,7 +1427,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlPathExpressionTAG(path);
 
 	return 
-			this.subscribeWQLSurround(wql_query_nodes,this.WQL_VALUES);
+			this.subscribeWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_VALUES);
 	}//String subscribeWQL_VALUES()
 
 
@@ -1446,7 +1455,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlPathExpressionTAG(path);
 
 	return 
-			this.subscribeWQLSurround(wql_query_nodes,this.WQL_RELATED);
+			this.subscribeWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_RELATED);
 	}//String subscribeWQL_RELATED()
 
 
@@ -1465,7 +1474,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlNodeTAG(nodeURI);
 
 	return 
-			this.subscribeWQLSurround(wql_query_nodes,this.WQL_NODETYPES);
+			this.subscribeWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_NODETYPES);
 	}//String subscribeWQL_NODETYPES()
 
 
@@ -1486,7 +1495,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlNodeTAG("type", "", nodeType);
 
 	return 
-			this.subscribeWQLSurround(wql_query_nodes,this.WQL_ISTYPE);
+			this.subscribeWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_ISTYPE);
 	}//String subscribeWQL_ISTYPES()
 
 
@@ -1507,7 +1516,7 @@ public class SSAP_XMLTools
 	wql_query_nodes[++i]=newXmlNodeTAG("supertype", "", superClassNodeURI);
 
 	return 
-			this.subscribeWQLSurround(wql_query_nodes,this.WQL_ISSUBTYPE);
+			this.subscribeWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_ISSUBTYPE);
 	}//String subscribeWQL_ISSUBTYPE()
 
 
@@ -1556,7 +1565,6 @@ public class SSAP_XMLTools
 	 */
 	public Boolean isRDFNotification (String xml)
 	{
-		boolean isRDF = false;
 		if(xml==null)
 		{
 			System.out.println("ERROR:SSAP_XMLTools:SibXMLMessageParser: XML message is null");
@@ -2115,7 +2123,7 @@ public class SSAP_XMLTools
 			return null;
 		}
 
-		SSAP_sparql_response out = new SSAP_sparql_response();
+		new SSAP_sparql_response();
 
 		Element root = doc.getRootElement();
 		Namespace ns = root.getNamespace();
@@ -2180,7 +2188,7 @@ public class SSAP_XMLTools
 			return null;
 		}
 
-		SSAP_sparql_response out = new SSAP_sparql_response();
+		new SSAP_sparql_response();
 
 		Element root = doc.getRootElement();
 		Namespace ns = root.getNamespace();

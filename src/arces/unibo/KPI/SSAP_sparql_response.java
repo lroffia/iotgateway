@@ -2,25 +2,14 @@ package arces.unibo.KPI;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
-import javax.sound.midi.SysexMessage;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-
-
-//import org.w3c.dom.Document;
-//import org.w3c.dom.Element;
-//import org.w3c.dom.NodeList;
 import org.jdom2.*;
 import org.jdom2.input.*;
 import org.jdom2.output.*;
-import org.xml.sax.InputSource;
 
 
 /**
@@ -105,9 +94,8 @@ public class SSAP_sparql_response {
 
 			//	        GET ROOT ELEMENT + NAMESPACE
 			Element root = sparql_response_document.getRootElement();
-			Namespace ns;
 			List<Element> sparqlChildren= root.getChildren();
-			ns = root.getNamespace();
+			root.getNamespace();
 			Iterator <Element> sparqlIter = sparqlChildren.iterator();
 
 			while(sparqlIter.hasNext())
@@ -168,7 +156,7 @@ public class SSAP_sparql_response {
 							//										here we populate the cell_temp structure (dynamic one, to be transfered to single_cell static String[])
 							Vector<String> cell_temp = new Vector<String>();
 							Element binding = bindingListIter.next();
-							List attribute = binding.getAttributes();
+							List<Attribute> attribute = binding.getAttributes();
 
 							for (int i =0;i<attribute.size();i++)
 							{
@@ -209,7 +197,7 @@ public class SSAP_sparql_response {
 									cell_temp.add(bindingchild.getName());
 									cell_temp.add(bindingchild.getValue());
 
-									List lit_attribute = bindingchild.getAttributes();
+									List<Attribute> lit_attribute = bindingchild.getAttributes();
 
 									for (int i =0;i<lit_attribute.size();i++)
 									{
@@ -319,8 +307,6 @@ public class SSAP_sparql_response {
 
 			//	        GET ROOT ELEMENT + NAMESPACE
 			Element root = sparql_response_document.getRootElement();
-			Namespace ns;
-
 			//			GET ROOT CHILDREN (with name PARAMETER)
 			List <Element> rootchidrenList = root.getChildren("parameter");
 			Iterator <Element> rootIter = rootchidrenList.iterator();
@@ -338,7 +324,7 @@ public class SSAP_sparql_response {
 					while(parameterIter.hasNext())
 					{
 						Element parameterchildren = parameterIter.next();
-						ns=parameterchildren.getNamespace();
+						parameterchildren.getNamespace();
 
 
 						//					QUERY TYPE CONFIRM GRAPH (DESCRIBE/CONSTRUCT)
@@ -356,7 +342,7 @@ public class SSAP_sparql_response {
 							while(sparqlIter.hasNext())
 							{
 								Element sparqlchild = sparqlIter.next();
-								ns=sparqlchild.getNamespace();
+								sparqlchild.getNamespace();
 
 								//				INTO <HEAD>
 								if(sparqlchild.getName().equalsIgnoreCase("head"))
@@ -412,7 +398,7 @@ public class SSAP_sparql_response {
 											//										here we populate the cell_temp structure (dynamic one, to be transfered to single_cell static String[])
 											Vector<String> cell_temp = new Vector<String>();
 											Element binding = bindingListIter.next();
-											List attribute = binding.getAttributes();
+											List<Attribute> attribute = binding.getAttributes();
 
 											for (int i =0;i<attribute.size();i++)
 											{
@@ -453,7 +439,7 @@ public class SSAP_sparql_response {
 													cell_temp.add(bindingchild.getName());
 													cell_temp.add(bindingchild.getValue());
 
-													List lit_attribute = bindingchild.getAttributes();
+													List<Attribute> lit_attribute = bindingchild.getAttributes();
 
 													for (int i =0;i<lit_attribute.size();i++)
 													{
@@ -586,7 +572,7 @@ public class SSAP_sparql_response {
 
 
 			List<Element> sparqlChildren= ssap_sparql_response_element.getChildren();
-			Namespace ns = ssap_sparql_response_element.getNamespace();
+			ssap_sparql_response_element.getNamespace();
 			Iterator <Element> sparqlIter = sparqlChildren.iterator();
 
 			while(sparqlIter.hasNext())
@@ -649,7 +635,7 @@ public class SSAP_sparql_response {
 							//										here we populate the cell_temp structure (dynamic one, to be transfered to single_cell static String[])
 							Vector<String> cell_temp = new Vector<String>();
 							Element binding = bindingListIter.next();
-							List attribute = binding.getAttributes();
+							List<Attribute> attribute = binding.getAttributes();
 
 							for (int i =0;i<attribute.size();i++)
 							{
@@ -690,7 +676,7 @@ public class SSAP_sparql_response {
 									cell_temp.add(bindingchild.getName());
 									cell_temp.add(bindingchild.getValue());
 
-									List lit_attribute = bindingchild.getAttributes();
+									List<Attribute> lit_attribute = bindingchild.getAttributes();
 
 									for (int i =0;i<lit_attribute.size();i++)
 									{
@@ -851,16 +837,13 @@ public class SSAP_sparql_response {
 			SAXBuilder builder = new SAXBuilder();
 			Document doc = builder.build(new ByteArrayInputStream(select_ask_response_String.getBytes()));
 			Element root = doc.getRootElement();
-			Namespace ns;
-
-
 			List<Element> head= root.getChildren();
 			Iterator <Element> sparqlIter = head.iterator();
 
 			while(sparqlIter.hasNext())
 			{
 				Element sparqlchildren = sparqlIter.next();
-				ns=sparqlchildren.getNamespace();
+				sparqlchildren.getNamespace();
 
 				//				INTO <HEAD>
 				if(sparqlchildren.getName().equalsIgnoreCase("head"))
@@ -915,7 +898,7 @@ public class SSAP_sparql_response {
 							//										here we populate the cell_temp structure (dynamic one, to be transfered to single_cell static String[])
 							Vector<String> cell_temp = new Vector<String>();
 							Element binding = bindingListIter.next();
-							List attribute = binding.getAttributes();
+							List<Attribute> attribute = binding.getAttributes();
 
 							for (int i =0;i<attribute.size();i++)
 							{
@@ -956,7 +939,7 @@ public class SSAP_sparql_response {
 									cell_temp.add(bindingchild.getName());
 									cell_temp.add(bindingchild.getValue());
 
-									List lit_attribute = bindingchild.getAttributes();
+									List<Attribute> lit_attribute = bindingchild.getAttributes();
 
 									for (int i =0;i<lit_attribute.size();i++)
 									{
@@ -1034,30 +1017,6 @@ public class SSAP_sparql_response {
 		} 
 
 	}
-
-	/**
-	 * This method can be used to remove spaces, tabulations, new lines and other characters not needed for computation, but for visualization 
-	 * @param human readable sparql_response
-	 * @return sparql_response without characters not needed for computation
-	 */
-	private String formatString(String sparql_res) {
-
-		String new_response = new String();
-
-		//	   replaces end of lines
-		new_response = sparql_res.replace("\n", "");
-
-		//	   replaces double spaces
-		boolean double_space = sparql_res.contains("  ");
-		while(double_space){
-			new_response = new_response.replace("  ", " ");
-			double_space = new_response.contains("  ");
-		}
-		new_response = new_response.replace("> <", "><");
-
-		return new_response;
-	}
-
 
 	/**
 	 * A simple XML parser from a string. Returns a Document which represents the root of the document tree.

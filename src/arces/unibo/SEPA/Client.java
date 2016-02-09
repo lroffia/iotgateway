@@ -14,7 +14,7 @@ public abstract class Client implements IClient{
 	private boolean joined = false;
 	
 	private String defaultIP = "192.168.56.101"; //"mml.arces.unibo.it"; //"192.168.56.101"; //"127.0.0.1";
-	private int defaultPort = 10010;//10010;//7701;
+	private int defaultPort = 7701;//10010;//7701;
 	private String defaultName ="SEPA Engine";
 	
 	private void addNamespace(String prefix,String uri){
@@ -36,7 +36,7 @@ public abstract class Client implements IClient{
 		//kp.enable_error_message();
 	}
 	
-	public boolean start() {
+	public boolean join() {
 		ret = kp.join();
 		joined = ret.isConfirmed();
 		return joined;
@@ -44,7 +44,7 @@ public abstract class Client implements IClient{
 	
 	protected boolean isJoined() {return joined;}
 	
-	public boolean stop() {
+	public boolean leave() {
 		if (!joined) return false;
 		ret = kp.leave();
 		joined = !ret.isConfirmed();

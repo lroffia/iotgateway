@@ -7,7 +7,7 @@ import arces.unibo.gateway.mapping.ContextAction;
 
 public abstract class ProtocolMapper implements IProtocolMapper {
 	public String ioT2MPResponseString(String pattern, ContextAction contextAction) {
-		return pattern.replace("<*>", contextAction.getValue());
+		return pattern.replace("*", contextAction.getValue());
 	}
 	
 	public ContextAction mpRequestString2IoT(String request, String pattern,ContextAction contextPattern) {
@@ -28,7 +28,7 @@ public abstract class ProtocolMapper implements IProtocolMapper {
 		while(keys.hasNext()) {
 			String key = keys.next();
 			if (!patternValues.containsKey(key)) continue;
-			if (patternValues.get(key).equals("<*>")) {
+			if (patternValues.get(key).equals("*")) {
 				valueKey = key;
 				matching++;
 			}
@@ -40,7 +40,7 @@ public abstract class ProtocolMapper implements IProtocolMapper {
 		//Retrieve value
 		String value = contextPattern.getValue();
 		if (contextPattern.getActionURI().equals("iot:SET")) 
-			if (valueKey != null && value.equals("<*>")) value = requestValues.get(valueKey);		
+			if (valueKey != null && value.equals("*")) value = requestValues.get(valueKey);		
 		ContextAction ret = new ContextAction(contextPattern.getContextURI(), contextPattern.getActionURI(), value);
 		
 		return ret;

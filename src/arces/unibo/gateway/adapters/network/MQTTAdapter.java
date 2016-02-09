@@ -13,5 +13,19 @@ public class MQTTAdapter extends MNAdapter {
 		
 	}
 
+	@Override
+	public boolean start() {
+		System.out.println("********************");
+		System.out.println("* PINGPONG Adapter *");
+		System.out.println("********************");
+		
+		return super.start();
+	}
+	
+	@Override
+	public void stop(){
+		super.stop();
+	}
+	
 	//TODO Send the response by calling "boolean mnResponse(String value)";
 }

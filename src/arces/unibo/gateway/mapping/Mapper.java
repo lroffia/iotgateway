@@ -13,11 +13,11 @@ public abstract class Mapper extends Consumer implements IMapper {
 
 	public abstract String name();
 	
-	public boolean start(){
+	public boolean join(){
 		System.out.println("*********************");
 		System.out.println("Mapper: "+name());
 		System.out.println("*********************");
 		
-		return super.start();
+		return super.join();
 	}
 }

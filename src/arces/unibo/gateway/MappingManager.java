@@ -22,6 +22,11 @@ public class MappingManager {
 		return true;
 	}
 	
+	public void stop(){
+		mnMappingManager.stop();
+		mpMappingManager.stop();
+	}
+	
 	public boolean addProtocolMapping(String protocol,String requestStringPattern,String responseStringPattern,String context,String action,String value){
 		return mpMappingManager.addMapping(protocol, requestStringPattern, responseStringPattern, context, action, value);
 	}

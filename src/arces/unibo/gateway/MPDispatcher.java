@@ -156,23 +156,36 @@ public class MPDispatcher {
 		System.out.println("* Multi-Protocol Dispatcher *");
 		System.out.println("*****************************");
 		
-		if(!mpMapper.start()) return false;
-		if(!mpRequestDispatcher.start()) return false;
-		if(!mpResponseDispatcher.start()) return false;
+		if(!mpMapper.join()) return false;
+		if(!mpRequestDispatcher.join()) return false;
+		if(!mpResponseDispatcher.join()) return false;
 		
-		BindingsResults ret = mpMapper.subscribe();
-		if (ret == null) return false;
-		else mpMapper.notify(ret);
+		BindingsResults ret;
+		if (!mpMapper.subscribe()) return false;
+		else {
+			ret = mpMapper.getQueryResults();
+			mpMapper.notify(ret);
+		}
 		
-		ret = mpRequestDispatcher.subscribe();
-		if (ret == null) return false;
-		//else mpRequestDispatcher.notify(ret);
+		if (!mpRequestDispatcher.subscribe()) return false;
+		else {
+			ret = mpRequestDispatcher.getQueryResults();
+			mpRequestDispatcher.notify(ret);
+		}
 		
-		ret = mpResponseDispatcher.subscribe();
-		if (ret == null) return false;
-		//else mpResponseDispatcher.notify(ret);
+		if (!mpResponseDispatcher.subscribe()) return false;
+		else {
+			ret = mpResponseDispatcher.getQueryResults();
+			mpResponseDispatcher.notify(ret);
+		}
 		
 		return true;
+	}
+	
+	public void stop(){
+		mpResponseDispatcher.unsubscribe();
+		mpRequestDispatcher.unsubscribe();
+		mpMapper.unsubscribe();
 	}
 	
 	

@@ -8,36 +8,51 @@ import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 
-public abstract class MNAdapter extends Aggregator implements INetworkAdapter {
-		
-	private static String MN_RESPONSE = 
-			" INSERT DATA { "
-			+ "?response rdf:type iot:MN-Response . "
-			+ "?response iot:hasNetwork ?network . "
-			+ "?response iot:hasMNResponseString ?value"
-			+ " }";
+public abstract class MNAdapter {
 	
-	private static String MN_REQUEST =
-			" SELECT ?value WHERE { "
-			+ "?request rdf:type iot:MN-Request . "
-			+ "?request iot:hasNetwork ?network . "
-			+ "?request iot:hasMNRequestString ?value"
-			+ " }";
+	protected abstract String networkURI();
+	protected abstract void mnRequest(String request);
+	protected abstract boolean doStart();
+	protected abstract void doStop();
 	
-	public boolean start() {
-		if(!super.start()) return false;
+	private MNRequestResponseDispatcher dispatcher;
+	
+	class MNRequestResponseDispatcher extends Aggregator {
+		private static final String MN_RESPONSE = 
+				" INSERT DATA { "
+				+ "?response rdf:type iot:MN-Response . "
+				+ "?response iot:hasNetwork ?network . "
+				+ "?response iot:hasMNResponseString ?value"
+				+ " }";
 		
-		BindingsResults ret = subscribe();
-		notify(ret);
+		private static final String MN_REQUEST =
+				" SELECT ?value WHERE { "
+				+ "?request rdf:type iot:MN-Request . "
+				+ "?request iot:hasNetwork ?network . "
+				+ "?request iot:hasMNRequestString ?value"
+				+ " }";
 		
-		return true;
+		public MNRequestResponseDispatcher(){
+			super(MN_REQUEST,MN_RESPONSE);
+		}
+			
+		@Override
+		public boolean subscribe(){
+			//SPARQL SUBSCRIBE
+			Bindings bindings = new Bindings();
+			bindings.addBinding("?network", new BindingURIValue(networkURI()));
+			return subscribe(bindings);
+		}
+		
+		@Override
+		public void notify(BindingsResults notify) {
+			for (Bindings bindings : notify.getAddedBindings()){
+				mnRequest(bindings.getBindingValue("?value").getValue());
+			}
+		}
 	}
 	
-	public MNAdapter(){
-		super(MN_REQUEST,MN_RESPONSE);
-	}
-	
-	public boolean mnResponse(String value) {
+	protected final boolean mnResponse(String value) {
 		String response = "iot:MN-Response_"+UUID.randomUUID().toString();
 		
 		Bindings bindings = new Bindings();
@@ -46,22 +61,18 @@ public abstract class MNAdapter extends Aggregator implements INetworkAdapter {
 		bindings.addBinding("?network", new BindingURIValue(networkURI()));
 		
 		//SPARQL UPDATE
-		return update(bindings);
+		return dispatcher.update(bindings);
 	}
 	
-	public BindingsResults subscribe(){
-		//SPARQL SUBSCRIBE
-		Bindings bindings = new Bindings();
-		bindings.addBinding("?network", new BindingURIValue(networkURI()));
-		return subscribe(bindings);
+	public boolean start(){
+		dispatcher = new MNRequestResponseDispatcher();
+		if (!dispatcher.join()) return false;
+		if (!dispatcher.subscribe()) return false;
+		return doStart();
 	}
 	
-	public abstract void mnRequest(String request);
-	
-	@Override
-	public void notify(BindingsResults notify) {
-		for (Bindings bindings : notify.getAddedBindings()){
-			mnRequest(bindings.getBindingValue("?value").getValue());
-		}
+	public void stop(){
+		dispatcher.unsubscribe();
+		doStop();
 	}
 }

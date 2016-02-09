@@ -8,8 +8,6 @@
 
 package arces.unibo.KPI;
 
-import java.util.Vector;
-
 public interface iKPIC_subscribeHandler {
 	
 	String subID = "";
