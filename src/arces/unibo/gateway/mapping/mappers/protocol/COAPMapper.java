@@ -16,4 +16,9 @@ public class COAPMapper implements IProtocolMapper {
 		return null;
 	}
 
+	@Override
+	public String getMapperURI() {
+		return "iot:COAP";
+	}
+
 }

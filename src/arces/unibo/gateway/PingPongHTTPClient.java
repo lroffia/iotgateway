@@ -14,9 +14,16 @@ import org.apache.http.util.EntityUtils;
 
 public class PingPongHTTPClient {
 	private static String server = "127.0.0.1";
-	private static long startTime = 0;
+
 	private static ResponseHandler<String> responseHandler;
 	private static CloseableHttpClient httpclient = HttpClients.createDefault();
+
+	private static long startTime = 0;
+	private static long pingTime = 0;
+	private static long nRequest = 0;
+	private static long pingMax = 0;
+	private static long pingMin = 0;
+	private static long pingAvg = 0;
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
 		String ret = "PING";
@@ -52,9 +59,20 @@ public class PingPongHTTPClient {
         startTime = java.time.Instant.now().toEpochMilli();
         
         responseBody = httpclient.execute(httpget, responseHandler);
-		//httpclient.close();
 		
-        System.out.println("HTTP CLIENT RESPONSE ("+ (java.time.Instant.now().toEpochMilli() - startTime) +" ms): " + responseBody);
+        pingTime = java.time.Instant.now().toEpochMilli() - startTime;
+        
+        if (nRequest == 0) {
+        	pingMin = pingTime;
+        	pingMax = pingTime;
+        }
+        else if (pingTime < pingMin) pingMin = pingTime;
+        else if (pingTime > pingMax) pingMax = pingTime;
+        nRequest++;
+        pingAvg += pingTime;
+        
+        String message = String.format("Min: %d Avg: %d Max: %d", pingMin,pingAvg/nRequest,pingMax);
+        System.out.println(message);
         
         return responseBody;
 	}

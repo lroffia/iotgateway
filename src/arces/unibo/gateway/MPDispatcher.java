@@ -11,7 +11,6 @@ import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.gateway.mapping.ContextAction;
-import arces.unibo.gateway.mapping.MPMap;
 import arces.unibo.gateway.mapping.MPMapper;
 import arces.unibo.gateway.mapping.MPRequest;
 import arces.unibo.gateway.mapping.MPResponse;

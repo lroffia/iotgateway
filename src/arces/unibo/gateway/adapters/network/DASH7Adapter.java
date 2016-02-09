@@ -34,7 +34,7 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	}
 	
 	@Override
-	public boolean start() {
+	public boolean doStart() {
 		System.out.println("*****************");
 		System.out.println("* DASH7 Adapter *");
 		System.out.println("*****************");
@@ -55,7 +55,7 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		dash7Coordinator = new STDash7Coordinator();
 		dash7Coordinator.addObserver(this);
 			
-		return super.start();
+		return true;
 	}
 
 	@Override
@@ -109,5 +109,11 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	@Override
 	public String networkURI() {
 		return "iot:DASH7";
+	}
+
+	@Override
+	protected void doStop() {
+		// TODO Auto-generated method stub
+		
 	}
 }

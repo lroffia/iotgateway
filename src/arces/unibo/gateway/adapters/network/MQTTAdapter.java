@@ -3,29 +3,25 @@ package arces.unibo.gateway.adapters.network;
 public class MQTTAdapter extends MNAdapter {
 
 	@Override
-	public String networkURI() {
+	protected String networkURI() {
 		return "iot:MQTT";
 	}
 
 	@Override
-	public void mnRequest(String request) {
-		// TODO Manage the MN-Request
-		
+	protected void mnRequest(String request) {
+		// TODO Auto-generated method stub
+		// TODO Send the response by calling "boolean mnResponse(String value)";
 	}
 
 	@Override
-	public boolean start() {
-		System.out.println("********************");
-		System.out.println("* PINGPONG Adapter *");
-		System.out.println("********************");
-		
-		return super.start();
+	protected boolean doStart() {
+		// TODO Auto-generated method stub
+		return false;
 	}
-	
+
 	@Override
-	public void stop(){
-		super.stop();
+	protected void doStop() {
+		// TODO Auto-generated method stub
+		
 	}
-	
-	//TODO Send the response by calling "boolean mnResponse(String value)";
 }

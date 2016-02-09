@@ -8,12 +8,13 @@ import arces.unibo.gateway.mapping.mappers.network.INetworkMapper;
 import arces.unibo.gateway.mapping.mappers.protocol.IProtocolMapper;
 
 public abstract class Map {
-	HashMap<String,Mappings> maps = new HashMap<String,Mappings>();
+	protected HashMap<String,Mappings> maps = new HashMap<String,Mappings>();
 	
-	public void addMapper(String key,IMapper mapper){
+	/*
+	public void addMapper(String key,Mapper mapper){
 		maps.put(key, new Mappings(mapper));	
 	}
-
+*/
 	public ContextAction mpRequest2IoT(MPRequest request) {
 		if (!maps.containsKey(request.getProtocol())) return null;
 		return maps.get(request.getProtocol()).mpRequestString2IoT(request.getRequestString());

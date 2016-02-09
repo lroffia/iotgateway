@@ -23,7 +23,7 @@ public class HTTPAdapter extends MPAdapter {
 		super();
 	}
 	
-	public boolean start(){
+	public boolean doStart(){
 		System.out.println("****************");
 		System.out.println("* HTTP Adapter *");
 		System.out.println("****************");
@@ -54,13 +54,10 @@ public class HTTPAdapter extends MPAdapter {
 	    System.out.println("<value>");
 	    System.out.println("--------------------------------------------------------------");
 	    
-	    if(!super.join()) return false;
-	    if(!super.subscribe()) return false;
 	    return true;
 	}
 	
-	public void stop(){
-		super.unsubscribe();
+	public void doStop(){
 		server.stop(0);
 	}
 

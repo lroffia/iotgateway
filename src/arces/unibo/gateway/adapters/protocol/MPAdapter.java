@@ -9,33 +9,67 @@ import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 
-public abstract class MPAdapter extends Aggregator implements IProtocolAdapter {
+public abstract class MPAdapter {
 
-	//MP-ADAPTER
-		private static String MP_REQUEST = 
-				" INSERT DATA { "
-				+ "?request rdf:type iot:MP-Request . "
-				+ "?request iot:hasProtocol ?protocol . "
-				+ "?request iot:hasMPRequestString ?value"
-				+ " }";
+	public abstract String protocolURI();
+	public abstract void mpResponse(String request,String value);
+	public abstract boolean doStart();
+	public abstract void doStop();
+	
+	private MPRequestResponseDispatcher dispatcher;
+	
+	class MPRequestResponseDispatcher extends Aggregator {
+		//MP-ADAPTER
+			private static final String MP_REQUEST = 
+					" INSERT DATA { "
+					+ "?request rdf:type iot:MP-Request . "
+					+ "?request iot:hasProtocol ?protocol . "
+					+ "?request iot:hasMPRequestString ?value"
+					+ " }";
+			
+			private static final String MP_RESPONSE =
+					" SELECT ?request ?value WHERE { "
+							+ "?response rdf:type iot:MP-Response . "
+							+ "?request iot:hasMPResponse ?response . "	
+							+ "?response iot:hasMPResponseString ?value . "
+							+ "?request iot:hasProtocol ?protocol"
+							+ " }";
 		
-		private static String MP_RESPONSE =
-				" SELECT ?request ?value WHERE { "
-						+ "?response rdf:type iot:MP-Response . "
-						+ "?request iot:hasMPResponse ?response . "	
-						+ "?response iot:hasMPResponseString ?value . "
-						+ "?request iot:hasProtocol ?protocol"
-						+ " }";
+		
+		public boolean subscribe() {
+			Bindings bindings = new Bindings();
+			bindings.addBinding("?protocol", new BindingURIValue(protocolURI()));
+			return super.subscribe(bindings);	
+		}
+		
+		public MPRequestResponseDispatcher(){
+			super(MP_RESPONSE,MP_REQUEST);
+		}
+		
+		@Override
+		public void notify(BindingsResults notify) {
+			if (notify.getAddedBindings().isEmpty()) return;
+			
+			Iterator<Bindings> bindings = notify.getAddedBindings().iterator();
+			
+			while(bindings.hasNext()) {
+				Bindings binding = bindings.next();
 	
-	
-	public boolean subscribe() {
-		Bindings bindings = new Bindings();
-		bindings.addBinding("?protocol", new BindingURIValue(protocolURI()));
-		return super.subscribe(bindings);	
+				mpResponse(binding.getBindingValue("?request").getValue(),binding.getBindingValue("?value").getValue());
+			}
+		}
 	}
 	
-	public MPAdapter(){
-		super(MP_RESPONSE,MP_REQUEST);
+	public boolean start(){
+		dispatcher = new MPRequestResponseDispatcher();
+		if (!dispatcher.join()) return false;
+		if (!dispatcher.subscribe()) return false;
+		return doStart();
+	}
+	
+	public void stop(){
+		dispatcher.unsubscribe();
+		doStop();
 	}
 	
 	protected final String mpRequest(String value) {
@@ -46,23 +80,8 @@ public abstract class MPAdapter extends Aggregator implements IProtocolAdapter {
 		bindings.addBinding("?protocol", new BindingURIValue(protocolURI()));
 		
 		//SPARQL UPDATE
-		if(!update(bindings)) return null;
+		if(!dispatcher.update(bindings)) return null;
 		
 		return request;
-	}
-	
-	public abstract void mpResponse(String request,String value);
-	
-	@Override
-	public void notify(BindingsResults notify) {
-		if (notify.getAddedBindings().isEmpty()) return;
-		
-		Iterator<Bindings> bindings = notify.getAddedBindings().iterator();
-		
-		while(bindings.hasNext()) {
-			Bindings binding = bindings.next();
-
-			mpResponse(binding.getBindingValue("?request").getValue(),binding.getBindingValue("?value").getValue());
-		}
 	}
 }

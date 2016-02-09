@@ -16,4 +16,9 @@ public class MQTTMapper implements INetworkMapper {
 		return null;
 	}
 
+	@Override
+	public String getMapperURI() {
+		return "iot:MQTT";
+	}
+
 }

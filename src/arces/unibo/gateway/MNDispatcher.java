@@ -10,7 +10,6 @@ import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.gateway.mapping.ContextAction;
-import arces.unibo.gateway.mapping.MNMap;
 import arces.unibo.gateway.mapping.MNMapper;
 import arces.unibo.gateway.mapping.MNRequest;
 import arces.unibo.gateway.mapping.MNResponse;

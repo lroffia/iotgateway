@@ -9,21 +9,22 @@ public class COAPAdapter extends MPAdapter{
 
 	@Override
 	public void mpResponse(String request, String value) {
-		// TODO Manage the response "value" related to the request URI "request"
-
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	public boolean start() {
+	public boolean doStart() {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public void stop() {
+	public void doStop() {
 		// TODO Auto-generated method stub
 		
 	}
+
 	
 	//TODO Call the method "String mpRequest(String value)" to send a request. The method returns the URI of the request
 

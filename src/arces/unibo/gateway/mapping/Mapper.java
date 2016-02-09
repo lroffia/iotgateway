@@ -2,7 +2,7 @@ package arces.unibo.gateway.mapping;
 
 import arces.unibo.SEPA.Consumer;
 
-public abstract class Mapper extends Consumer implements IMapper {
+public abstract class Mapper extends Consumer {
 
 	protected Map map;
 	

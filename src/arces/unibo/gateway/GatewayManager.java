@@ -71,24 +71,18 @@ public class GatewayManager {
 		networks = new ArrayList<MNAdapter>();
 		//TODO: add all supported networks here
 		networks.add(new PingPongAdapter());		
-		for (MNAdapter adapter : networks) {
-			if (!adapter.join()) return;
-			if (!adapter.subscribe()) return;
-		}
+		for (MNAdapter adapter : networks)  adapter.start();
 		
 		//Protocol adapters
 		protocols= new ArrayList<MPAdapter>();
 		//TODO: add all supported protocols here
 		protocols.add(new HTTPAdapter());
-		for (MPAdapter adapter : protocols) {
-			if (!adapter.join()) return;
-			if (!adapter.subscribe()) return;
-		}
-		
+		for (MPAdapter adapter : protocols) adapter.start();
+
 		System.in.read();
 		
-		for (MPAdapter adapter : protocols) adapter.unsubscribe();
-		for (MNAdapter adapter : networks) adapter.unsubscribe();
+		for (MPAdapter adapter : protocols) adapter.stop();
+		for (MNAdapter adapter : networks) adapter.stop();
 		mnDispatcher.stop();
 		mpDispatcher.stop();
 		mappingManager.stop();

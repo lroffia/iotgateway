@@ -22,7 +22,7 @@ public class Aggregator extends Consumer implements IAggregator {
 		 ret = kp.update_sparql(sparql);
 		 
 		 if (ret == null) return false;
-		 return ret.Status.equals("m3:Success");
+		 return ret.isConfirmed();
 	 }
 	 
 	 public boolean update(){
