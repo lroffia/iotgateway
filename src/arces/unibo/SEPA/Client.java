@@ -1,43 +1,71 @@
 package arces.unibo.SEPA;
 
+import java.io.IOException;
 import java.util.HashMap;
+
+import org.jdom2.JDOMException;
 
 import arces.unibo.KPI.KPICore;
 import arces.unibo.KPI.SIBResponse;
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
-public abstract class Client implements IClient{
-	protected String PREFIXES = "";
+public abstract class Client implements IClient{	
 	protected HashMap<String,String> URI2PrefixMap = new HashMap<String,String>();
+	protected HashMap<String,String> prefix2URIMap = new HashMap<String,String>();
 	
 	protected KPICore kp = null;
 	protected SIBResponse ret;
 	private boolean joined = false;
 	
-	private String defaultIP = "mml.arces.unibo.it"; //"mml.arces.unibo.it"; //"192.168.56.101"; //"127.0.0.1";
-	private int defaultPort = 7701;//10010;//7701;
-	private String defaultName ="SEPA Engine";
+	protected static String defaultIP = "127.0.0.1";
+	protected static int defaultPort = 7766;
+	protected static String defaultName ="IoTGateway";
 	
-	private void addNamespace(String prefix,String uri){
-		PREFIXES += "PREFIX " + prefix +":" + "<" + uri + "> ";
+	public void addNamespace(String prefix,String uri){
+		if (prefix2URIMap.containsKey(prefix)) removeNamespace(prefix);
 		URI2PrefixMap.put(uri, prefix);
+		prefix2URIMap.put(prefix, uri);
+	}
+	
+	public void removeNamespace(String prefix){
+		if (!prefix2URIMap.containsKey(prefix)) return;
+		String rmURI = prefix2URIMap.get(prefix);
+		URI2PrefixMap.remove(rmURI);
+		prefix2URIMap.remove(prefix);
+	}
+	
+	public void clearNamespaces() {
+		URI2PrefixMap.clear();
+		prefix2URIMap.clear();
+	}
+	
+	protected String prefixes() {
+		String ret = "";
+		for (String prefix : prefix2URIMap.keySet())
+			ret += "PREFIX " + prefix + ":<" + prefix2URIMap.get(prefix) + "> ";
+		return ret;
 	}
 	
 	public Client(String SIB_IP,int SIB_PORT,String SIB_NAME){
-		System.out.println("SEPA Client Created IP:"+SIB_IP+" Port:"+SIB_PORT+" Name:"+SIB_NAME);
+		Logging.log(VERBOSITY.DEBUG,"SEPA","CLIENT Created IP:"+SIB_IP+" Port:"+SIB_PORT+" Name:"+SIB_NAME);
 		kp = new KPICore(SIB_IP, SIB_PORT, SIB_NAME);	
+		
+		addNamespace("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		addNamespace("iot","http://www.arces.unibo.it/IoTGateway#");
 	}
 	
 	public Client(){
-		kp = new KPICore(defaultIP, defaultPort, defaultName);
-
-		addNamespace("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
-		addNamespace("iot","http://www.arces.unibo.it/IoTGateway#");
-		//kp.enable_debug_message();
-		//kp.enable_error_message();
+		this(defaultIP, defaultPort, defaultName);
 	}
 	
 	public boolean join() {
-		ret = kp.join();
+		try {
+			ret = kp.join();
+		} catch (JDOMException | IOException e) {
+			e.printStackTrace();
+			return false;
+		}
 		joined = ret.isConfirmed();
 		return joined;
 	}
@@ -46,7 +74,16 @@ public abstract class Client implements IClient{
 	
 	public boolean leave() {
 		if (!joined) return false;
-		ret = kp.leave();
+		try {
+			ret = kp.leave();
+		} catch (JDOMException | IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		if (ret == null) {
+			joined = false;
+			return false;
+		}
 		joined = !ret.isConfirmed();
 		return !joined;
 	}
@@ -63,6 +100,7 @@ public abstract class Client implements IClient{
 			replacedSparql = replacedSparql.substring(sparql.indexOf('{'), replacedSparql.length());
 		}
 		for (String var : bindings.getVariables()) {
+			if (bindings.getBindingValue(var) == null) continue;
 			if (bindings.getBindingValue(var).isLiteral()) 
 				replacedSparql = replacedSparql.replace(var,"\""+bindings.getBindingValue(var).getValue()+"\"");
 			else	

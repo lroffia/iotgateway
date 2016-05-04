@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
 
@@ -14,10 +13,10 @@ import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
 
-
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public class SIBResponse {
-
 
 	public  String Message= "";
 	public  String MessageType = "";
@@ -42,8 +41,6 @@ public class SIBResponse {
 
 	public SIBResponse() {
 		// TODO Auto-generated constructor stub
-
-
 	}
 	
 	public SIBResponse(String primitive, String message, String subscriptionID){
@@ -71,20 +68,15 @@ public class SIBResponse {
 		}
 	}
 
-	public SIBResponse(String xml)
+	public SIBResponse(String xml) throws JDOMException, IOException
 	{
 		this.Message = xml;
-		Document sparql_response_document;
+		this.Status = " parsing message ";
+		
+		SAXBuilder builder = new SAXBuilder();
+		Document sparql_response_document = null;
 
-		sparql_response_document = new Document();
-		try {
-			sparql_response_document = loadXMLFromString(xml);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			sparql_response_document = null;
-			this.Status = " parsing message ";
-		}
+		sparql_response_document = builder.build(new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
 
 		//	        GET ROOT ELEMENT + NAMESPACE
 		if(sparql_response_document != null)
@@ -97,72 +89,67 @@ public class SIBResponse {
 			this.node_id = root.getChildText("node_id");
 			this.space_id = root.getChildText("space_id");
 
-
 			List <Element> parameterList = root.getChildren("parameter");
-			Iterator <Element> parameterIter = parameterList.iterator();
 
 			ArrayList<Element> parToProcess = new ArrayList<Element>();
 
-			while(parameterIter.hasNext())
+			for(Element Parameter : parameterList)
 			{
-				Element Parameter = parameterIter.next();
 				String parName = Parameter.getAttributeValue("name");
 
-				switch (parName)
-				{
-
-				case "status": this.Status = Parameter.getText(); 
-				break;
-				case "subscription_id": this.subscription_id = Parameter.getText();
-				break;
-				case "update_id" : this.update_id = Parameter.getText();
-				break;
-				case "type": this.queryType = Parameter.getText(); //here the query type if needed 
-				break;
-				//case "query": {} //here the  RDF query to send, not needed for answers
-
-				case "new_results": parToProcess.add(Parameter);
-				break;
-				case "obsolete_results": parToProcess.add(Parameter);
-				break;
-				case "results": parToProcess.add(Parameter);
-				break;
-				case "bnodes": ;
-				break;
-				default : System.out.println("Error while reading parameter name: " + parName);
-				break;
+				switch (parName){
+					case "status": 
+						this.Status = Parameter.getText(); 
+						break;
+					case "subscription_id": 
+						this.subscription_id = Parameter.getText();
+						break;
+					case "update_id" : 
+						this.update_id = Parameter.getText();
+						break;
+					case "type": 
+						this.queryType = Parameter.getText(); //here the query type if needed 
+						break;
+					case "new_results": 
+						parToProcess.add(Parameter);
+						break;
+					case "obsolete_results": 
+						parToProcess.add(Parameter);
+						break;
+					case "results": 
+						parToProcess.add(Parameter);
+						break;
+					case "bnodes": 
+						break;
+					default : 
+						Logging.log(VERBOSITY.DEBUG,"KPI","Error while reading parameter name: " + parName);
+						break;
 				}
 			}
 
 			for(int i = 0; i < parToProcess.size(); i++)
 			{
-		//		System.out.println ("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII" + parToProcess.get(i).toString());
 				Element par = parToProcess.get(i);
 				String parName = par.getAttributeValue("name");
-		//		System.out.println("Par name to process: " + parName);
 				if(par.getChild("triple_list")!= null)
 				{
-
 					this.queryType = "RDF-M3";
 					Vector<Vector<String>> triplev = new Vector<Vector<String>>();
 					Element el = par.getChild ("triple_list");
 
 					List<Element> triples =  el.getChildren("triple");
-					Iterator<Element> it = triples.iterator();
 
-					while(it.hasNext())
-					{   Vector<String> singleton=new Vector<String>();
+					for (Element etriple: triples){   
+						Vector<String> singleton=new Vector<String>();
 
-					Element etriple = it.next();
+						singleton.add(etriple.getChild("subject").getText());
+						singleton.add(etriple.getChild("predicate").getText());
+						singleton.add(etriple.getChild("object").getText());
+						singleton.add(etriple.getChild("object").getAttributeValue("type"));
 
-					singleton.add(etriple.getChild("subject").getText());
+						triplev.add(singleton);			
+					}
 
-					singleton.add(etriple.getChild("predicate").getText());
-					singleton.add(etriple.getChild("object").getText());
-					singleton.add(etriple.getChild("object").getAttributeValue("type"));
-
-					triplev.add(singleton);			
-					}//while(it.hasNext())
 					if (parName.equals("results"))
 					{
 						this.query_results = triplev;
@@ -199,24 +186,6 @@ public class SIBResponse {
 		}
 	}
 
-
-
-	private static Document loadXMLFromString(String xml)
-	{
-		SAXBuilder builder = new SAXBuilder();
-		Document doc = null;
-
-		try
-		{
-			doc = builder.build(new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
-		}
-		catch (JDOMException|IOException e)
-		{
-			System.err.println("ERROR: SIBResponse:loadXMLFromString " + e.getMessage() + "\nXML: \""+xml+"\"\n");
-		}
-		return doc;
-	}
-
 	@Override
 	public String toString()
 	{
@@ -234,7 +203,4 @@ public class SIBResponse {
 			return true;
 		return this.Status.equalsIgnoreCase("m3:success");
 	}
-
-
-
 }

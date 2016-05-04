@@ -1,5 +1,6 @@
 package arces.unibo.gateway.adapters.network;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import arces.unibo.SEPA.Aggregator;
@@ -7,48 +8,66 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
+import arces.unibo.SEPA.SPARQL;
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public abstract class MNAdapter {
+	private MNRequestResponseDispatcher dispatcher;
 	
-	protected abstract String networkURI();
+	//Abstract methods
+	public abstract String networkURI();
 	protected abstract void mnRequest(String request);
 	protected abstract boolean doStart();
 	protected abstract void doStop();
+	public abstract String adapterName();
 	
-	private MNRequestResponseDispatcher dispatcher;
+	public MNAdapter() {
+		dispatcher = new MNRequestResponseDispatcher();	
+	}
+	
+	public MNAdapter(String SIB_IP,int SIB_PORT,String SIB_NAME){
+		dispatcher = new MNRequestResponseDispatcher(SIB_IP, SIB_PORT,SIB_NAME);
+	}
 	
 	class MNRequestResponseDispatcher extends Aggregator {
-		private static final String MN_RESPONSE = 
-				" INSERT DATA { "
-				+ "?response rdf:type iot:MN-Response . "
-				+ "?response iot:hasNetwork ?network . "
-				+ "?response iot:hasMNResponseString ?value"
-				+ " }";
-		
-		private static final String MN_REQUEST =
-				" SELECT ?value WHERE { "
-				+ "?request rdf:type iot:MN-Request . "
-				+ "?request iot:hasNetwork ?network . "
-				+ "?request iot:hasMNRequestString ?value"
-				+ " }";
 		
 		public MNRequestResponseDispatcher(){
-			super(MN_REQUEST,MN_RESPONSE);
+			super(SPARQL.subscribe("MN_REQUEST"),SPARQL.insert("MN_RESPONSE"));
 		}
-			
-		@Override
-		public boolean subscribe(){
+		
+		public MNRequestResponseDispatcher(String SIB_IP,int SIB_PORT,String SIB_NAME){
+			super(SPARQL.subscribe("MN_REQUEST"),SPARQL.insert("MN_RESPONSE"),SIB_IP, SIB_PORT,SIB_NAME);
+		}
+		
+		public String  subscribe(){
 			//SPARQL SUBSCRIBE
 			Bindings bindings = new Bindings();
 			bindings.addBinding("?network", new BindingURIValue(networkURI()));
+			
 			return subscribe(bindings);
 		}
 		
 		@Override
 		public void notify(BindingsResults notify) {
-			for (Bindings bindings : notify.getAddedBindings()){
-				mnRequest(bindings.getBindingValue("?value").getValue());
+
+		}
+
+		@Override
+		public void notifyAdded(ArrayList<Bindings> bindings) {
+			for (Bindings binding : bindings){
+				mnRequest(binding.getBindingValue("?value").getValue());
 			}
+		}
+
+		@Override
+		public void notifyRemoved(ArrayList<Bindings> bindings) {
+			
+		}
+
+		@Override
+		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
+			notifyAdded(bindingsResults);
 		}
 	}
 	
@@ -65,14 +84,25 @@ public abstract class MNAdapter {
 	}
 	
 	public boolean start(){
-		dispatcher = new MNRequestResponseDispatcher();
-		if (!dispatcher.join()) return false;
-		if (!dispatcher.subscribe()) return false;
+		if (!dispatcher.join()) {
+			Logging.log(VERBOSITY.FATAL,adapterName(),"Join FAILED");
+			return false;
+		}
+		
+		String subID = dispatcher.subscribe();
+		
+		if (subID == null) {
+			Logging.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
+			return false;
+		}
+		
+		Logging.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
+		
 		return doStart();
 	}
 	
-	public void stop(){
-		dispatcher.unsubscribe();
+	public boolean stop(){
 		doStop();
+		return dispatcher.unsubscribe();
 	}
 }

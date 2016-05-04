@@ -9,7 +9,6 @@
  * @version     %I%, %G%
  */
 
-
 package arces.unibo.KPI;
 
 import java.io.ByteArrayInputStream;
@@ -23,7 +22,8 @@ import org.jdom2.*;
 //import org.jdom.input.SAXBuilder;
 import org.jdom2.input.SAXBuilder;
 
-
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public class SSAP_XMLTools
 {
@@ -56,8 +56,6 @@ public class SSAP_XMLTools
 		builder = new SAXBuilder();
 		this.nodeID           =nodeID;
 		this.SMART_SPACE_NAME =SMART_SPACE_NAME;
-
-
 	}//public KPXML(String HOST,int PORT,String SMART_SPACE_NAME)
 
 	/**
@@ -71,8 +69,6 @@ public class SSAP_XMLTools
 		builder = new SAXBuilder();
 		this.nodeID           =null;
 		this.SMART_SPACE_NAME =null;
-
-
 	}
 
 	/**
@@ -89,26 +85,24 @@ public class SSAP_XMLTools
 	{   
 		if(xml==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:SibXMLMessageParser: XML message is null")
-			;return null;
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:SibXMLMessageParser: XML message is null");
+			return null;
 		}
 		if(id==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:SibXMLMessageParser:id is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:SibXMLMessageParser:id is null");
 			return null;
 		}
 
 		Document doc=null;
 		try {
-			//System.out.println("################" + xml);
 			doc = builder.build(new ByteArrayInputStream(xml.getBytes()));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		if(doc==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:SibXMLMessageParser:doc is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:SibXMLMessageParser:doc is null");
 			return null;
 		}
 
@@ -116,9 +110,6 @@ public class SSAP_XMLTools
 
 		Element root = doc.getRootElement();
 		Namespace ns = root.getNamespace();
-
-		//String Comm = root.getChild("Command", ns ).getText();
-		//Element rootActivity = root.getChild("Activity", ns);	
 
 		for(int i=0; i< id.length; i++)
 		{   
@@ -169,19 +160,23 @@ public class SSAP_XMLTools
 
 	public Element getParameterElement(String xml,String attribute, String value)
 	{
-		if(xml==null){System.out.println("ERROR:SSAP_XMLTools:getParameterElement: XML message is null");return null;}
+		if(xml==null){
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getParameterElement: XML message is null");
+			return null;
+		}
 
 		Document doc=null;
 		try {
 			doc = builder.build(new ByteArrayInputStream(xml.getBytes()));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			//e.printStackTrace();
-			System.out.println("SSAP\n"+xml+"\nAttribute: "+attribute+"\nValue: "+value+"\n");
+			Logging.log(VERBOSITY.DEBUG,"KPI","SSAP\n"+xml+"\nAttribute: "+attribute+"\nValue: "+value+"\n");
 			return null;
 		} 
 
-		if(doc==null) {System.out.println("ERROR:SSAP_XMLTools:getParameterElement:doc is null");return null;}
+		if(doc==null) {
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getParameterElement:doc is null");
+			return null;
+		}
 
 		Element root = doc.getRootElement();
 		Namespace ns = root.getNamespace();
@@ -192,10 +187,10 @@ public class SSAP_XMLTools
 		for(ip=0;ip<parameters.size();ip++)
 			if( parameters.get(ip).getAttributeValue( attribute ).equals( value ))break;
 
-		if(!(ip<parameters.size())) {System.out.println("ERROR:SSAP_XMLTools:getParameterElement:parameter("
-				+attribute+"="+value+") not found!");return null;}
-
-		//System.out.println("###### "+parameters.get(ip).getValue() );
+		if(!(ip<parameters.size())) {
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getParameterElement:parameter("
+				+attribute+"="+value+") not found!");
+			return null;}
 
 		return parameters.get(ip);
 	}
@@ -276,7 +271,7 @@ public class SSAP_XMLTools
 	{
 		if(xml==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:getQueryTriple:XML message is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getQueryTriple:XML message is null");
 			return null;
 		}
 
@@ -290,7 +285,7 @@ public class SSAP_XMLTools
 
 		if(doc==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:getQueryTriple:doc is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getQueryTriple:doc is null");
 			return null;
 		}
 
@@ -304,11 +299,17 @@ public class SSAP_XMLTools
 		for(ip=0;ip<parameters.size();ip++)
 			if( parameters.get(ip).getAttributeValue("name").equals("results"))break;
 
-		if(!(ip<parameters.size())) {System.out.println("ERROR:SSAP_XMLTools:getQueryTriple:parameter(results) not found!");return null;}
+		if(!(ip<parameters.size())) {
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getQueryTriple:parameter(results) not found!");
+			return null;
+		}
 
 		Element triple_list = parameters.get(ip).getChild("triple_list", ns);
 
-		if(triple_list==null) {System.out.println("ERROR:SSAP_XMLTools:getQueryTriple:triple_list not found");return null;}
+		if(triple_list==null) {
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getQueryTriple:triple_list not found");
+			return null;
+		}
 
 		List<Element> triples =  triple_list.getChildren("triple", ns);
 		Iterator<Element> i = triples.iterator();
@@ -439,13 +440,13 @@ public class SSAP_XMLTools
 	 */
 	private Vector<Vector<String>> getEventTriple(String xml,String ParamAttValue)
 	{
-		if(xml==null){System.out.println("ERROR:SSAP_XMLTools:getEventTriple: XML message is null");return null;}
+		if(xml==null){Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getEventTriple: XML message is null");return null;}
 
 		Element parameters = getParameterElement(xml,"name", ParamAttValue);
-		if(parameters==null) {System.out.println("ERROR:SSAP_XMLTools:getEventTriple:parameters not found:"+ParamAttValue);return null;}
+		if(parameters==null) {Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getEventTriple:parameters not found:"+ParamAttValue);return null;}
 
 		Element triple_list = parameters.getChild("triple_list");
-		if(triple_list==null) {System.out.println("ERROR:SSAP_XMLTools:getEventTriple:triple_list not found");return null;}
+		if(triple_list==null) {Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getEventTriple:triple_list not found");return null;}
 
 		Vector<Vector<String>> triple=new Vector<Vector<String>>();
 
@@ -545,8 +546,7 @@ public class SSAP_XMLTools
 		Element e = getParameterElement(xml,"name", "subscription_id");
 		
 		if (e == null) {
-			System.out.println("getSubscriptionID is null");
-			System.out.println(xml);
+			Logging.log(VERBOSITY.DEBUG,"KPI","getSubscriptionID is null");
 			return "";
 		}
 		
@@ -602,10 +602,10 @@ public class SSAP_XMLTools
 		Vector<Vector<String>> triples = getQueryTriple(xml);
 
 		if(triples!=null)
-		{ System.out.println("Triple List:\n");
+		{ Logging.log(VERBOSITY.DEBUG,"KPI","Triple List");
 		for(int i=0; i<triples.size() ; i++ )
 		{ Vector<String> t=triples.get(i);
-		System.out.println(
+		Logging.log(VERBOSITY.DEBUG,"KPI",
 				"  S:["+t.get(0)
 				+"] P:["+t.get(1)
 				+"] O:["+t.get(2)
@@ -613,7 +613,7 @@ public class SSAP_XMLTools
 
 		}//for(int j=0; i<triple.size() ; i++ )
 		}  
-		else System.out.println("SSAP_XMLTools:printTriple:NO TRIPLE FOUND!!!");
+		else Logging.log(VERBOSITY.DEBUG,"KPI","SSAP_XMLTools:printTriple:NO TRIPLE FOUND!!!");
 
 	}//	public void printTriple(xml)
 
@@ -1103,9 +1103,6 @@ public class SSAP_XMLTools
 		++transaction_id;
 		subscription_id=transaction_id;
 
-
-
-
 		return 
 				"<SSAP_message>" 
 				+"<transaction_type>SUBSCRIBE</transaction_type><message_type>REQUEST</message_type>" 
@@ -1187,9 +1184,6 @@ public class SSAP_XMLTools
          + "<parameter name = \"subscription_id\">" + subscription_id + "</parameter>"
          + "</SSAP_message>";
 	}//String unsubscribe()
-
-
-
 
 
 	/* * * * * * * * * * * * * * * * * * *\
@@ -1314,10 +1308,6 @@ public class SSAP_XMLTools
 			this.queryWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_ISSUBTYPE);
 	}//String queryWQL_ISSUBTYPE()
 
-
-
-
-
 	/**
 	 * Method to build an XML node tag for WQL query purpose
 	 * 
@@ -1363,8 +1353,6 @@ public class SSAP_XMLTools
 	}//private final newWQLNode()
 
 
-
-
 	/**
 	 * Method to complete the XML message for the wilbur query.
 	 * This method surround the string representation of the all 
@@ -1401,9 +1389,6 @@ public class SSAP_XMLTools
 	}//private final String queryWQLSurround(String wql_query)
 
 
-
-
-
 	/* * * * * * * * * * * * * * * * * * *\
       WQL subscription
    \* * * * * * * * * * * * * * * * * * */
@@ -1429,10 +1414,6 @@ public class SSAP_XMLTools
 	return 
 			this.subscribeWQLSurround(wql_query_nodes,SSAP_XMLTools.WQL_VALUES);
 	}//String subscribeWQL_VALUES()
-
-
-
-
 
 	/**
 	 * Make the WQL-QUERY SUBSCRIPTION SSAP message 
@@ -1567,7 +1548,7 @@ public class SSAP_XMLTools
 	{
 		if(xml==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:SibXMLMessageParser: XML message is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:SibXMLMessageParser: XML message is null");
 			return null;
 		}
 
@@ -1582,7 +1563,7 @@ public class SSAP_XMLTools
 
 		if(doc==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:SibXMLMessageParser:doc is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:SibXMLMessageParser:doc is null");
 			return null;
 		}
 		Element root = doc.getRootElement();
@@ -1680,17 +1661,17 @@ public class SSAP_XMLTools
 	 */
 	private Vector<Vector<String>> getWQLEventNode(String xml,String ParamAttValue)
 	{
-		if(xml==null){System.out.println("ERROR:SSAP_XMLTools:getWQLEventTriple: XML message is null");return null;}
+		if(xml==null){Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getWQLEventTriple: XML message is null");return null;}
 
 		Element parameters = getParameterElement(xml,"name", ParamAttValue);
-		if(parameters==null){System.out.println("ERROR:SSAP_XMLTools:getWQLEventTriple:parameters not found:"+ParamAttValue);return null;}
+		if(parameters==null){Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getWQLEventTriple:parameters not found:"+ParamAttValue);return null;}
 
 		Element node_list = parameters.getChild("node_list");
-		if(node_list==null) {System.out.println("ERROR:SSAP_XMLTools:getWQLEventTriple:node_list not found");return null;}
+		if(node_list==null) {Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getWQLEventTriple:node_list not found");return null;}
 
 		List<Element> all_node = node_list.getChildren(); //could be literal or uri
 		if(all_node==null /*|| all_node.isEmpty()*/)
-		{System.out.println("ERROR:SSAP_XMLTools:getWQLEventTriple:children for node_list not found");return null;}
+		{Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getWQLEventTriple:children for node_list not found");return null;}
 
 		Vector<Vector<String>> nodes=new Vector<Vector<String>>();
 
@@ -1701,7 +1682,7 @@ public class SSAP_XMLTools
 
 		Element etriple = i.next();
 
-		//System.out.println("E-TRIPLE:"+etriple.getName()+" value:"+etriple.getText());
+		//Logging.log("E-TRIPLE:"+etriple.getName()+" value:"+etriple.getText());
 		singleton.add(etriple.getName());
 		singleton.add(etriple.getText());
 
@@ -1718,10 +1699,10 @@ public class SSAP_XMLTools
 	 */
 	public String getWQLTrueFalseResultEventNode(String xml)
 	{
-		if(xml==null){System.out.println("ERROR:SSAP_XMLTools:getWQLEventTriple: XML message is null");return null;}
+		if(xml==null){Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getWQLEventTriple: XML message is null");return null;}
 
 		Element parameters = getParameterElement(xml,"name", "results");
-		if(parameters==null){System.out.println("ERROR:SSAP_XMLTools:getWQLEventTriple:parameters not found:"+"results");return null;}
+		if(parameters==null){Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getWQLEventTriple:parameters not found:"+"results");return null;}
 
 		return parameters.getText();
 	}  
@@ -1734,17 +1715,16 @@ public class SSAP_XMLTools
 	 * @return
 	 */
 	public void printNodes(Vector<Vector<String>> nodes)
-	{if(nodes==null){System.out.println("ERROR:SSAP_XMLTools:printNodes:nodes is null!");return;}
+	{if(nodes==null){Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:printNodes:nodes is null!");return;}
 
-	System.out.println("SSAP_XMLTools:printNodes:");
+	Logging.log(VERBOSITY.DEBUG,"KPI","SSAP_XMLTools:printNodes:");
 	for(int i=0;i<nodes.size();i++)
-	{System.out.println("Line:"+i+":");
+	{Logging.log(VERBOSITY.DEBUG,"KPI","Line:"+i+":");
 	Vector<String> line=nodes.get(i);
 
 	for(int j=0;j<line.size();j++)
 	{System.out.print(j+") "+line.get(j)+" ");
 	}
-	System.out.println();
 	}	
 	}
 
@@ -1802,7 +1782,7 @@ public class SSAP_XMLTools
 	 * @return the value of the element "status"
 	 */
 	public String getSSAPmsgStatus(String xml)
-	{ //System.out.println("SSAP_XMLTools:getSSAPmsgStatus:xml content:\n"+xml);
+	{ //Logging.log("SSAP_XMLTools:getSSAPmsgStatus:xml content:\n"+xml);
 		if(getParameterElement(xml,"name", "status")!= null)
 		{
 			return getParameterElement(xml,"name", "status").getValue();
@@ -1813,7 +1793,7 @@ public class SSAP_XMLTools
 		}
 	}
 	public String getSSAPmsgIndicationSequence(String xml)
-	{ //System.out.println("SSAP_XMLTools:getSSAPmsgStatus:xml content:\n"+xml);
+	{ //Logging.log("SSAP_XMLTools:getSSAPmsgStatus:xml content:\n"+xml);
 		if(getParameterElement(xml,"name", "ind_sequence")!= null)
 		{
 			return getParameterElement(xml,"name", "ind_sequence").getValue();
@@ -2105,7 +2085,7 @@ public class SSAP_XMLTools
 	{
 		if(xml==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:get_SPARQL_indication:XML message is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:get_SPARQL_indication:XML message is null");
 			return null;
 		}
 
@@ -2119,7 +2099,7 @@ public class SSAP_XMLTools
 
 		if(doc==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:get_SPARQL_indication:doc is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:get_SPARQL_indication:doc is null");
 			return null;
 		}
 
@@ -2139,7 +2119,7 @@ public class SSAP_XMLTools
 		}
 		if(!(ip<parameters.size())) 
 		{
-			System.out.println("ERROR:SSAP_XMLTools:get_SPARQL_indication:(results) not found!");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:get_SPARQL_indication:(results) not found!");
 			return null;
 		}
 
@@ -2170,7 +2150,7 @@ public class SSAP_XMLTools
 	{
 		if(xml==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:getQueryTriple:XML message is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getQueryTriple:XML message is null");
 			return null;
 		}
 
@@ -2184,7 +2164,7 @@ public class SSAP_XMLTools
 
 		if(doc==null)
 		{
-			System.out.println("ERROR:SSAP_XMLTools:getQueryTriple:doc is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getQueryTriple:doc is null");
 			return null;
 		}
 
@@ -2204,7 +2184,7 @@ public class SSAP_XMLTools
 		}
 		if(!(ip<parameters.size())) 
 		{
-			System.out.println("ERROR:SSAP_XMLTools:getQueryTriple:parameter(results) not found!");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_XMLTools:getQueryTriple:parameter(results) not found!");
 			return null;
 		}
 
@@ -2222,7 +2202,7 @@ public class SSAP_XMLTools
 		}
 		if(results==null)
 		{
-			//	System.out.println("Warning:SSAP_XMLTools:getQueryTriple:get_SPARQL_indication:(results) not found!");
+			//	Logging.log("Warning:SSAP_XMLTools:getQueryTriple:get_SPARQL_indication:(results) not found!");
 			return null;
 		}
 		return new SSAP_sparql_response(results);

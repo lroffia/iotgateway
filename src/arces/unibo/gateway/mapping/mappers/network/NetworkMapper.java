@@ -1,14 +1,14 @@
 package arces.unibo.gateway.mapping.mappers.network;
 
-import arces.unibo.gateway.mapping.ContextAction;
+import arces.unibo.gateway.mapping.ResourceAction;
 
 public abstract class NetworkMapper implements INetworkMapper{
 
-	public String ioT2MNRequestString(String pattern, ContextAction contextAction) {
-		return pattern.replace("*", contextAction.getValue());
+	public String resourceAction2MNRequestString(String pattern, ResourceAction resourceAction) {
+		return pattern.replace("*", resourceAction.getValue());
 	}
 	
-	public ContextAction mnResponseString2IoT(String response, String pattern, ContextAction contextPattern) {
+	public ResourceAction mnResponseString2ResourceAction(String response, String pattern, ResourceAction resourceActionPattern) {
 		String[] patternValues = pattern.split("&");
 		String[] responseValues = response.split("&");
 		String value = null;
@@ -22,6 +22,6 @@ public abstract class NetworkMapper implements INetworkMapper{
 			if (!patternValues[i].equals(responseValues[i])) return null;
 		}
 		
-		return new ContextAction(contextPattern.getContextURI(),contextPattern.getActionURI(),value);
+		return new ResourceAction(resourceActionPattern.getResourceURI(),resourceActionPattern.getActionURI(),resourceActionPattern.getValue().replace("*", value));
 	}
 }

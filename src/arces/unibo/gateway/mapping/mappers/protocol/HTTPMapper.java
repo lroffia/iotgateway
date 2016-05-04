@@ -6,4 +6,6 @@ public class HTTPMapper extends ProtocolMapper {
 	public String getMapperURI() {
 		return "iot:HTTP";
 	}
+
+
 }

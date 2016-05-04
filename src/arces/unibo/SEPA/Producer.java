@@ -1,39 +1,63 @@
 package arces.unibo.SEPA;
 
-import java.util.UUID;
+import java.io.IOException;
+
+import org.jdom2.JDOMException;
+
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public class Producer extends Client implements IProducer {
-	private String SPARQL_UPDATE = "INSERT { ?subject ?predicate ?object }";
+	private String SPARQL_UPDATE = "";
 	
-	public Producer(String query) {
-		super();
-		SPARQL_UPDATE = query;
+	private String tag = "SEPA PRODUCER";
+	
+	private boolean retry = true;
+	private static final int maxRetries = 3;
+	private int nRetry = 0;
+	
+	public Producer(String updateQuery,String SIB_IP,int SIB_PORT,String SIB_NAME){
+		super(SIB_IP,SIB_PORT,SIB_NAME);
+		SPARQL_UPDATE = updateQuery;
 	}
-
-	public Producer() {
-		super();
+	public Producer(String updateQuery) {
+		this(updateQuery,defaultIP, defaultPort, defaultName);
 	}
 	
-	 public boolean update(Bindings forcedBindings){
-		 if (!isJoined()) return false;
+	public synchronized boolean update(Bindings forcedBindings){
+		 if (!isJoined()) {
+			 Logging.log(VERBOSITY.ERROR,tag,"UPDATE FAILED because client is not joined");
+			 return false;
+		 }
 		 
-		 String sparql = PREFIXES + replaceBindings(SPARQL_UPDATE,forcedBindings);
+		 String sparql = prefixes() + replaceBindings(SPARQL_UPDATE,forcedBindings).replace("\n", "").replace("\r", "");
 		 
-		 System.out.println(">> UPDATE "+sparql);
+		 Logging.log(VERBOSITY.DEBUG,tag,"UPDATE "+sparql);
 		 
-		 ret = kp.update_sparql(sparql);
+		 nRetry = 0;
+		 retry = true;
+		 ret = null;
 		 
-		 if (ret == null) return false;
+		 while (retry){
+			try 
+			{
+				ret = kp.update_sparql(sparql);
+			} 
+			catch (JDOMException | IOException e) {
+				nRetry++;
+				Logging.log(VERBOSITY.ERROR,tag,"UPDATE FAILED ("+nRetry+"/"+maxRetries+") "+sparql);
+				if (nRetry == maxRetries) retry = false;
+				continue;
+			}
+			retry = false;
+		 }
 		 
-		 return ret.Status.equals("m3:Success");
-	 }
-	 
-	 public boolean update(){		 
-		 Bindings forcedBindings = new Bindings();
-		 forcedBindings.addBinding("?subject", new BindingURIValue("default:"+UUID.randomUUID().toString()));
-		 forcedBindings.addBinding("?predicate", new BindingURIValue("default:"+UUID.randomUUID().toString()));
-		 forcedBindings.addBinding("?object", new BindingURIValue("default:"+UUID.randomUUID().toString()));
+		 if (ret == null) {
+			 Logging.log(VERBOSITY.ERROR,tag,"Update return value is NULL");
+			 return false;
+		 }
 		 
-		 return update(forcedBindings);
+		 Logging.log(VERBOSITY.DEBUG, tag, "Status = " + ret.Status);
+		 return ret.isConfirmed();
 	 }
 }

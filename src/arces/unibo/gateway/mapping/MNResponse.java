@@ -19,6 +19,6 @@ public class MNResponse {
 	
 	@Override
 	public String toString(){
-		return "MN-Response<"+URI+","+networkURI+","+responseString+">";
+		return "MN-Response<"+networkURI+","+responseString+">";
 	}
 }

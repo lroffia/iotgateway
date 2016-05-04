@@ -8,11 +8,12 @@
  * @version     %I%, %G%
  */
 
-
-
 package arces.unibo.KPI;
 
 import java.util.Vector;
+
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public class KPIEventListener extends KPICore implements /*iKPIC,*/ iKPIC_subscribeHandler{
 	
@@ -62,16 +63,12 @@ public class KPIEventListener extends KPICore implements /*iKPIC,*/ iKPIC_subscr
 		 */
 		super(HOST, PORT, SMART_SPACE_NAME);
 		xmlTools = new SSAP_XMLTools();
-//		this.HOST=HOST;
-//		this.PORT=PORT;
-//		this.SSNM=SMART_SPACE_NAME;
-		
 	}//KPIEventListener()
 	
 	
 	@Override
     public void kpic_SIBEventHandler(String xml)
-    {System.out.println("\n[NEW EVENT(EventListener)]___________________________________");
+    {Logging.log(VERBOSITY.DEBUG,"KPI","NEW EVENT(EventListener)]");
      
      String subscriptionId=xmlTools.getSubscriptionID(xml);
      
@@ -81,7 +78,7 @@ public class KPIEventListener extends KPICore implements /*iKPIC,*/ iKPIC_subscr
     		   subscriptionMemo.get(i).subscribeHandler.kpic_SIBEventHandler(xml);
        }//for(int i=0;i<subscriptionMemo.size();i++)
      
-     System.out.println("\n[Default event handler(EventListener)]___________________________________");
+     Logging.log(VERBOSITY.DEBUG,"KPI","[Default event handler(EventListener)]");
      kpic_SIBEventHandler(xml);
      
     }//public void kp_sib_event(String xml)

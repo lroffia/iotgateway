@@ -1,36 +1,63 @@
 package arces.unibo.SEPA;
 
-import java.util.UUID;
+import java.io.IOException;
 
-public class Aggregator extends Consumer implements IAggregator {
+import org.jdom2.JDOMException;
+
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
+
+public abstract class Aggregator extends Consumer implements IAggregator {
 	private String SPARQL_UPDATE = "INSERT { ?subject ?predicate ?object }";
 	
-	public Aggregator(String subscribeQuery,String updateQuery) {
-		super(subscribeQuery);
-		SPARQL_UPDATE = updateQuery;
+	private String tag = "SEPA AGGREGATOR";
+	
+	private boolean retry = true;
+	private int maxRetries = 3;
+	private int nRetry = 0;
+	
+	public Aggregator(String subscribeQuery,String updateQuery,String SIB_IP,int SIB_PORT,String SIB_NAME){
+		super(subscribeQuery,SIB_IP,SIB_PORT,SIB_NAME);
+		SPARQL_UPDATE = updateQuery;	
 	}
-
-	public Aggregator() {
-		super();
+	public Aggregator(String subscribeQuery,String updateQuery) {
+		this(subscribeQuery,updateQuery,defaultIP, defaultPort, defaultName);
 	}
 	
-	 public boolean update(Bindings forcedBindings){
-		 String sparql = PREFIXES + replaceBindings(SPARQL_UPDATE,forcedBindings);
+	public synchronized boolean update(Bindings forcedBindings){
+		 if (!isJoined()) {
+			 Logging.log(VERBOSITY.ERROR,tag,"UPDATE FAILED because client is not joined");
+			 return false;
+		 }
 		 
-		 System.out.println(">> UPDATE "+sparql);
+		 String sparql = prefixes() + replaceBindings(SPARQL_UPDATE,forcedBindings).replace("\n", "").replace("\r", "");
 		 
-		 ret = kp.update_sparql(sparql);
+		 Logging.log(VERBOSITY.DEBUG,tag,"UPDATE "+sparql);
 		 
-		 if (ret == null) return false;
+		 nRetry = 0;
+		 retry = true;
+		 ret = null;
+		 
+		 while (retry){
+			try 
+			{
+				ret = kp.update_sparql(sparql);
+			} 
+			catch (JDOMException | IOException e) {
+				nRetry++;
+				Logging.log(VERBOSITY.ERROR,tag,"UPDATE FAILED ("+nRetry+"/"+maxRetries+") "+sparql);
+				if (nRetry == maxRetries) retry = false;
+				continue;
+			}
+			retry = false;
+		 }
+		 
+		 if (ret == null) {
+			 Logging.log(VERBOSITY.ERROR,tag,"Update return value is NULL");
+			 return false;
+		 }
+		 
+		 Logging.log(VERBOSITY.DEBUG, tag, "Status = " + ret.Status);
 		 return ret.isConfirmed();
-	 }
-	 
-	 public boolean update(){
-		 Bindings forcedBindings = new Bindings();
-		 forcedBindings.addBinding("?subject", new BindingURIValue("default:"+UUID.randomUUID().toString()));
-		 forcedBindings.addBinding("?predicate", new BindingURIValue("default:"+UUID.randomUUID().toString()));
-		 forcedBindings.addBinding("?object", new BindingURIValue("default:"+UUID.randomUUID().toString()));
-		 
-		 return update(forcedBindings);
 	 }
 }

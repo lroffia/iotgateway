@@ -5,6 +5,7 @@ public abstract class BindingValue {
 	
 	String value;
 	BINDING_TYPE type;
+	boolean added = true;
 	
 	public boolean isURI() {
 		return (type == BINDING_TYPE.URI);
@@ -15,4 +16,10 @@ public abstract class BindingValue {
 	}
 	
 	public String getValue() {return value;}
+	
+	public String toString() {
+		return value;
+	}
+	
+	public boolean isAdded() {return added;}
 }

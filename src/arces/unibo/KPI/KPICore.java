@@ -16,10 +16,14 @@
 
 package arces.unibo.KPI;
 
-
 import java.io.*;
 import java.net.*;
 import java.util.*;
+
+import org.jdom2.JDOMException;
+
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribeHandler
 {
@@ -49,15 +53,12 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 		this.protocol_version = protocol_version;
 	}
 
-
 	private final int      SOCKET_TIMEOUT_DELAY = 5000;
-
 
 	/**
 	 * SSAP specification protocol element
 	 */
 	public  String nodeID="00000000-0000-0000-0000-DEAD0000BEEF";
-
 
 	/**
 	 * Set the node ID
@@ -69,7 +70,6 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 		this.xmlTools = new SSAP_XMLTools();
 		this.xmlTools.nodeID = newNodeID;
 	}
-
 
 	private String ANYURI="http://www.nokia.com/NRC/M3/sib#any";
 
@@ -181,14 +181,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	{this.HOST=HOST;
 	this.PORT=PORT;
 	this.SMART_SPACE_NAME=SMART_SPACE_NAME;
-	//this.nodeID="DEAD0000BEEF-"+(new Random()).nextInt(10);
 	this.nodeID=""+UUID.randomUUID();
-
-	
-
-	/*this.transaction_id =0;
-        this.subscription_id=0;*/
-
 	this.xmlTools = new SSAP_XMLTools(nodeID,SMART_SPACE_NAME,this.ANYURI);
 
 	}//public KpCore(String HOST,int port)
@@ -215,7 +208,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param msg
 	 */
 	void err_print(String msg)
-	{ if(PRINT_ALL_ERR)System.out.println(msg);
+	{ if(PRINT_ALL_ERR)Logging.log(VERBOSITY.DEBUG,"KPI",msg);
 	}//void err_print(String mess)
 
 	/**
@@ -223,9 +216,8 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param msg
 	 */
 	void deb_print(String msg)
-	{ if(PRINT_ALL_DEBUG)System.out.println(msg);
+	{ if(PRINT_ALL_DEBUG)Logging.log(VERBOSITY.DEBUG,"KPI",msg);
 	}//void err_print(String mess)
-
 
 	public void enable_error_message(){PRINT_ALL_ERR=true;}
 	public void enable_debug_message(){PRINT_ALL_DEBUG=true;}
@@ -367,7 +359,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 			while ((charRead = in.read(buffer, 0, buffer.length)) != (-1)) 
 			{
 				builder.append(buffer, 0 , charRead);
-				// System.out.println("reading" + builder.toString());
+				// Logging.log("reading" + builder.toString());
 			}
 			msg = builder.toString();
 
@@ -582,7 +574,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 				}
 				catch (InterruptedException e)
 				{
-					System.out.println("[sleep exception!]"+e);
+					Logging.log(VERBOSITY.DEBUG,"KPI","[sleep exception!]"+e);
 				}                  
 			}
 		};
@@ -625,8 +617,8 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 */
 	//	@Override
 	//	public void kpic_SIBEventHandler(String xml)
-	//	{System.out.println("\n[EVENT(KpCore)]___________________________________");
-	//	System.out.println("("+ this.event_counter++ +")EVENT:\n"+xml);      
+	//	{Logging.log("\n[EVENT(KpCore)]___________________________________");
+	//	Logging.log("("+ this.event_counter++ +")EVENT:\n"+xml);      
 	//	}//public void kp_sib_event(String xml)
 	//
 
@@ -643,8 +635,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Perform the JOIN procedure 
 	 * Check the error state with the functions: getErrMess, getErrID
 	 * @return a string representation of the XML answer message from the SIB
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse join()
+	public SIBResponse join() throws JDOMException, IOException
 	{
 		deb_print("\n[JOIN]___________________________________"); 
 		return new SIBResponse( sendSSAPMsg( this.xmlTools.join() ));
@@ -655,8 +649,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Perform the LEAVE procedure 
 	 * Check the error state with the functions: getErrMess, getErrID
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse leave()
+	public SIBResponse leave() throws JDOMException, IOException
 	{
 		deb_print("\n[LEAVE]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.leave() ));
@@ -676,8 +672,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * 
 	 *  
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse queryRDF(String s,String p,String o, String s_type, String o_type)
+	public SIBResponse queryRDF(String s,String p,String o, String s_type, String o_type) throws JDOMException, IOException
 	{
 		deb_print("\n[QUERY RDF]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.queryRDF(s, p, o, s_type, o_type) ));
@@ -698,8 +696,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 *  A null value for subject, predicate or object means any value
 	 *  
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */     
-	public SIBResponse queryRDF( Vector<Vector<String>> queryList )
+	public SIBResponse queryRDF( Vector<Vector<String>> queryList ) throws JDOMException, IOException
 	{
 		deb_print("\n[QUERY RDF]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.queryRDF(queryList) )); 
@@ -806,8 +806,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param o_type the string representation of the object type. Allowed values are: uri, literal
 	 * 
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse insert(String s,String p,String o, String s_type, String o_type)
+	public SIBResponse insert(String s,String p,String o, String s_type, String o_type) throws JDOMException, IOException
 	{
 		deb_print("\n[INSERT]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.insert(s, p, o, s_type, o_type) ));
@@ -827,8 +829,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * -the object type
 	 * 
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */     
-	public SIBResponse insert( Vector<Vector<String>> queryList )
+	public SIBResponse insert( Vector<Vector<String>> queryList ) throws JDOMException, IOException
 	{
 		deb_print("\n[INSERT]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.insert(queryList) ));
@@ -847,8 +851,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * 
 	 *  
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse remove(String s,String p,String o,String s_type,String o_type)
+	public SIBResponse remove(String s,String p,String o,String s_type,String o_type) throws JDOMException, IOException
 	{
 		deb_print("\n[REMOVE]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.remove(s, p, o, s_type, o_type) ));
@@ -870,8 +876,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * A null value for subject, predicate or object means any value
 	 * 
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */     
-	public SIBResponse remove( Vector<Vector<String>> queryList )
+	public SIBResponse remove( Vector<Vector<String>> queryList ) throws JDOMException, IOException
 	{
 		deb_print("\n[REMOVE]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.remove(queryList) ));
@@ -901,10 +909,12 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param oo_type the string representation of the object type. Allowed values are: uri, literal
 	 * 
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
 	//o==old, n==new
 	public SIBResponse update( String sn,String pn,String on,String sn_type,String on_type
-			,String so,String po,String oo,String so_type,String oo_type)
+			,String so,String po,String oo,String so_type,String oo_type) throws JDOMException, IOException
 	{
 		deb_print("\n[UPDATE]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.update(sn, pn, on, sn_type, on_type 
@@ -915,11 +925,13 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Perfor a SPARQL update on SIBs supporting it
 	 * @param sparql_update a SPARQL update query
 	 * @return the SIB answer
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 * @Todo This method currently supports sparql update for SIB 0.9 only with protocol version = 0 (default) 
 	 */
 
 
-	public SIBResponse update_sparql(String sparql_update )
+	public SIBResponse update_sparql(String sparql_update ) throws JDOMException, IOException
 	{
 
 		deb_print("\n[UPDATE]___________________________________");
@@ -957,10 +969,12 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * -the string representation of the old object type. Allowed values are: uri, literal
 	 * 
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
 	//o==old, n==new
 	public SIBResponse update( Vector<Vector<String>>  newTripleVector
-			, Vector<Vector<String>>  oldTripleVector)
+			, Vector<Vector<String>>  oldTripleVector) throws JDOMException, IOException
 	{deb_print("\n[UPDATE]___________________________________");
 	return new SIBResponse(sendSSAPMsg( this.xmlTools.update(newTripleVector, oldTripleVector) ));
 	}
@@ -968,8 +982,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 
 	/**
 	 * Perform a persistent sparql update, acting like a rule on the store
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse persistent_update( String query)
+	public SIBResponse persistent_update( String query) throws JDOMException, IOException
 	{deb_print("\n[PERSISTENT UPDATE]___________________________________");
 	return new SIBResponse(sendSSAPMsg( this.xmlTools.persistent_update(query )));
 	}
@@ -978,8 +994,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Remove a persistent update
 	 * @param rule_id the id of the persistent update
 	 * @return the SIB response message
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse cancel_persistent_update(String update_id)
+	public SIBResponse cancel_persistent_update(String update_id) throws JDOMException, IOException
 	{
 		deb_print("\n[CANCEL PERSISTENT UPDATE]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.cancel_persistent_update(update_id )));
@@ -996,39 +1014,41 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param o_type the string representation of the object type. Allowed values are: uri, literal
 	 * 
 	 * @return a null value string in case of error otherwise an empty string 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
 
 	@Deprecated
-	public SIBResponse subscribeRDF(String s,String p,String o,String o_type)
+	public SIBResponse subscribeRDF(String s,String p,String o,String o_type) throws JDOMException, IOException
 	{
 		deb_print("\n[SUBSCRIBE RDF]___________________________________"); 
-		//System.out.println("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
+		//Logging.log("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
 		return subscribe( this.xmlTools.subscribeRDF(s, p, o, o_type) );
 	}//public String subscribeRDF(String s,String p,String o,String o_type)
 
 	@Deprecated
-	public SIBResponse subscribeRDF(Vector<Vector<String> > triples)
+	public SIBResponse subscribeRDF(Vector<Vector<String> > triples) throws JDOMException, IOException
 	{
 		deb_print("\n[SUBSCRIBE RDF]___________________________________"); 
-		//System.out.println("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
+		//Logging.log("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
 		return subscribe( this.xmlTools.subscribeRDF(triples));
 	}//public String subscribeRDF(String s,String p,String o,String o_type)
 
 
-	public SIBResponse subscribeRDF(String s,String p,String o,String o_type, iKPIC_subscribeHandler2 handler)
+	public SIBResponse subscribeRDF(String s,String p,String o,String o_type, iKPIC_subscribeHandler2 handler) throws JDOMException, IOException
 	{
 		deb_print("\n[SUBSCRIBE RDF]___________________________________"); 
-		//		System.out.println("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
+		//		Logging.log("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
 
 
 
 		return subscribe( this.xmlTools.subscribeRDF(s, p, o, o_type ) , handler);
 	}//public String subscribeRDF(String s,String p,String o,String o_type)
 
-	public SIBResponse subscribeRDF(Vector<Vector<String> > triples, iKPIC_subscribeHandler2 handler)
+	public SIBResponse subscribeRDF(Vector<Vector<String> > triples, iKPIC_subscribeHandler2 handler) throws JDOMException, IOException
 	{
 		deb_print("\n[SUBSCRIBE RDF]___________________________________"); 
-		//System.out.println("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
+		//Logging.log("DEBUG: " + this.xmlTools.subscribeRDF(s, p, o, o_type));
 		return subscribe( this.xmlTools.subscribeRDF(triples), handler);
 	}//public String subscribeRDF(String s,String p,String o,String o_type)
 
@@ -1037,10 +1057,12 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Perform the SUBSCRIBE procedure with a sparql query
 	 * @param query a sparql query
 	 * @return the SIB answer
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
 
 	@Deprecated
-	public SIBResponse subscribeSPARQL(String query)
+	public SIBResponse subscribeSPARQL(String query) throws JDOMException, IOException
 	{
 		deb_print("\n[SUBSCRIBE SPARQL]___________________________________"); 
 
@@ -1048,7 +1070,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 
 	}//public String subscribeSPARQL(String query)
 
-	public SIBResponse subscribeSPARQL(String query, iKPIC_subscribeHandler2 handler)
+	public SIBResponse subscribeSPARQL(String query, iKPIC_subscribeHandler2 handler) throws JDOMException, IOException
 	{
 		deb_print("\n[SUBSCRIBE SPARQL]___________________________________"); 
 
@@ -1150,12 +1172,14 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * 
 	 * @return null in case of error otherwise the SIB answer to the 
 	 * subscription request
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	private SIBResponse subscribe(String msg, iKPIC_subscribeHandler2 handler)
+	private SIBResponse subscribe(String msg, iKPIC_subscribeHandler2 handler) throws JDOMException, IOException
 	{
 		deb_print("KpCore:subscribe method");
 		int ret=0;
-		//		System.out.println("HERE!");
+		//		Logging.log("HERE!");
 		if(handler==null)
 		{   this.KP_ERROR_ID=this.ERR_EVENT_HANDLER_NULL;
 		err_print("EVENT HANDLER IS NULL!!!"); 
@@ -1202,7 +1226,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 			while ((charRead = in.read(buffer, 0, buffer.length)) != (-1)) 
 			{
 				builder.append(buffer, 0 , charRead);
-				//  System.out.println("Into while msg=" + builder.toString());
+				//  Logging.log("Into while msg=" + builder.toString());
 
 				msg = builder.toString();
 
@@ -1221,8 +1245,8 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
                  	    t_out      = out;
                  	    t_in       = in;*/
 
-						//			System.out.println("KpCore:subscribe:event message recognized:_"+msg.replace("\n", "")+"_");
-						//						System.out.println("1");
+						//			Logging.log("KpCore:subscribe:event message recognized:_"+msg.replace("\n", "")+"_");
+						//						Logging.log("1");
 						kpSocket.setKeepAlive(true);
 
 						new Subscription(kpSocket, handler);
@@ -1231,7 +1255,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 					}//if(this.xmlTools.isSubscriptionConfirmed(ret))
 					else 
 					{ 
-						System.out.println("[90] UNKNOW MESSAGE:"+msg);
+						Logging.log(VERBOSITY.DEBUG,"KPI","[90] UNKNOW MESSAGE:"+msg);
 						break;
 					}
 
@@ -1254,7 +1278,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 		//                  { //System.out.print("#"+(char)c); 
 		//                    msg=msg+(char)c;
 		//                   
-		//                    //System.out.println("<><><><>"+msg);
+		//                    //Logging.log("<><><><>"+msg);
 		//                    
 		////                    if(    msg.startsWith("<SSAP_message>") 
 		////                    	&& msg.endsWith(  "</SSAP_message>") )
@@ -1277,13 +1301,13 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 		//                    	    
 		//                    	    return msg;
 		//                    	  }//if(this.xmlTools.isSubscriptionConfirmed(ret))
-		//                    	else { System.out.println("[90] UNKNOW MESSAGE:"+msg); break;}
+		//                    	else { Logging.log("[90] UNKNOW MESSAGE:"+msg); break;}
 		//                    	
 		//                    }//if(tmp_msg.startsWith("<SSAP_message>") && tmp_msg.endsWith("</SSAP_message>"))
 		//                  }//while((c=in.read())!=-1)
 		//                
-		//                //if(c==-1)System.out.println("[91 c="+c+"] UNKNOW MESSAGE:"+msg);
-		//                //else     System.out.println("[92 c="+c+"] UNKNOW STATE:"+msg);
+		//                //if(c==-1)Logging.log("[91 c="+c+"] UNKNOW MESSAGE:"+msg);
+		//                //else     Logging.log("[92 c="+c+"] UNKNOW STATE:"+msg);
 		//                
 		//                deb_print("KpCore:subscribe:event reding loop end");
 		//                
@@ -1309,8 +1333,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * 
 	 * @return null in case of error otherwise the SIB answer to the 
 	 * subscription request
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	private SIBResponse subscribe(String msg)
+	private SIBResponse subscribe(String msg) throws JDOMException, IOException
 	{
 		deb_print("KpCore:subscribe method");
 		int ret=0;
@@ -1357,7 +1383,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 			while ((charRead = in.read(buffer, 0, buffer.length)) != (-1)) 
 			{
 				builder.append(buffer, 0 , charRead);
-				//  System.out.println("Into while msg=" + builder.toString());
+				//  Logging.log("Into while msg=" + builder.toString());
 
 				msg = builder.toString();
 
@@ -1384,7 +1410,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 					}//if(this.xmlTools.isSubscriptionConfirmed(ret))
 					else 
 					{ 
-						System.out.println("[90] UNKNOW MESSAGE:"+msg);
+						Logging.log(VERBOSITY.DEBUG,"KPI","[90] UNKNOW MESSAGE:"+msg);
 						break;
 					}
 
@@ -1407,7 +1433,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 		//                  { //System.out.print("#"+(char)c); 
 		//                    msg=msg+(char)c;
 		//                   
-		//                    //System.out.println("<><><><>"+msg);
+		//                    //Logging.log("<><><><>"+msg);
 		//                    
 		////                    if(    msg.startsWith("<SSAP_message>") 
 		////                    	&& msg.endsWith(  "</SSAP_message>") )
@@ -1430,13 +1456,13 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 		//                    	    
 		//                    	    return msg;
 		//                    	  }//if(this.xmlTools.isSubscriptionConfirmed(ret))
-		//                    	else { System.out.println("[90] UNKNOW MESSAGE:"+msg); break;}
+		//                    	else { Logging.log("[90] UNKNOW MESSAGE:"+msg); break;}
 		//                    	
 		//                    }//if(tmp_msg.startsWith("<SSAP_message>") && tmp_msg.endsWith("</SSAP_message>"))
 		//                  }//while((c=in.read())!=-1)
 		//                
-		//                //if(c==-1)System.out.println("[91 c="+c+"] UNKNOW MESSAGE:"+msg);
-		//                //else     System.out.println("[92 c="+c+"] UNKNOW STATE:"+msg);
+		//                //if(c==-1)Logging.log("[91 c="+c+"] UNKNOW MESSAGE:"+msg);
+		//                //else     Logging.log("[92 c="+c+"] UNKNOW STATE:"+msg);
 		//                
 		//                deb_print("KpCore:subscribe:event reding loop end");
 		//                
@@ -1513,8 +1539,8 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 							restOfTheMessage = msg_event.substring(msg_event.indexOf("</SSAP_message>") + 15);
 							msg_event = msg_event.substring(0, msg_event.indexOf("</SSAP_message>") + 15);
 
-							//	System.out.println("##1 real_msg = " + msg_event);
-							//	System.out.println("##2 rest_of_msg = " + restOfTheMessage);
+							//	Logging.log("##1 real_msg = " + msg_event);
+							//	Logging.log("##2 rest_of_msg = " + restOfTheMessage);
 							// This control is mandatory
 							deb_print("KpCore:EventHandlerThread:is this a UnSubscriptionConfirmed message?");   
 							if(xmlTools.isUnSubscriptionConfirmed(msg_event))
@@ -1540,7 +1566,7 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 							{						
 								deb_print( "KpCore:EventHandlerThread:YES, UnSubscription Confirmed!\n"
 										+"EVENT HANDLER THREAD:stop");
-								//System.out.println( "Rest of the message = " + restOfTheMessage);
+								//Logging.log( "Rest of the message = " + restOfTheMessage);
 								String test = restOfTheMessage.substring(0, restOfTheMessage.indexOf("</SSAP_message>") +15);
 								if (xmlTools.isUnSubscriptionConfirmed(test))
 								{
@@ -1605,8 +1631,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Check the error state with the functions: getErrMess, getErrID
 	 * 
 	 * @return a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse unsubscribe()
+	public SIBResponse unsubscribe() throws JDOMException, IOException
 	{
 		deb_print("\n[UNSUBSCRIBE]___________________________________");            
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.unsubscribe() ));
@@ -1639,9 +1667,11 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param EntityI Specify the entity which the protection must be applied 
 	 * @param properties EntityI's Property list to protect 
 	 * @return a string representation of the XML answer message from the SIB
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
 	@Override
-	public SIBResponse insertProtection(String EntityI, Vector<String> properties)
+	public SIBResponse insertProtection(String EntityI, Vector<String> properties) throws JDOMException, IOException
 	{
 		Vector<Vector<String>> triples= new Vector<Vector<String>>(); 
 
@@ -1684,9 +1714,11 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param EntityI Specify the entity on which the protection was applied
 	 * @param properties EntityI's Property list protected
 	 * @return a string representation of the XML answer message from the SIB
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
 	@Override
-	public SIBResponse removeProtection(String EntityI, Vector<String> properties)
+	public SIBResponse removeProtection(String EntityI, Vector<String> properties) throws JDOMException, IOException
 	{
 		Vector<Vector<String>> triples= new Vector<Vector<String>>(); 
 		String xml="";
@@ -1788,8 +1820,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * 
 	 * @param string
 	 * @return  a string representation of the XML answer message from the SIB 
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse querySPARQL(String string) {
+	public SIBResponse querySPARQL(String string) throws JDOMException, IOException {
 		deb_print("\n[QUERY SPARQL]___________________________________");
 		return new SIBResponse(sendSSAPMsg( this.xmlTools.querySPARQL(string) ));
 	}//public String querySparql(String string)
@@ -1798,8 +1832,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * Remove specified in RDFXML
 	 * @param graph
 	 * @return SIB response
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse remove_rdf_xml(String graph){
+	public SIBResponse remove_rdf_xml(String graph) throws JDOMException, IOException{
 		deb_print("\n[REMOVE_RDF-XML]___________________________________");
 		if(protocol_version == 0)
 		{
@@ -1816,8 +1852,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * 
 	 * @param graph
 	 * @return
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse insert_rdf_xml(String graph){
+	public SIBResponse insert_rdf_xml(String graph) throws JDOMException, IOException{
 		deb_print("\n[INSERT_RDF-XML]___________________________________");
 		deb_print(this.xmlTools.insert_rdf_xml(graph));
 		if(protocol_version == 0)
@@ -1835,8 +1873,10 @@ public class KPICore implements iKPIC, iKPIC_subscribeHandler2,  iKPIC_subscribe
 	 * @param insGraph
 	 * @param remGraph
 	 * @return
+	 * @throws IOException 
+	 * @throws JDOMException 
 	 */
-	public SIBResponse update_rdf_xml( String insGraph, String remGraph){
+	public SIBResponse update_rdf_xml( String insGraph, String remGraph) throws JDOMException, IOException{
 		deb_print("\n[UPDATE]___________________________________");
 		if(protocol_version == 0)
 		{

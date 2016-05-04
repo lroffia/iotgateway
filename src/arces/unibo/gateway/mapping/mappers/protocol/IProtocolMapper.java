@@ -1,9 +1,9 @@
 package arces.unibo.gateway.mapping.mappers.protocol;
 
 import arces.unibo.gateway.mapping.IMapper;
-import arces.unibo.gateway.mapping.ContextAction;
+import arces.unibo.gateway.mapping.ResourceAction;
 
 public interface IProtocolMapper extends IMapper {
-	public ContextAction mpRequestString2IoT(String request,String pattern,ContextAction contextPattern);
-	public String ioT2MPResponseString(String pattern, ContextAction contextAction);
+	public ResourceAction mpRequestString2ResourceAction(String request,String requestPattern,ResourceAction resourceActionPattern);
+	public String resourceAction2MPResponseString(ResourceAction resourceAction,ResourceAction resourceActionPattern,String responsePattern);
 }

@@ -1,15 +1,15 @@
 package arces.unibo.gateway.mapping.mappers.network;
 
-import arces.unibo.gateway.mapping.ContextAction;
+import arces.unibo.gateway.mapping.ResourceAction;
 
 public class PingPongMapper extends NetworkMapper {
 	
-	public String ioT2MNRequestString(String pattern, ContextAction contextAction) {
+	public String resourceAction2MNRequestString(String pattern, ResourceAction resourceAction) {
 		return pattern;
 	}
 	
-	public ContextAction mnResponseString2IoT(String response, String pattern, ContextAction contextPattern) {		
-		if (response.equals(pattern)) return new ContextAction(contextPattern.getContextURI(),contextPattern.getActionURI(),response);
+	public ResourceAction mnResponseString2ResourceAction(String response, String pattern, ResourceAction resourceActionPattern) {		
+		if (response.equals(pattern)) return new ResourceAction(resourceActionPattern.getResourceURI(),resourceActionPattern.getActionURI(),response);
 		return null;
 	}
 

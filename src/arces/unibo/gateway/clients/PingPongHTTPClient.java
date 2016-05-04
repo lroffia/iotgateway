@@ -1,4 +1,4 @@
-package arces.unibo.gateway;
+package arces.unibo.gateway.clients;
 
 import java.io.IOException;
 //import java.util.concurrent.Semaphore;
@@ -11,6 +11,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
+
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public class PingPongHTTPClient {
 	private static String server = "127.0.0.1";
@@ -38,7 +41,7 @@ public class PingPongHTTPClient {
 	            } 
 	            else 
 	            {
-	            	System.out.println("  ***Unexpected response status: " + status + " ***");
+	            	Logging.log(VERBOSITY.INFO, "HTTP CLIENT", "Unexpected response status: " + status);
 	            	return "ERROR";
 	            }
 	        }
@@ -46,7 +49,7 @@ public class PingPongHTTPClient {
 		while(true) {
 			ret = doRequest(ret);
 			if (ret.equals("ERROR") || ret.equals("TIMEOUT")) ret = "PING";
-			//Thread.sleep(1000);
+			//Thread.sleep(100);
 		}	
 	}
 	
@@ -54,13 +57,13 @@ public class PingPongHTTPClient {
         String responseBody ="ERROR";
          	
         HttpGet httpget = new HttpGet( "http://" + server + ":8000/iot?action="+ping);
-        System.out.println("HTTP CLIENT REQUEST: "+httpget.toString());
+        Logging.log(VERBOSITY.INFO, "HTTP CLIENT", httpget.toString());
         
-        startTime = java.time.Instant.now().toEpochMilli();
+        startTime = System.currentTimeMillis();
         
         responseBody = httpclient.execute(httpget, responseHandler);
 		
-        pingTime = java.time.Instant.now().toEpochMilli() - startTime;
+        pingTime = System.currentTimeMillis() - startTime;
         
         if (nRequest == 0) {
         	pingMin = pingTime;
@@ -72,7 +75,7 @@ public class PingPongHTTPClient {
         pingAvg += pingTime;
         
         String message = String.format("Min: %d Avg: %d Max: %d", pingMin,pingAvg/nRequest,pingMax);
-        System.out.println(message);
+        Logging.log(VERBOSITY.INFO, "HTTP CLIENT",message);
         
         return responseBody;
 	}

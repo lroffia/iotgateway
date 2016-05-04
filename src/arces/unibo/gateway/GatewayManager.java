@@ -1,91 +1,927 @@
 package arces.unibo.gateway;
 
-import java.io.IOException;
+import java.awt.EventQueue;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.Font;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JScrollPane;
+import javax.swing.JButton;
+
+import arces.unibo.SEPA.SPARQL;
+import arces.unibo.gateway.GarbageCollector.GarbageCollectorListener;
+import arces.unibo.gateway.MappingInputDialog.MappingInputDialogListener;
+import arces.unibo.gateway.MappingManager.MappingEventListener;
+import arces.unibo.gateway.mapping.MNMapping;
+import arces.unibo.gateway.mapping.MPMapping;
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
+
 import java.util.ArrayList;
+import java.util.Vector;
+import javax.swing.JTabbedPane;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
-import arces.unibo.gateway.adapters.network.MNAdapter;
-import arces.unibo.gateway.adapters.network.PingPongAdapter;
-import arces.unibo.gateway.adapters.protocol.HTTPAdapter;
-import arces.unibo.gateway.adapters.protocol.MPAdapter;
+public class GatewayManager implements MappingEventListener, MappingInputDialogListener, GarbageCollectorListener {
 
-public class GatewayManager {
+	//Tables models
+	private DefaultTableModel protocolMappingDataModel;
+	private DefaultTableModel networkMappingDataModel;
+	private DefaultTableModel pendingResourceRequestsDM;
+	private DefaultTableModel resourceRequestsDM;
+	private DefaultTableModel resourceResponsesDM;
+	private DefaultTableModel MPRequestsDM;
+	private DefaultTableModel MPResponsesDM;
+	private DefaultTableModel MNRequestsDM;
+	private DefaultTableModel MNResponsesDM;
 	
-	static MappingManager mappingManager;
-	static MNDispatcher mnDispatcher;
-	static MPDispatcher mpDispatcher;
-	static ArrayList<MNAdapter> networks;
-	static ArrayList<MPAdapter> protocols;
-	static GarbageCollector gc;
+	//Tables headers
+	private String protocolMappingHeader[] = new String[] 
+			{"Protocol URI", "Request string pattern", "Response string pattern", "Resource URI", "Action URI", "Action value","Mapping URI"};
+	private String networkMappingHeader[] = new String[] 
+			{"Network URI", "Request string pattern", "Response string pattern", "Resource URI", "Action URI", "Action value","Mapping URI"};	
+	private String resourceHeader[] = new String[] 
+			{"Timestamp","Resource URI", "Action URI", "Value"};
+	private String MPHeader[] = new String[] 
+			{"Timestamp","Protocol URI", "Value"};
+	private String MNHeader[] = new String[] 
+			{"Timestamp","Network URI", "Value"};
 	
-	private static boolean addDefaultProtocolMapping() {
-		
-		//Protocols default mappings
-		System.out.println("Adding default protocol mappings");
-		//this.addProtocolMapping("iot:HTTP", "action=GET&type=TEMPERATURE&location=ROOM1", "<*>", "iot:Context_1", "iot:GET", "<*>");
-		//this.addProtocolMapping("iot:HTTP", "action=GET&type=TEMPERATURE&location=ROOM2", "<*>", "iot:Context_2", "iot:GET", "<*>");
-		//this.addProtocolMapping("iot:HTTP", "action=GET&type=TEMPERATURE&location=ROOM3", "<*>", "iot:Context_3", "iot:GET", "<*>");
-		//this.addProtocolMapping("iot:HTTP", "action=GET&type=TEMPERATURE&location=ROOM4", "<*>", "iot:Context_4", "iot:GET", "<*>");
-		//this.addProtocolMapping("iot:HTTP", "action=GET&type=VALVE&location=ROOM1", "<*>", "iot:Context_5", "iot:GET", "<*>");
-		//this.addProtocolMapping("iot:HTTP", "action=SET&type=VALVE&location=ROOM1&value=<*>", "<*>", "iot:Context_5", "iot:SET", "<*>");
-		if(!mappingManager.addProtocolMapping("iot:HTTP", "action=PING", "*", "iot:Context_PING", "iot:GET", "*")) return false;
-		if(!mappingManager.addProtocolMapping("iot:HTTP", "action=PONG", "*", "iot:Context_PONG", "iot:GET", "*")) return false;
-		return true;
-		
+	private MappingManager mappingManager;
+	private GarbageCollector garbageCollector;
+	
+	private long MPRequestsN = 0;
+	private long MPResponsesN = 0;
+	private long pendingResourceRequestsN = 0;
+	private long resourceRequestsN = 0;
+	private long resourceResponsesN = 0;
+	private long MNRequestsN = 0;
+	private long MNResponsesN = 0;
+	
+	private JFrame frmSemanticGatewayManager;
+	private JTable table;
+	private JScrollPane scrollPane;
+	private JLabel lblNetworkMappings;
+	private JTable table_1;
+	private JScrollPane scrollPane_1;
+	private JButton btnAdd;
+	private JButton btnRemove;
+	private JButton btnUpdate;
+	private JTabbedPane tabbedPane;
+	private JPanel panel;
+	private JPanel panel_1;
+	private JLabel lblResourcePendingRequests;
+	private JTable table_resourcePendingRequests;
+	private JScrollPane scrollPane_2;
+	private JLabel lblNewLabel;
+	private JTable table_MPResponses;
+	private JScrollPane scrollPane_3;
+	private JLabel lblMpRequests;
+	private JTable table_MPRequests;
+	private JLabel lblResourceRequests;
+	private JTable table_resourceRequests;
+	private JLabel lblResourceResponses;
+	private JTable table_resourceResponses;
+	private JLabel lblNewLabel_1;
+	private JLabel lblTotalTriples;
+	private JLabel lblNewLabel_2;
+	private JTable table_MNRequests;
+	private JLabel lblMnResponses;
+	private JTable table_MNResponses;
+	private JScrollPane scrollPane_4;
+	private JScrollPane scrollPane_5;
+	private JScrollPane scrollPane_6;
+	private JScrollPane scrollPane_7;
+	private JScrollPane scrollPane_8;
+	private JButton btnClearMPRequests;
+	private JButton btnPendingResourceRequests;
+	private JButton btnClearMPResponses;
+	private JButton btnClearResourceRequests;
+	private JButton btnClearResourceResponses;
+	private JButton btnClearMNRequests;
+	private JButton btnClearMNResponses;
+	private JLabel labelMPRequestsN;
+	private JLabel lblPendingResourceRequestsN;
+	private JLabel labelResourceRequests;
+	private JLabel labelMNRequestsN;
+	private JLabel labelMNResponsesN;
+	private JLabel labelResourceResponsesN;
+	private JLabel labelMPResponsesN;
+	
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GatewayManager window = new GatewayManager();
+					window.frmSemanticGatewayManager.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
-	private static boolean addDefaultNetworkMapping() {
+
+	/**
+	 * Create the application.
+	 */
+	public GatewayManager() {
+		initialize();
+	}
+
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initialize() {
+		final MappingInputDialog dlg = new MappingInputDialog();
+		dlg.setListener(this);
+
+		protocolMappingDataModel = new DefaultTableModel(0, 0){
+		    /**
+			 * 
+			 */
+			private static final long serialVersionUID = -752721579700272933L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        if (column == 6) return false;
+		        
+		        return true;
+		    }
+		};
+		
+		protocolMappingDataModel.setColumnIdentifiers(protocolMappingHeader);
+		
+		networkMappingDataModel = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6795458612569289029L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        if (column == 6) return false;
+		        
+		        return true;
+		    }
+		};
+		
+		networkMappingDataModel.setColumnIdentifiers(networkMappingHeader);
+		
+		pendingResourceRequestsDM = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -6795458612569289029L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		pendingResourceRequestsDM.setColumnIdentifiers(resourceHeader);
+
+		resourceRequestsDM = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2403052528444271791L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		resourceRequestsDM.setColumnIdentifiers(resourceHeader);
+		
+		resourceResponsesDM = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 5784973092085444932L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		resourceResponsesDM.setColumnIdentifiers(resourceHeader);
+		
+		MPRequestsDM = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 6231730058550334611L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		MPRequestsDM.setColumnIdentifiers(MPHeader);
+		
+		MPResponsesDM = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -4255983650517939210L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		MPResponsesDM.setColumnIdentifiers(MPHeader);
+		
+		MNRequestsDM = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2300240321642218453L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		MNRequestsDM.setColumnIdentifiers(MNHeader);
+		
+		MNResponsesDM = new DefaultTableModel(0, 0){
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 1850732027696720168L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		MNResponsesDM.setColumnIdentifiers(MNHeader);
+		
+		frmSemanticGatewayManager = new JFrame();
+		frmSemanticGatewayManager.setTitle("Semantic Gateway Manager");
+		frmSemanticGatewayManager.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				mappingManager.stop();
+				garbageCollector.stop();
+			}
+		});
+		frmSemanticGatewayManager.setBounds(100, 100, 521, 578);
+		frmSemanticGatewayManager.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frmSemanticGatewayManager.getContentPane().setLayout(new BorderLayout(0, 0));
+		
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+		tabbedPane.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
+		frmSemanticGatewayManager.getContentPane().add(tabbedPane);
+		
+		panel = new JPanel();
+		tabbedPane.addTab("Mappings", null, panel, null);
+		GridBagLayout gbl_panel = new GridBagLayout();
+		gbl_panel.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel.rowHeights = new int[]{0, 117, 0, 0, 0, 0};
+		gbl_panel.columnWeights = new double[]{1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel.rowWeights = new double[]{0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		panel.setLayout(gbl_panel);
+		
+		JLabel lblProtocolMappings = new JLabel("Protocol mappings");
+		GridBagConstraints gbc_lblProtocolMappings = new GridBagConstraints();
+		gbc_lblProtocolMappings.anchor = GridBagConstraints.NORTH;
+		gbc_lblProtocolMappings.gridwidth = 3;
+		gbc_lblProtocolMappings.insets = new Insets(0, 0, 5, 5);
+		gbc_lblProtocolMappings.gridx = 0;
+		gbc_lblProtocolMappings.gridy = 0;
+		panel.add(lblProtocolMappings, gbc_lblProtocolMappings);
+		lblProtocolMappings.setFont(new Font("Lucida Grande", Font.BOLD, 14));
+		
+		scrollPane = new JScrollPane();
+		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
+		gbc_scrollPane.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane.gridwidth = 3;
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane.gridx = 0;
+		gbc_scrollPane.gridy = 1;
+		panel.add(scrollPane, gbc_scrollPane);
+		table = new JTable(protocolMappingDataModel) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -8035546607083119932L;
+
+			@Override
+		    public void changeSelection(int rowIndex, int columnIndex,
+		            boolean toggle, boolean extend) {
+				if(isRowSelected(rowIndex)) {
+					removeRowSelectionInterval(rowIndex,rowIndex);
+					removeColumnSelectionInterval(columnIndex, columnIndex);
+				}
+				else super.changeSelection(rowIndex, columnIndex, toggle, extend);
+		        
+		    }
+		};
+		scrollPane.setViewportView(table);
+		table.setAutoCreateRowSorter(true);
+		
+		lblNetworkMappings = new JLabel("Network mappings");
+		GridBagConstraints gbc_lblNetworkMappings = new GridBagConstraints();
+		gbc_lblNetworkMappings.gridwidth = 3;
+		gbc_lblNetworkMappings.anchor = GridBagConstraints.NORTH;
+		gbc_lblNetworkMappings.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNetworkMappings.gridx = 0;
+		gbc_lblNetworkMappings.gridy = 2;
+		panel.add(lblNetworkMappings, gbc_lblNetworkMappings);
+		lblNetworkMappings.setFont(new Font("Lucida Grande", Font.BOLD, 14));
+		
+		scrollPane_1 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
+		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_1.gridwidth = 3;
+		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_1.gridx = 0;
+		gbc_scrollPane_1.gridy = 3;
+		panel.add(scrollPane_1, gbc_scrollPane_1);
+		table_1 = new JTable(networkMappingDataModel) {
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = -1479378785764639121L;
+
+			@Override
+		    public void changeSelection(int rowIndex, int columnIndex,
+		            boolean toggle, boolean extend) {
+				if(isRowSelected(rowIndex)) {
+					removeRowSelectionInterval(rowIndex,rowIndex);
+				}
+				else super.changeSelection(rowIndex, columnIndex, toggle, extend);
+		        
+		    }
+		};
+		scrollPane_1.setViewportView(table_1);
+		table_1.setAutoCreateRowSorter(true);
+		
+		btnAdd = new JButton("Add");
+		GridBagConstraints gbc_btnAdd = new GridBagConstraints();
+		gbc_btnAdd.anchor = GridBagConstraints.EAST;
+		gbc_btnAdd.insets = new Insets(0, 0, 0, 5);
+		gbc_btnAdd.gridx = 0;
+		gbc_btnAdd.gridy = 4;
+		panel.add(btnAdd, gbc_btnAdd);
+		
+		btnRemove = new JButton("Remove");
+		GridBagConstraints gbc_btnRemove = new GridBagConstraints();
+		gbc_btnRemove.insets = new Insets(0, 0, 0, 5);
+		gbc_btnRemove.gridx = 1;
+		gbc_btnRemove.gridy = 4;
+		panel.add(btnRemove, gbc_btnRemove);
+		
+		btnUpdate = new JButton("Update");
+		btnUpdate.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				int[] rows = table.getSelectedRows();
+				for (int i = 0; i < rows.length; i++) rows[i] = table.convertRowIndexToModel(rows[i]);
+				for(int index: rows) mappingManager.updateProtocolMapping(protocolMappingDataModel.getValueAt(index, 6).toString(),
+						protocolMappingDataModel.getValueAt(index, 0).toString(),
+						protocolMappingDataModel.getValueAt(index, 1).toString(),
+						protocolMappingDataModel.getValueAt(index, 2).toString(),
+						protocolMappingDataModel.getValueAt(index, 3).toString(),
+						protocolMappingDataModel.getValueAt(index, 4).toString(),
+						protocolMappingDataModel.getValueAt(index, 5).toString());
 				
-		//Networks default mappings
-		System.out.println("Adding default network mappings");
-		//this.addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO1", "TEMPERATURE&NODO1&<*>", "iot:Context_1", "iot:GET", "<*>");
-		//this.addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO2", "TEMPERATURE&NODO2&<*>", "iot:Context_2", "iot:GET", "<*>");
-		//this.addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO3", "TEMPERATURE&NODO3&<*>", "iot:Context_3", "iot:GET", "<*>");
-		//this.addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO4", "TEMPERATURE&NODO4&<*>", "iot:Context_4", "iot:GET", "<*>");
-		//this.addNetworkMapping("iot:DASH7", "VALVE@NODO1&<*>", "VALVE&NODO1&<*>", "iot:Context_5", "iot:SET", "<*>");
-		//this.addNetworkMapping("iot:DASH7", "STATUS@NODO1", "STATUS&NODO1&<*>", "iot:Context_5", "iot:GET", "<*>");
+				rows = table_1.getSelectedRows();
+				for (int i = 0; i < rows.length; i++) rows[i] = table_1.convertRowIndexToModel(rows[i]);
+				for(int index: rows) mappingManager.updateProtocolMapping(networkMappingDataModel.getValueAt(index, 6).toString(),
+						networkMappingDataModel.getValueAt(index, 0).toString(),
+						networkMappingDataModel.getValueAt(index, 1).toString(),
+						networkMappingDataModel.getValueAt(index, 2).toString(),
+						networkMappingDataModel.getValueAt(index, 3).toString(),
+						networkMappingDataModel.getValueAt(index, 4).toString(),
+						networkMappingDataModel.getValueAt(index, 5).toString());
+			}
+		});
+		GridBagConstraints gbc_btnUpdate = new GridBagConstraints();
+		gbc_btnUpdate.gridx = 2;
+		gbc_btnUpdate.gridy = 4;
+		panel.add(btnUpdate, gbc_btnUpdate);
+		btnRemove.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				int[] rows = table.getSelectedRows();
+				for (int i = 0; i < rows.length; i++) rows[i] = table.convertRowIndexToModel(rows[i]);
+				for(int index: rows) mappingManager.removeProtocolMapping(protocolMappingDataModel.getValueAt(index, 6).toString());
+				
+				rows = table_1.getSelectedRows();
+				for (int i = 0; i < rows.length; i++) rows[i] = table_1.convertRowIndexToModel(rows[i]);
+				for(int index: rows) mappingManager.removeNetworkMapping(networkMappingDataModel.getValueAt(index, 6).toString());
+			}
+		});
+		btnAdd.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				dlg.setVisible(true);
+			}
+		});
 		
-		if(!mappingManager.addNetworkMapping("iot:PINGPONG", "PING", "PONG", "iot:Context_PING", "iot:GET", "*")) return false;
-		if(!mappingManager.addNetworkMapping("iot:PINGPONG", "PONG", "PING", "iot:Context_PONG", "iot:GET", "*")) return false;
-		return true;
-	}
-	
-	public static void main(String[] args) throws IOException, InterruptedException {
+		panel_1 = new JPanel();
+		tabbedPane.addTab("Garbage collector", null, panel_1, null);
+		GridBagLayout gbl_panel_1 = new GridBagLayout();
+		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		panel_1.setLayout(gbl_panel_1);
 		
-		//Garbage collector
-		gc = new GarbageCollector();
-		if (!gc.start(true)) return;
+		lblNewLabel_1 = new JLabel("RDF Store Size (Triples)");
+		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 12));
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.gridwidth = 2;
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.NORTHEAST;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_1.gridx = 0;
+		gbc_lblNewLabel_1.gridy = 0;
+		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
-		//Mapping manager
+		lblTotalTriples = new JLabel("--");
+		lblTotalTriples.setFont(new Font("Dialog", Font.BOLD, 12));
+		GridBagConstraints gbc_lblTotalTriples = new GridBagConstraints();
+		gbc_lblTotalTriples.insets = new Insets(0, 0, 5, 0);
+		gbc_lblTotalTriples.anchor = GridBagConstraints.NORTHWEST;
+		gbc_lblTotalTriples.gridx = 2;
+		gbc_lblTotalTriples.gridy = 0;
+		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);
+		
+		lblMpRequests = new JLabel("MP Requests");
+		GridBagConstraints gbc_lblMpRequests = new GridBagConstraints();
+		gbc_lblMpRequests.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblMpRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_lblMpRequests.gridx = 0;
+		gbc_lblMpRequests.gridy = 2;
+		panel_1.add(lblMpRequests, gbc_lblMpRequests);
+		
+		scrollPane_4 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_4 = new GridBagConstraints();
+		gbc_scrollPane_4.gridwidth = 2;
+		gbc_scrollPane_4.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_4.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_4.gridx = 0;
+		gbc_scrollPane_4.gridy = 3;
+		panel_1.add(scrollPane_4, gbc_scrollPane_4);
+		
+		table_MPRequests = new JTable(MPRequestsDM);
+		scrollPane_4.setViewportView(table_MPRequests);
+		
+		labelMPRequestsN = new JLabel("--");
+		GridBagConstraints gbc_labelMPRequestsN = new GridBagConstraints();
+		gbc_labelMPRequestsN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelMPRequestsN.gridx = 2;
+		gbc_labelMPRequestsN.gridy = 3;
+		panel_1.add(labelMPRequestsN, gbc_labelMPRequestsN);
+		
+		lblResourcePendingRequests = new JLabel("Pending Resource Requests");
+		GridBagConstraints gbc_lblResourcePendingRequests = new GridBagConstraints();
+		gbc_lblResourcePendingRequests.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblResourcePendingRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcePendingRequests.gridx = 0;
+		gbc_lblResourcePendingRequests.gridy = 4;
+		panel_1.add(lblResourcePendingRequests, gbc_lblResourcePendingRequests);
+		
+		btnClearMPRequests = new JButton("Clear");
+		btnClearMPRequests.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while(MPRequestsDM.getRowCount() > 0) MPRequestsDM.removeRow(0);
+			}
+		});
+		GridBagConstraints gbc_btnClearMPRequests = new GridBagConstraints();
+		gbc_btnClearMPRequests.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearMPRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearMPRequests.gridx = 1;
+		gbc_btnClearMPRequests.gridy = 4;
+		panel_1.add(btnClearMPRequests, gbc_btnClearMPRequests);
+		
+		scrollPane_2 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
+		gbc_scrollPane_2.gridwidth = 2;
+		gbc_scrollPane_2.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_2.gridx = 0;
+		gbc_scrollPane_2.gridy = 5;
+		panel_1.add(scrollPane_2, gbc_scrollPane_2);
+		
+		table_resourcePendingRequests = new JTable(pendingResourceRequestsDM);
+		scrollPane_2.setViewportView(table_resourcePendingRequests);
+		
+		lblPendingResourceRequestsN = new JLabel("--");
+		GridBagConstraints gbc_lblPendingResourceRequestsN = new GridBagConstraints();
+		gbc_lblPendingResourceRequestsN.insets = new Insets(0, 0, 5, 0);
+		gbc_lblPendingResourceRequestsN.gridx = 2;
+		gbc_lblPendingResourceRequestsN.gridy = 5;
+		panel_1.add(lblPendingResourceRequestsN, gbc_lblPendingResourceRequestsN);
+		
+		lblResourceRequests = new JLabel("Resource Requests");
+		GridBagConstraints gbc_lblResourceRequests = new GridBagConstraints();
+		gbc_lblResourceRequests.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblResourceRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourceRequests.gridx = 0;
+		gbc_lblResourceRequests.gridy = 6;
+		panel_1.add(lblResourceRequests, gbc_lblResourceRequests);
+		
+		btnPendingResourceRequests = new JButton("Clear");
+		btnPendingResourceRequests.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while (pendingResourceRequestsDM.getRowCount() > 0) pendingResourceRequestsDM.removeRow(0);
+			}
+		});
+		GridBagConstraints gbc_btnPendingResourceRequests = new GridBagConstraints();
+		gbc_btnPendingResourceRequests.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnPendingResourceRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_btnPendingResourceRequests.gridx = 1;
+		gbc_btnPendingResourceRequests.gridy = 6;
+		panel_1.add(btnPendingResourceRequests, gbc_btnPendingResourceRequests);
+		
+		scrollPane_8 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_8 = new GridBagConstraints();
+		gbc_scrollPane_8.gridwidth = 2;
+		gbc_scrollPane_8.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_8.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_8.gridx = 0;
+		gbc_scrollPane_8.gridy = 7;
+		panel_1.add(scrollPane_8, gbc_scrollPane_8);
+		
+		table_resourceRequests = new JTable(resourceRequestsDM);
+		scrollPane_8.setViewportView(table_resourceRequests);
+		
+		labelResourceRequests = new JLabel("--");
+		GridBagConstraints gbc_labelResourceRequests = new GridBagConstraints();
+		gbc_labelResourceRequests.insets = new Insets(0, 0, 5, 0);
+		gbc_labelResourceRequests.gridx = 2;
+		gbc_labelResourceRequests.gridy = 7;
+		panel_1.add(labelResourceRequests, gbc_labelResourceRequests);
+		
+		lblNewLabel_2 = new JLabel("MN Requests");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_2.gridx = 0;
+		gbc_lblNewLabel_2.gridy = 8;
+		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+		btnClearResourceRequests = new JButton("Clear");
+		btnClearResourceRequests.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while(resourceRequestsDM.getRowCount() > 0) resourceRequestsDM.removeRow(0);
+			}
+		});
+		GridBagConstraints gbc_btnClearResourceRequests = new GridBagConstraints();
+		gbc_btnClearResourceRequests.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearResourceRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearResourceRequests.gridx = 1;
+		gbc_btnClearResourceRequests.gridy = 8;
+		panel_1.add(btnClearResourceRequests, gbc_btnClearResourceRequests);
+		
+		scrollPane_6 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_6 = new GridBagConstraints();
+		gbc_scrollPane_6.gridwidth = 2;
+		gbc_scrollPane_6.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_6.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_6.gridx = 0;
+		gbc_scrollPane_6.gridy = 9;
+		panel_1.add(scrollPane_6, gbc_scrollPane_6);
+		
+		table_MNRequests = new JTable(MNRequestsDM);
+		scrollPane_6.setViewportView(table_MNRequests);
+		
+		labelMNRequestsN = new JLabel("--");
+		GridBagConstraints gbc_labelMNRequestsN = new GridBagConstraints();
+		gbc_labelMNRequestsN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelMNRequestsN.gridx = 2;
+		gbc_labelMNRequestsN.gridy = 9;
+		panel_1.add(labelMNRequestsN, gbc_labelMNRequestsN);
+		
+		lblMnResponses = new JLabel("MN Responses");
+		GridBagConstraints gbc_lblMnResponses = new GridBagConstraints();
+		gbc_lblMnResponses.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblMnResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_lblMnResponses.gridx = 0;
+		gbc_lblMnResponses.gridy = 10;
+		panel_1.add(lblMnResponses, gbc_lblMnResponses);
+		
+		btnClearMNRequests = new JButton("Clear");
+		btnClearMNRequests.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while (MNRequestsDM.getRowCount()>0) MNRequestsDM.removeRow(0);
+			}
+		});
+		GridBagConstraints gbc_btnClearMNRequests = new GridBagConstraints();
+		gbc_btnClearMNRequests.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearMNRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearMNRequests.gridx = 1;
+		gbc_btnClearMNRequests.gridy = 10;
+		panel_1.add(btnClearMNRequests, gbc_btnClearMNRequests);
+		
+		scrollPane_5 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_5 = new GridBagConstraints();
+		gbc_scrollPane_5.gridwidth = 2;
+		gbc_scrollPane_5.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_5.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_5.gridx = 0;
+		gbc_scrollPane_5.gridy = 11;
+		panel_1.add(scrollPane_5, gbc_scrollPane_5);
+		
+		table_MNResponses = new JTable(MNResponsesDM);
+		scrollPane_5.setViewportView(table_MNResponses);
+		
+		labelMNResponsesN = new JLabel("--");
+		GridBagConstraints gbc_labelMNResponsesN = new GridBagConstraints();
+		gbc_labelMNResponsesN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelMNResponsesN.gridx = 2;
+		gbc_labelMNResponsesN.gridy = 11;
+		panel_1.add(labelMNResponsesN, gbc_labelMNResponsesN);
+		
+		lblResourceResponses = new JLabel("Resource Responses");
+		GridBagConstraints gbc_lblResourceResponses = new GridBagConstraints();
+		gbc_lblResourceResponses.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblResourceResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourceResponses.gridx = 0;
+		gbc_lblResourceResponses.gridy = 12;
+		panel_1.add(lblResourceResponses, gbc_lblResourceResponses);
+		
+		btnClearMNResponses = new JButton("Clear");
+		btnClearMNResponses.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while(MNResponsesDM.getRowCount() > 0) MNResponsesDM.removeRow(0);
+			}
+		});
+		GridBagConstraints gbc_btnClearMNResponses = new GridBagConstraints();
+		gbc_btnClearMNResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearMNResponses.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearMNResponses.gridx = 1;
+		gbc_btnClearMNResponses.gridy = 12;
+		panel_1.add(btnClearMNResponses, gbc_btnClearMNResponses);
+		
+		scrollPane_7 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_7 = new GridBagConstraints();
+		gbc_scrollPane_7.gridwidth = 2;
+		gbc_scrollPane_7.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_7.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_7.gridx = 0;
+		gbc_scrollPane_7.gridy = 13;
+		panel_1.add(scrollPane_7, gbc_scrollPane_7);
+		
+		table_resourceResponses = new JTable(resourceResponsesDM);
+		scrollPane_7.setViewportView(table_resourceResponses);
+		
+		labelResourceResponsesN = new JLabel("--");
+		GridBagConstraints gbc_labelResourceResponsesN = new GridBagConstraints();
+		gbc_labelResourceResponsesN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelResourceResponsesN.gridx = 2;
+		gbc_labelResourceResponsesN.gridy = 13;
+		panel_1.add(labelResourceResponsesN, gbc_labelResourceResponsesN);
+		
+		lblNewLabel = new JLabel("MP Responses");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 0;
+		gbc_lblNewLabel.gridy = 14;
+		panel_1.add(lblNewLabel, gbc_lblNewLabel);
+		
+		btnClearResourceResponses = new JButton("Clear");
+		btnClearResourceResponses.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while(resourceResponsesDM.getRowCount() > 0) resourceResponsesDM.removeRow(0);
+			}
+		});
+		GridBagConstraints gbc_btnClearResourceResponses = new GridBagConstraints();
+		gbc_btnClearResourceResponses.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearResourceResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearResourceResponses.gridx = 1;
+		gbc_btnClearResourceResponses.gridy = 14;
+		panel_1.add(btnClearResourceResponses, gbc_btnClearResourceResponses);
+		
+		scrollPane_3 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_3 = new GridBagConstraints();
+		gbc_scrollPane_3.gridwidth = 2;
+		gbc_scrollPane_3.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_3.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_3.gridx = 0;
+		gbc_scrollPane_3.gridy = 15;
+		panel_1.add(scrollPane_3, gbc_scrollPane_3);
+		
+		table_MPResponses = new JTable(MPResponsesDM);
+		scrollPane_3.setViewportView(table_MPResponses);
+		
+		btnClearMPResponses = new JButton("Clear");
+		btnClearMPResponses.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while(MPResponsesDM.getRowCount() > 0) MPResponsesDM.removeRow(0);	
+			}
+		});
+		
+		labelMPResponsesN = new JLabel("--");
+		GridBagConstraints gbc_labelMPResponsesN = new GridBagConstraints();
+		gbc_labelMPResponsesN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelMPResponsesN.gridx = 2;
+		gbc_labelMPResponsesN.gridy = 15;
+		panel_1.add(labelMPResponsesN, gbc_labelMPResponsesN);
+		GridBagConstraints gbc_btnClearMPResponses = new GridBagConstraints();
+		gbc_btnClearMPResponses.insets = new Insets(0, 0, 0, 5);
+		gbc_btnClearMPResponses.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearMPResponses.gridx = 1;
+		gbc_btnClearMPResponses.gridy = 16;
+		panel_1.add(btnClearMPResponses, gbc_btnClearMPResponses);
+		
+		Logging.setVerbosityLevel(VERBOSITY.DEBUG);
+		
+		SPARQL.loadApplicationProfile(GatewayManager.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml");
+		
 		mappingManager = new MappingManager();
-		if(!mappingManager.start()) return;
-		mappingManager.removeAllMapping();
-		addDefaultNetworkMapping();
-		addDefaultProtocolMapping();
+		mappingManager.setMappingEventListener(this);
+		mappingManager.start();
 		
-		//Dispatchers
-		mnDispatcher = new MNDispatcher();
-		mpDispatcher = new MPDispatcher();
-		if(!mpDispatcher.start()) return;
-		if(!mnDispatcher.start()) return;
-		
-		//Network adapters
-		networks = new ArrayList<MNAdapter>();
-		//TODO: add all supported networks here
-		networks.add(new PingPongAdapter());		
-		for (MNAdapter adapter : networks)  adapter.start();
-		
-		//Protocol adapters
-		protocols= new ArrayList<MPAdapter>();
-		//TODO: add all supported protocols here
-		protocols.add(new HTTPAdapter());
-		for (MPAdapter adapter : protocols) adapter.start();
+		garbageCollector = new GarbageCollector();
+		garbageCollector.setListener(this);
+		garbageCollector.start(false, true);
+	}
 
-		System.in.read();
+	@Override
+	public void addedMPMappings(ArrayList<MPMapping> mappings) {
+		for (MPMapping mapping : mappings) {
+			Vector<Object> data = new Vector<Object>();
+	        data.add(mapping.getProtocolURI());
+	        data.add(mapping.getRequestPattern());
+	        data.add(mapping.getResponsePattern());
+	        data.add(mapping.getResourceURI());
+	        data.add(mapping.getActionURI());
+	        data.add(mapping.getActionValue());
+	        data.add(mapping.getURI());
+			protocolMappingDataModel.addRow(data);
+		}		
+	}
+
+	@Override
+	public void removedMPMappings(ArrayList<MPMapping> mappings) {
+		for (MPMapping mapping : mappings){
+			for (int index = 0; index < protocolMappingDataModel.getRowCount() ; index++) {
+				if (protocolMappingDataModel.getValueAt(index, 6).toString().equals(mapping.getURI())) {
+					protocolMappingDataModel.removeRow(index);
+					break;
+				}
+			}
+		}
+	}
+
+	@Override
+	public void addedMNMappings(ArrayList<MNMapping> mappings) {
+		for (MNMapping mapping : mappings) {
+			Vector<Object> data = new Vector<Object>();
+	        data.add(mapping.getNetworkURI());
+	        data.add(mapping.getRequestPattern());
+	        data.add(mapping.getResponsePattern());
+	        data.add(mapping.getResourceURI());
+	        data.add(mapping.getActionURI());
+	        data.add(mapping.getActionValue());
+	        data.add(mapping.getURI());
+			networkMappingDataModel.addRow(data);
+		}
+	}
+
+	@Override
+	public void removedMNMappings(ArrayList<MNMapping> mappings) {
+		for (MNMapping mapping : mappings){
+			for (int index = 0; index < networkMappingDataModel.getRowCount() ; index++) {
+				if (networkMappingDataModel.getValueAt(index, 6).toString().equals(mapping.getURI())) {
+					networkMappingDataModel.removeRow(index);
+					break;
+				}
+			}
+		}
+	}
+
+	@Override
+	public void newMNMapping(MNMapping mapping) {
+		mappingManager.addNetworkMapping(mapping.getNetworkURI(), mapping.getRequestPattern(), mapping.getResponsePattern(), 
+				mapping.getResourceURI(), mapping.getActionURI(), mapping.getActionValue());
+	}
+
+	@Override
+	public void newMPMapping(MPMapping mapping) {
+		mappingManager.addProtocolMapping(mapping.getProtocolURI(), mapping.getRequestPattern(), mapping.getResponsePattern(), 
+				mapping.getResourceURI(), mapping.getActionURI(), mapping.getActionValue());
+	}
+
+	@Override
+	public void newResourcePendingRequest(String resource, String action, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+        data.add(resource);
+        data.add(action);
+        data.add(value);
+        pendingResourceRequestsDM.addRow(data);
+
+    	lblPendingResourceRequestsN.setText(String.format("%d",++pendingResourceRequestsN));
+	}
+
+	@Override
+	public void newResourceRequest(String resource, String action, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+		data.add(resource);
+        data.add(action);
+        data.add(value);
+        resourceRequestsDM.addRow(data);
+        
+        labelResourceRequests.setText(String.format("%d",++resourceRequestsN)); 
+	}
+
+	@Override
+	public void newResourceResponse(String resource, String action, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+		data.add(resource);
+        data.add(action);
+        data.add(value);
+        resourceResponsesDM.addRow(data);
+        
+        labelResourceResponsesN.setText(String.format("%d",++resourceResponsesN));
+	}
+
+	@Override
+	public void newMPResponse(String protocol, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+		data.add(protocol);
+        data.add(value);
+        MPResponsesDM.addRow(data);
+        
+        labelMPResponsesN.setText(String.format("%d",++MPResponsesN));
+	}
+
+	@Override
+	public void newMPRequest(String protocol, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+		data.add(protocol);
+        data.add(value);
+        MPRequestsDM.addRow(data);
+        
+        labelMPRequestsN.setText(String.format("%d",++MPRequestsN));
+	}
+
+	@Override
+	public void newMNResponse(String network, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+		data.add(network);
+        data.add(value);
+        MNResponsesDM.addRow(data);
+        
+        labelMNResponsesN.setText(String.format("%d",++MNResponsesN));
+	}
+
+	@Override
+	public void newMNRequest(String network, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+		data.add(network);
+        data.add(value);
+        MNRequestsDM.addRow(data);
+        
+        labelMNRequestsN.setText(String.format("%d",++MNRequestsN));
+	}
+
+	@Override
+	public void totalTriples(long triples) {
+		lblTotalTriples.setText(String.format("%d", triples));
 		
-		for (MPAdapter adapter : protocols) adapter.stop();
-		for (MNAdapter adapter : networks) adapter.stop();
-		mnDispatcher.stop();
-		mpDispatcher.stop();
-		mappingManager.stop();
-		gc.stop();
 	}
 }

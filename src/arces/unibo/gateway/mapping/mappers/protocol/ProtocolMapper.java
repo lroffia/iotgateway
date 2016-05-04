@@ -3,14 +3,18 @@ package arces.unibo.gateway.mapping.mappers.protocol;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import arces.unibo.gateway.mapping.ContextAction;
+import arces.unibo.gateway.mapping.ResourceAction;
 
 public abstract class ProtocolMapper implements IProtocolMapper {
-	public String ioT2MPResponseString(String pattern, ContextAction contextAction) {
-		return pattern.replace("*", contextAction.getValue());
+	
+	@Override
+	public String resourceAction2MPResponseString(ResourceAction resourceAction, ResourceAction resourceActionPattern,
+			String responsePattern) {
+		if (resourceAction.equals(resourceActionPattern)) return responsePattern.replace("*", resourceAction.getValue());
+		return null;
 	}
 	
-	public ContextAction mpRequestString2IoT(String request, String pattern,ContextAction contextPattern) {
+	public ResourceAction mpRequestString2ResourceAction(String request, String pattern,ResourceAction resourceActionPattern) {
 		
 		HashMap<String,String> patternValues = new HashMap<String,String>();
 		HashMap<String,String> requestValues = new HashMap<String,String>();
@@ -38,10 +42,10 @@ public abstract class ProtocolMapper implements IProtocolMapper {
 		if(matching != requestValues.keySet().size()) return null;
 		
 		//Retrieve value
-		String value = contextPattern.getValue();
-		if (contextPattern.getActionURI().equals("iot:SET")) 
+		String value = resourceActionPattern.getValue();
+		if (resourceActionPattern.getActionURI().equals("iot:SET")) 
 			if (valueKey != null && value.equals("*")) value = requestValues.get(valueKey);		
-		ContextAction ret = new ContextAction(contextPattern.getContextURI(), contextPattern.getActionURI(), value);
+		ResourceAction ret = new ResourceAction(resourceActionPattern.getResourceURI(), resourceActionPattern.getActionURI(), value);
 		
 		return ret;
 	}

@@ -19,6 +19,6 @@ public class MNRequest {
 	
 	@Override
 	public String toString(){
-		return "MN-Request<"+URI+","+network+","+requestString+">";
+		return "MN-Request<"+network+","+requestString+">";
 	}
 }

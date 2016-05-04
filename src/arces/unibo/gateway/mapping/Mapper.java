@@ -1,6 +1,8 @@
 package arces.unibo.gateway.mapping;
 
 import arces.unibo.SEPA.Consumer;
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public abstract class Mapper extends Consumer {
 
@@ -14,10 +16,11 @@ public abstract class Mapper extends Consumer {
 	public abstract String name();
 	
 	public boolean join(){
-		System.out.println("*********************");
-		System.out.println("Mapper: "+name());
-		System.out.println("*********************");
-		
+		Logging.log(VERBOSITY.DEBUG, name(), "Join");
 		return super.join();
+	}
+	
+	public String subscribe() {
+		return super.subscribe(null);
 	}
 }

@@ -3,7 +3,6 @@
 	<name>IoTGateway</name>
 	<comment></comment>
 	<projects>
-		<project>STDash7</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

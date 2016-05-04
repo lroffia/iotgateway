@@ -26,6 +26,6 @@ public class MPResponse {
 	
 	@Override
 	public String toString(){
-		return "MP-Response<"+URI+","+protocol+","+responseString+">";
+		return "MP-Response<"+protocol+","+responseString+">";
 	}
 }

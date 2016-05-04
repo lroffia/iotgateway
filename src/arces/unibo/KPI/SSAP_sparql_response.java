@@ -11,6 +11,8 @@ import org.jdom2.*;
 import org.jdom2.input.*;
 import org.jdom2.output.*;
 
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 /**
  * This class represents the SSAP RESPONSE to a generic SPARQL query.
@@ -85,11 +87,8 @@ public class SSAP_sparql_response {
 		this.booleans=new Vector<String>();
 		this.sparql_response_results = new Vector<Vector<String[]>>();
 
-
 		try
 		{
-
-
 			Document sparql_response_document=loadXMLFromString(xml);
 
 			//	        GET ROOT ELEMENT + NAMESPACE
@@ -294,8 +293,7 @@ public class SSAP_sparql_response {
 
 		if(ssap_sparql_response==null)
 		{
-			System.out.println("ERROR:SSAP_sparql_response:Constructor:XML message is null");
-			/*System.exit(2);*/
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_sparql_response:Constructor:XML message is null");
 		}
 
 		try
@@ -476,7 +474,7 @@ public class SSAP_sparql_response {
 											}
 											else if(cell_temp.size()==2)//unbound in redland SIB
 											{			
-												//System.out.println("HELLO!!!");
+												//Logging.log("HELLO!!!");
 												single_cell= new String[3];
 												single_cell[VARNAME]=cell_temp.elementAt(VARNAME);
 												single_cell[CATEGORY]=cell_temp.elementAt(CATEGORY);
@@ -565,12 +563,8 @@ public class SSAP_sparql_response {
 		this.booleans=new Vector<String>();
 		this.sparql_response_results = new Vector<Vector<String[]>>();
 
-
 		try
 		{
-
-
-
 			List<Element> sparqlChildren= ssap_sparql_response_element.getChildren();
 			ssap_sparql_response_element.getNamespace();
 			Iterator <Element> sparqlIter = sparqlChildren.iterator();
@@ -760,10 +754,6 @@ public class SSAP_sparql_response {
 				}//endif boolean
 			}//while
 
-
-
-
-
 		} catch (Exception e)
 		{
 			System.err.println("EXCEPTION:");
@@ -822,7 +812,7 @@ public class SSAP_sparql_response {
 
 		if(select_ask_response_String==null)
 		{
-			System.out.println("ERROR:SSAP_sparql_response:Constructor:XML message is null");
+			Logging.log(VERBOSITY.DEBUG,"KPI","ERROR:SSAP_sparql_response:Constructor:XML message is null");
 			//System.exit(2);
 		}
 
@@ -1028,7 +1018,7 @@ public class SSAP_sparql_response {
 	private static Document loadXMLFromString(String xml) throws Exception
 	{
 		SAXBuilder builder = new SAXBuilder();
-		//System.out.println("xml = " + xml);
+		//Logging.log("xml = " + xml);
 		Document doc = builder.build(new ByteArrayInputStream(xml.getBytes(Charset.forName("UTF-8"))));
 		
 
@@ -1406,7 +1396,7 @@ public class SSAP_sparql_response {
 				XMLOutputter out = new XMLOutputter();
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				out.output(graph, baos);
-				System.out.println(baos.toString());
+				Logging.log(VERBOSITY.DEBUG,"KPI",baos.toString());
 			} catch (Exception e)
 			{
 				System.err.println("This object represent the result of query that is a sparql SELECT/ASK type. No graph to print");
@@ -1416,10 +1406,4 @@ public class SSAP_sparql_response {
 			System.err.println("Sorry, this query is a sparql SELECT/ASK type. No graph to print");
 		}
 	}
-
-
-
-
-
-
 }

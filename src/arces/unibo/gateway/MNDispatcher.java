@@ -9,84 +9,60 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.gateway.mapping.ContextAction;
-import arces.unibo.gateway.mapping.MNMapper;
+import arces.unibo.SEPA.SPARQL;
+import arces.unibo.gateway.mapping.ResourceAction;
+import arces.unibo.gateway.mapping.mappers.network.DASH7Mapper;
+import arces.unibo.gateway.mapping.mappers.network.INetworkMapper;
+import arces.unibo.gateway.mapping.mappers.network.MQTTMapper;
+import arces.unibo.gateway.mapping.mappers.network.PingPongMapper;
+import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MNRequest;
 import arces.unibo.gateway.mapping.MNResponse;
+import arces.unibo.gateway.mapping.Map;
+import arces.unibo.gateway.mapping.Mapper;
+import arces.unibo.gateway.mapping.Mappings;
+
+import arces.unibo.tools.Logging;
+import arces.unibo.tools.Logging.VERBOSITY;
 
 public class MNDispatcher {
+	private static String tag = "MN DISPATCHER";
 	
 	private MNRequestDispatcher mnRequestDispatcher;
 	private MNResponseDispatcher mnResponseDispatcher;
 	private MNMapper mnMapper;
 	private MNMap mnMap;
-	private HashMap<ContextAction,ArrayList<MNRequest>> requestMap = new HashMap<ContextAction,ArrayList<MNRequest>>();
+	private HashMap<ResourceAction,ArrayList<MNRequest>> requestMap = new HashMap<ResourceAction,ArrayList<MNRequest>>();
 	
-	public class MNRequestDispatcher extends Aggregator {
+	public class MNMap extends Map {
+		private ArrayList<INetworkMapper> mappers = new ArrayList<INetworkMapper>();
 		
-		private static final String IOT_REQUEST =
-				" SELECT ?value ?action ?context WHERE { "
-						+ "?request rdf:type iot:IoT-Request . "
-						+ "?request iot:hasValue ?value . "
-						+ "?request iot:hasAction ?action . "
-						+ "?request iot:hasContext ?context"
-						+ " }";
-		
-		private static final String MN_PENDING_REQUEST = 
-				" INSERT DATA { "
-						+ "?request rdf:type iot:MN-Request . "
-						+ "?request iot:hasNetwork ?network . "
-						+ "?request iot:hasMNRequestString ?value"
-						+ " }";
-		
-		public MNRequestDispatcher() {
-			super(IOT_REQUEST,MN_PENDING_REQUEST);
-		}
-		
-		@Override
-		public void notify(BindingsResults notify) {
-			if (notify == null) return;
+		public MNMap(){
+			//TODO: add all supported mappings here
+			mappers.add(new PingPongMapper());
+			mappers.add(new DASH7Mapper());
+			mappers.add(new MQTTMapper());
 			
-			for(Bindings bindings : notify.getAddedBindings()){
-				String value = bindings.getBindingValue("?value").getValue();
-				String action = bindings.getBindingValue("?action").getValue();
-				String context = bindings.getBindingValue("?context").getValue();
-				ContextAction contextAction = new ContextAction(context, action, value);
-				
-				//Mapping IoT Request to MN Request List
-				ArrayList<MNRequest> mnRequestList = mnMap.ioT2MNRequestList(contextAction);
-				
-				if (mnRequestList.isEmpty()) {
-					System.out.println("MN DISPATCHER : no mapping found for IoT-Request "+contextAction.toString());
-					return;	
-				}
-				
-				//Matching request cache
-				boolean cacheHit = false;
-				for (ContextAction actionCache : requestMap.keySet()){
-					if (actionCache.equals(contextAction)){
-						requestMap.get(actionCache).addAll(mnRequestList);
-						cacheHit = true;
-						break;	
-					}
-				}
-				
-				//Request not cached: add to cache
-				if (!cacheHit) requestMap.put(contextAction, mnRequestList);
-				
-				//Dispatch MN Requests
-				for(MNRequest request : mnRequestList){
-					System.out.println("MN DISPATCHER : "+ contextAction.toString()+" --> "+request.toString());
-					
-					bindings = new Bindings();
-					bindings.addBinding("?request", new BindingURIValue(request.getURI()));
-					bindings.addBinding("?network", new BindingURIValue(request.getNetwork()));
-					bindings.addBinding("?value", new BindingLiteralValue(request.getRequestString()));
-					
-					update(bindings);
-				}
+			for(INetworkMapper mapper : mappers) {
+				addMapper(mapper.getMapperURI(), mapper);
+				Logging.log(VERBOSITY.INFO, "MN MAP",mapper.getMapperURI()+ "\tmapper added");
 			}
 		}
+		
+		public void addMapper(String key,INetworkMapper mapper){
+			maps.put(key, new Mappings(mapper));	
+		}
+	}
+	
+	public class MNRequestDispatcher extends Aggregator {	
+		private static final String tag = "MN REQUEST DISPATCHER";
+		
+		public MNRequestDispatcher() {super(SPARQL.subscribe("RESOURCE_REQUEST"),SPARQL.insert("MN_REQUEST"));}
+		
+		public String subscribe() {return super.subscribe(null);}
+		
+		@Override
+		public void notify(BindingsResults notify) {}
 
 		public void dispatch(MNRequest request){
 			Bindings bindings = new Bindings();
@@ -96,57 +72,209 @@ public class MNDispatcher {
 			
 			update(bindings);
 		}
-		
-	}
-	
-	public class MNResponseDispatcher extends Aggregator {
-		
-		private static final String MN_RESPONSE =
-				" SELECT ?network ?value WHERE { "
-				+ "?response rdf:type iot:MN-Response . "
-				+ "?response iot:hasNetwork ?network . "
-				+ "?response iot:hasMNResponseString ?value"
-				+ " }";
-		
-		private static final String IOT_RESPONSE = 
-				" INSERT DATA { "
-						+ "?response rdf:type iot:IoT-Response . "
-						+ "?response iot:hasAction ?action . "
-						+ "?response iot:hasContext ?context . "
-						+ "?response iot:hasValue ?value"
-						+ " }";	
-		
-		public MNResponseDispatcher() {
-			super(MN_RESPONSE,IOT_RESPONSE);
+
+		@Override
+		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+			for(Bindings bindings : bindingsResults){
+				String value = bindings.getBindingValue("?value").getValue();
+				String action = bindings.getBindingValue("?action").getValue();
+				String resource = bindings.getBindingValue("?resource").getValue();
+				ResourceAction resourceAction= new ResourceAction(resource, action, value);
+				
+				//Mapping Resource Request to MN Request List
+				ArrayList<MNRequest> mnRequestList = mnMap.resourceAction2MNRequestList(resourceAction);
+				
+				if (mnRequestList.isEmpty()) {
+					bindings = new Bindings();
+					ResourceAction response = new ResourceAction(resource, action, "MN-MAPPING NOT FOUND FOR "+resourceAction.toString());
+					bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));
+					bindings.addBinding("?resource", new BindingURIValue(response.getResourceURI()));
+					bindings.addBinding("?action", new BindingURIValue(response.getActionURI()));
+					bindings.addBinding("?value", new BindingLiteralValue(response.getValue()));
+
+					Logging.log(VERBOSITY.INFO, tag, resourceAction.toString()+ " --> "+response.toString());
+					
+					if(!mnResponseDispatcher.update(bindings)) 
+						Logging.log(VERBOSITY.ERROR,tag,"***RDF STORE UPDATE FAILED***");
+						
+					continue;
+				}
+				
+				//Matching request cache
+				boolean cacheHit = false;
+				for (ResourceAction actionCache : requestMap.keySet()){
+					if (actionCache.equals(resourceAction)){
+						requestMap.get(actionCache).addAll(mnRequestList);
+						cacheHit = true;
+						break;	
+					}
+				}
+				
+				//Request not cached: add to cache
+				if (!cacheHit) requestMap.put(resourceAction, mnRequestList);
+				
+				//Dispatch MN Requests
+				for(MNRequest request : mnRequestList){
+					bindings = new Bindings();
+					bindings.addBinding("?request", new BindingURIValue(request.getURI()));
+					bindings.addBinding("?network", new BindingURIValue(request.getNetwork()));
+					bindings.addBinding("?value", new BindingLiteralValue(request.getRequestString()));
+					
+					Logging.log(VERBOSITY.INFO, tag,resourceAction.toString()+" --> "+request.toString());
+					
+					if(!update(bindings)) 
+						Logging.log(VERBOSITY.ERROR,tag,"***RDF STORE UPDATE FAILED***");
+				}
+			}
 		}
 
 		@Override
-		public void notify(BindingsResults notify) {
-			for (Bindings bindings : notify.getAddedBindings()){
+		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		}
+
+		@Override
+		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
+			notifyAdded(bindingsResults);			
+		}
+	}
+	
+	public class MNResponseDispatcher extends Aggregator {		
+		private static final String tag = "MN RESPONSE DISPATCHER";
+		
+		public MNResponseDispatcher() {super(SPARQL.subscribe("MN_RESPONSE"),SPARQL.insert("RESOURCE_RESPONSE"));}
+
+		public String subscribe() {return super.subscribe(null);}
+		
+		@Override
+		public void notify(BindingsResults notify) {}
+
+		@Override
+		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+			for (Bindings bindings : bindingsResults){
 
 				MNResponse response = new MNResponse(bindings.getBindingValue("?network").getValue(), bindings.getBindingValue("?value").getValue());
 				
-				//Mapping MN Response to IoT Response
-				ContextAction contextAction = mnMap.mnResponse2IoT(response);
+				//Mapping MN Response to Resource Response
+				ResourceAction resourceAction = mnMap.mnResponse2ResourceAction(response);
 				
-				if (contextAction == null) {
-					System.out.println("MN DISPATCHER : no mapping found for MN-Response "+response.toString());
-					return;
-				}
-				
-				System.out.println("MN DISPATCHER : "+response.toString()+ " --> "+contextAction.toString());
+				if (resourceAction == null) resourceAction = new ResourceAction("iot:NULL","iot:NULL","MN-MAPPING NOT FOUND FOR "+response.toString());
 				
 				bindings = new Bindings();
-				bindings.addBinding("?context", new BindingURIValue(contextAction.getContextURI()));
-				bindings.addBinding("?action", new BindingURIValue(contextAction.getActionURI()));
-				bindings.addBinding("?value", new BindingLiteralValue(contextAction.getValue()));
-				bindings.addBinding("?response", new BindingURIValue("iot:IoT-Response_"+UUID.randomUUID().toString()));
+				bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));						
+				bindings.addBinding("?resource", new BindingURIValue(resourceAction.getResourceURI()));
+				bindings.addBinding("?action", new BindingURIValue(resourceAction.getActionURI()));
+				bindings.addBinding("?value", new BindingLiteralValue(resourceAction.getValue()));
 
-				update(bindings);
+				Logging.log(VERBOSITY.INFO, tag,response.toString()+ " --> "+resourceAction.toString());
+				
+				if(!update(bindings)) 
+					Logging.log(VERBOSITY.ERROR,tag,"***RDF STORE UPDATE FAILED***");
 			}
+		}
+
+		@Override
+		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {}
+
+		@Override
+		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
+			notifyAdded(bindingsResults);	
 		}
 	}
 
+	public class MNMapper extends Mapper {	
+		public MNMapper(Map map) {super(SPARQL.subscribe("MN_MAPPING"), map);}
+
+		@Override
+		public void notify(BindingsResults notify) {}
+
+		@Override
+		public String name() {return "MN MAPPER";}
+
+		@Override
+		public void notifyAdded(ArrayList<Bindings> bindings) {
+			String network="";
+			String resource="";
+			String action="";
+			String requestPattern="";
+			String responsePattern="";
+			String value = "";
+			
+			Logging.log(VERBOSITY.INFO, name(), "ADDED MAPPINGS");
+			for (Bindings results : bindings){
+				for(String var : results.getVariables()){
+					String bindingValue = results.getBindingValue(var).getValue();
+					switch(var){
+						case "?network":
+							network = bindingValue;
+							break;
+						case "?resource":
+							resource = bindingValue;
+							break;
+						case "?action":
+							action = bindingValue;
+							break;
+						case "?requestPattern":
+							requestPattern = bindingValue;
+							break;
+						case "?responsePattern":
+							responsePattern = bindingValue;
+							break;
+						case "?value":
+							value = bindingValue;
+							break;
+					}
+				}
+				MNMapping mapping = new MNMapping(network,requestPattern,responsePattern,new ResourceAction(resource,action,value));
+				if (map.addMapping(mapping)) 
+					Logging.log(VERBOSITY.INFO, name(), mapping.toString());
+			}
+		}
+
+		@Override
+		public void notifyRemoved(ArrayList<Bindings> bindings) {
+			String network="";
+			String resource="";
+			String action="";
+			String requestPattern="";
+			String responsePattern="";
+			String value = "";
+			
+			Logging.log(VERBOSITY.INFO, name(), "REMOVED MAPPINGS");
+			for (Bindings results : bindings){
+				for(String var : results.getVariables()){
+					String bindingValue = results.getBindingValue(var).getValue();
+					switch(var){
+						case "?network":
+							network = bindingValue;
+							break;
+						case "?resource":
+							resource = bindingValue;
+							break;
+						case "?action":
+							action = bindingValue;
+							break;
+						case "?requestPattern":
+							requestPattern = bindingValue;
+							break;
+						case "?responsePattern":
+							responsePattern = bindingValue;
+							break;
+						case "?value":
+							value = bindingValue;
+							break;
+					}
+				}
+				MNMapping mapping = new MNMapping(network,requestPattern,responsePattern,new ResourceAction(resource,action,value));
+				if (map.removeMapping(mapping)) Logging.log(VERBOSITY.INFO, name(), mapping.toString());
+			}
+		}
+
+		@Override
+		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
+			notifyAdded(bindingsResults);
+		}
+	}
+	
 	public MNDispatcher() {
 		mnMap = new MNMap();
 		mnRequestDispatcher = new MNRequestDispatcher();
@@ -155,39 +283,50 @@ public class MNDispatcher {
 	}
 	
 	public boolean start() {
-		System.out.println("****************************");
-		System.out.println("* Multi-Network Dispatcher *");
-		System.out.println("****************************");
-		
 		if(!mnMapper.join()) return false;
 		if(!mnRequestDispatcher.join()) return false;
 		if(!mnResponseDispatcher.join()) return false;
 		
-		BindingsResults ret;
-		if (!mnMapper.subscribe()) return false;
-		else {
-			ret = mnMapper.getQueryResults();
-			mnMapper.notify(ret);
+		String subID = mnMapper.subscribe();
+		
+		if (subID == null) {
+			Logging.log(VERBOSITY.FATAL, tag,"Mapper subscription FAILED");
+			return false;
 		}
 		
-		if (!mnRequestDispatcher.subscribe()) return false;
-		else {
-			ret = mnRequestDispatcher.getQueryResults();
-			mnRequestDispatcher.notify(ret);
+		Logging.log(VERBOSITY.DEBUG, tag,"Mapper subscription\t"+subID);
+		
+		subID = mnRequestDispatcher.subscribe();
+		
+		if (subID == null) {
+			Logging.log(VERBOSITY.FATAL, tag,"Request dispatcher subscription FAILED");
+			return false;
 		}
 		
-		if (!mnResponseDispatcher.subscribe()) return false;
-		else {
-			ret = mnResponseDispatcher.getQueryResults();
-			mnResponseDispatcher.notify(ret);
+		Logging.log(VERBOSITY.DEBUG, tag,"Request dispatcher subscription\t"+subID);
+		
+		subID = mnResponseDispatcher.subscribe();
+		
+		if (subID == null) {
+			Logging.log(VERBOSITY.FATAL, tag,"Response dispatcher subscription FAILED");
+			return false;
 		}
+		
+		Logging.log(VERBOSITY.DEBUG, tag,"Response dispatcher subscription\t"+subID);
+		
+		Logging.log(VERBOSITY.INFO, tag,"Started");
 		
 		return true;
 	}
 	
-	public void stop(){
-		mnResponseDispatcher.unsubscribe();
-		mnRequestDispatcher.unsubscribe();
-		mnMapper.unsubscribe();
+	public boolean stop(){		
+		boolean ret1 = mnResponseDispatcher.unsubscribe();
+		if (!ret1) Logging.log(VERBOSITY.ERROR, tag,"Response Dispatcher unsubscribe FAILED");
+		boolean ret2 = mnRequestDispatcher.unsubscribe();
+		if (!ret2) Logging.log(VERBOSITY.ERROR, tag,"Request Dispatcher unsubscribe FAILED");
+		boolean ret3 = mnMapper.unsubscribe();
+		if (!ret3) Logging.log(VERBOSITY.ERROR, tag,"Mapper unsubscribe FAILED");
+		
+		return (ret1 && ret2 && ret3);
 	}
 }

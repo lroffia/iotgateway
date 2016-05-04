@@ -31,7 +31,7 @@ public class MPRequest {
 	
 	@Override
 	public String toString(){
-		return "MP-Request<"+URI+","+protocol+","+requestString+">";
+		return "MP-Request<"+protocol+","+requestString+">";
 	}
 	
 }

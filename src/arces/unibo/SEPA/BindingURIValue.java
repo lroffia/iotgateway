@@ -4,7 +4,8 @@ import java.util.HashMap;
 
 public class BindingURIValue extends BindingValue {
 
-	public BindingURIValue(String value,HashMap<String,String> URI2PrefixMap){
+	public BindingURIValue(String value,HashMap<String,String> URI2PrefixMap,boolean added){
+		this.added = added;
 		this.type = BINDING_TYPE.URI;
 		if (URI2PrefixMap != null){
 			for(String uri : URI2PrefixMap.keySet()){
@@ -19,12 +20,17 @@ public class BindingURIValue extends BindingValue {
 	
 	public BindingURIValue(String value){
 		this.type = BINDING_TYPE.URI;
-		this.value = value;	
+		this.value = value;
+		this.added = true;
+	}
+	
+	public BindingURIValue(String value,boolean added){
+		this.type = BINDING_TYPE.URI;
+		this.value = value;
+		this.added = added;
 	}
 	
 	public String getValue() {
 		return value;
 	}
-	
-
 }

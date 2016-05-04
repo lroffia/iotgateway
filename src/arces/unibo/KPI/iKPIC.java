@@ -17,7 +17,10 @@
 
 package arces.unibo.KPI;
 
+import java.io.IOException;
 import java.util.Vector;
+
+import org.jdom2.JDOMException;
 
 public interface iKPIC 
 {
@@ -53,16 +56,20 @@ public interface iKPIC
      * Perform the JOIN procedure 
      * Check the error state with the functions: getErrMess, getErrID
      * @return a string representation of the XML answer message from the SIB
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse join();
+    public SIBResponse join() throws JDOMException, IOException;
 
     
     /**
      * Perform the LEAVE procedure 
      * Check the error state with the functions: getErrMess, getErrID
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse leave();
+    public SIBResponse leave() throws JDOMException, IOException;
     
     
     /**
@@ -75,8 +82,10 @@ public interface iKPIC
      * @param o_type the string representation of the object type. Allowed values are: uri, literal
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse queryRDF(String s,String p,String o, String s_type, String o_type);
+    public SIBResponse queryRDF(String s,String p,String o, String s_type, String o_type) throws JDOMException, IOException;
     
     
     /**
@@ -94,8 +103,10 @@ public interface iKPIC
      *  A null value for subject, predicate or object means any value
      *  
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */     
-    public SIBResponse queryRDF( Vector<Vector<String>> queryList );
+    public SIBResponse queryRDF( Vector<Vector<String>> queryList ) throws JDOMException, IOException;
     
     /**
      * Perform the INSERT procedure 
@@ -107,8 +118,10 @@ public interface iKPIC
      * @param o_type the string representation of the object type. Allowed values are: uri, literal
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse insert(String s,String p,String o, String s_type, String o_type);
+    public SIBResponse insert(String s,String p,String o, String s_type, String o_type) throws JDOMException, IOException;
 
     
     /**
@@ -124,8 +137,10 @@ public interface iKPIC
      * -the object type
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */     
-    public SIBResponse insert( Vector<Vector<String>> queryList );
+    public SIBResponse insert( Vector<Vector<String>> queryList ) throws JDOMException, IOException;
     
     /**
      * Perform the REMOVE procedure 
@@ -137,8 +152,10 @@ public interface iKPIC
      * @param o_type the string representation of the object type. Allowed values are: uri, literal
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse remove(String s,String p,String o,String s_type,String o_type); 	   
+    public SIBResponse remove(String s,String p,String o,String s_type,String o_type) throws JDOMException, IOException; 	   
     
     /**
      * Perform the REMOVE procedure 
@@ -155,8 +172,10 @@ public interface iKPIC
      * A null value for subject, predicate or object means any value
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */     
-    public SIBResponse remove( Vector<Vector<String>> queryList );
+    public SIBResponse remove( Vector<Vector<String>> queryList ) throws JDOMException, IOException;
     
     
     /**
@@ -178,10 +197,12 @@ public interface iKPIC
      * @param oo_type the string representation of the object type. Allowed values are: uri, literal
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */
     //o==old, n==new
     public SIBResponse update( String sn,String pn,String on,String sn_type,String on_type
- 		             ,String so,String po,String oo,String so_type,String oo_type);    
+ 		             ,String so,String po,String oo,String so_type,String oo_type) throws JDOMException, IOException;    
 
     
     /**
@@ -207,10 +228,12 @@ public interface iKPIC
      * -the string representation of the old object type. Allowed values are: uri, literal
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */
     //o==old, n==new
     public SIBResponse update( Vector<Vector<String>>  newTripleVector
- 		                , Vector<Vector<String>>  oldTripleVector);
+ 		                , Vector<Vector<String>>  oldTripleVector) throws JDOMException, IOException;
    
     
     
@@ -224,9 +247,11 @@ public interface iKPIC
      * @param o_type the string representation of the object type. Allowed values are: uri, literal
      * 
      * @return a null value string in case of error otherwise an empty string 
+     * @throws IOException 
+     * @throws JDOMException 
      */
     
-    public SIBResponse subscribeRDF(String s,String p,String o,String o_type);      
+    public SIBResponse subscribeRDF(String s,String p,String o,String o_type) throws JDOMException, IOException;      
     
     
     /**
@@ -234,8 +259,10 @@ public interface iKPIC
      * Check the error state with the functions: getErrMess, getErrID
      * 
      * @return a string representation of the XML answer message from the SIB 
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse unsubscribe();
+    public SIBResponse unsubscribe() throws JDOMException, IOException;
 	
 	
     /**
@@ -243,16 +270,20 @@ public interface iKPIC
      * @param EntityI Specify the entity which the protection must be applied 
      * @param properties EntityI's Property list to protect 
      * @return a string representation of the XML answer message from the SIB
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse insertProtection(String EntityI, Vector<String> properties);
+    public SIBResponse insertProtection(String EntityI, Vector<String> properties) throws JDOMException, IOException;
 
     /**
      * 
      * @param EntityI Specify the entity on which the protection was applied
      * @param properties EntityI's Property list protected
      * @return a string representation of the XML answer message from the SIB
+     * @throws IOException 
+     * @throws JDOMException 
      */
-    public SIBResponse removeProtection(String EntityI, Vector<String> properties);
+    public SIBResponse removeProtection(String EntityI, Vector<String> properties) throws JDOMException, IOException;
     
     
 }//

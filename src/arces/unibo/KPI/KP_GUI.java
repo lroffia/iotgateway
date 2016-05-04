@@ -2,6 +2,7 @@ package arces.unibo.KPI;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.util.Vector;
 import java.util.Properties;
 
@@ -14,6 +15,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+
+import org.jdom2.JDOMException;
+
 import javax.swing.JLabel;
 
 
@@ -488,7 +492,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 	else if( c == bJoin)
 	{ taMemo.setText(""); 
-	ret = kp.join();  
+	try {
+		ret = kp.join();
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}  
 	taMemo.append("Sent: " + kp.xmlTools.join() + "\n");
 
 	taMemo.append("SIB MESSAGE:\n"+ret+"\nKP-CORE MESSAGE:"+kp.getErrMess()+"("+kp.getErrID()+")\n"); 
@@ -500,7 +509,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	}//bJoin
 
 	else if( c == bLeave)
-	{ taMemo.setText(""); ret = kp.leave(); 
+	{ taMemo.setText(""); try {
+		ret = kp.leave();
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	} 
 	taMemo.append("Sent: " + kp.xmlTools.leave() + "\n");
 
 	taMemo.append("SIB MESSAGE:\n"+ret+"\nKP-CORE MESSAGE:"+kp.getErrMess()+"("+kp.getErrID()+")\n"); 
@@ -513,11 +527,16 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 	else if( c == bRDFQuery)
 	{ taMemo.setText("");
-	ret = kp.queryRDF( tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
-			,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
-					,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfON.getText()
-							,tfSNType.getText()
-							,tfONType.getText());
+	try {
+		ret = kp.queryRDF( tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
+				,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
+						,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfON.getText()
+								,tfSNType.getText()
+								,tfONType.getText());
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
 	taMemo.append("Sent: " + kp.xmlTools.queryRDF( tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
 			,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
 					,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfON.getText()
@@ -563,7 +582,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 		taMemo.setText("");
 		taMemo.append("\nSPARQL QUERY!"); 
 
-		ret = kp.querySPARQL(tfSQ.getText());
+		try {
+			ret = kp.querySPARQL(tfSQ.getText());
+		} catch (JDOMException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		taMemo.append("Sent: " + kp.xmlTools.querySPARQL(tfSQ.getText()) + "\n");
 		taMemo.append("SIB MESSAGE:\n"+ret+"\nKP-CORE MESSAGE:"+kp.getErrMess()+"("+kp.getErrID()+")\n");
 		taMemo.append("SPARQLQuery confirmed:"+(this.xmlTools.isResponseConfirmed(ret)?"YES":"NO")+"\n");
@@ -604,7 +628,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 		taMemo.setText("");
 		taMemo.append("\nSPARQL Subscription!"); 
 
-		ret = kp.subscribeSPARQL(tfSQ.getText(), this);
+		try {
+			ret = kp.subscribeSPARQL(tfSQ.getText(), this);
+		} catch (JDOMException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		String subID = ret.subscription_id;
 		taMemo.append("Sent: " + kp.xmlTools.subscribeSPARQL(tfSQ.getText()) + "\n");
 
@@ -646,7 +675,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 		taMemo.setText("");
 		taMemo.append("\nSPARQL Update!"); 
 
-		ret = kp.update_sparql(tfSQ.getText());
+		try {
+			ret = kp.update_sparql(tfSQ.getText());
+		} catch (JDOMException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		history.append("Sparql update s = " + tfSQ.getText() + "\n");
 
 		taMemo.append("Sent: " + kp.xmlTools.update_sparql(tfSQ.getText()) + "\n");
@@ -664,7 +698,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 		taMemo.setText("");
 		taMemo.append("\nPersistent SPARQL Update!"); 
-		ret = kp.persistent_update(tfSQ.getText());
+		try {
+			ret = kp.persistent_update(tfSQ.getText());
+		} catch (JDOMException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		taMemo.append("Sent: " + kp.xmlTools.persistent_update(tfSQ.getText()) + "\n");
 
 		taMemo.append("SIB MESSAGE:\n"+ret+"\nKP-CORE MESSAGE:"+kp.getErrMess()+"("+kp.getErrID()+")\n");
@@ -688,7 +727,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	{ taMemo.setText("");
 	taMemo.append("Cancelling Rule ... waiting for the SIB answer...\n");
 	ComboItemRenderable item = (ComboItemRenderable) cbRULES.getSelectedItem();
-	ret = kp.cancel_persistent_update( item.getName());	  
+	try {
+		ret = kp.cancel_persistent_update( item.getName());
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}	  
 	cbRULES.removeItemAt(cbRULES.getSelectedIndex());
 	taMemo.append("Sent: " + kp.xmlTools.cancel_persistent_update( item.getName()) + "\n");
 
@@ -721,12 +765,17 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	    	  if(true)return;*/
 
 		taMemo.setText(""); 
-		ret = kp.insert(
-				tfSN.getText()
-				,tfPN.getText() 
-				,tfON.getText()
-				,tfSNType.getText()
-				,tfONType.getText());
+		try {
+			ret = kp.insert(
+					tfSN.getText()
+					,tfPN.getText() 
+					,tfON.getText()
+					,tfSNType.getText()
+					,tfONType.getText());
+		} catch (JDOMException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		taMemo.append("Sent: " + kp.xmlTools.insert(
 				tfSN.getText()
 				,tfPN.getText() 
@@ -744,12 +793,17 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 	else if( c == bRemove)
 	{ taMemo.setText("");
-	ret = kp.remove( 
-			tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
-					,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
-							,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfON.getText()
-									,tfSNType.getText()
-									,tfONType.getText());	    
+	try {
+		ret = kp.remove( 
+				tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
+						,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
+								,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfON.getText()
+										,tfSNType.getText()
+										,tfONType.getText());
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}	    
 	taMemo.append("Sent: " + kp.xmlTools.remove( 
 			tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
 					,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
@@ -768,11 +822,16 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 
 	else if( c == bSubscribe)
 	{ taMemo.setText("");
-	ret = kp.subscribeRDF(  
-			tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
-					,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
-							,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfON.getText()
-									,tfONType.getText(), this);	
+	try {
+		ret = kp.subscribeRDF(  
+				tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
+						,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
+								,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfON.getText()
+										,tfONType.getText(), this);
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}	
 	taMemo.append("Sent: " + kp.xmlTools.subscribeRDF(  
 			tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
 					,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
@@ -841,18 +900,23 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	else if( c == bUpdate)
 	{ taMemo.setText("");
 
-	ret = kp.update( 
-			tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
-					,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
-							,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any"  : tfON.getText()
-									,tfSNType.getText()
-									,tfONType.getText()
-									,tfSO.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any":tfSO.getText()
-											,tfPO.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any":tfPO.getText() 
-													,tfOO.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any":tfOO.getText()
-															,tfSOType.getText()
-															,tfOOType.getText()
-			);
+	try {
+		ret = kp.update( 
+				tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
+						,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
+								,tfON.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any"  : tfON.getText()
+										,tfSNType.getText()
+										,tfONType.getText()
+										,tfSO.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any":tfSO.getText()
+												,tfPO.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any":tfPO.getText() 
+														,tfOO.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any":tfOO.getText()
+																,tfSOType.getText()
+																,tfOOType.getText()
+				);
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	}
 	taMemo.append("Sent: " + kp.xmlTools.update( 
 			tfSN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfSN.getText()
 					,tfPN.getText().equals("*") ? "http://www.nokia.com/NRC/M3/sib#any" : tfPN.getText() 
@@ -887,7 +951,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	}
 
 	properties.add(tfPN.getText());
-	ret = kp.insertProtection(tfSN.getText(), properties); 
+	try {
+		ret = kp.insertProtection(tfSN.getText(), properties);
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	} 
 	success = xmlTools.isResponseConfirmed(ret);
 
 	taMemo.append( "INSERT PROTECTION:SUCCESS:"+(success?"YES":"NO")
@@ -907,7 +976,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	return;
 	}
 	properties.add(tfPN.getText());
-	ret = kp.removeProtection(tfSN.getText(), properties); 
+	try {
+		ret = kp.removeProtection(tfSN.getText(), properties);
+	} catch (JDOMException | IOException e1) {
+		// TODO Auto-generated catch block
+		e1.printStackTrace();
+	} 
 	success = xmlTools.isResponseConfirmed(ret);
 
 	taMemo.append( "REMOVE PROTECTION:SUCCESS:"+(success?"YES":"NO")
@@ -920,7 +994,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 	{
 		//Before...leave the Smart Space...
 		taMemo.setText(""); 
-		ret = kp.leave(); 
+		try {
+			ret = kp.leave();
+		} catch (JDOMException | IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} 
 		taMemo.append("SIB MESSAGE:\n"+ret+"\nKP-CORE MESSAGE:"+kp.getErrMess()+"("+kp.getErrID()+")\n"); 
 		taMemo.append("Leave confirmed:"+(this.xmlTools.isResponseConfirmed(ret)?"YES":"NO"));	    
 
@@ -930,7 +1009,12 @@ public class KP_GUI  extends Panel implements ActionListener, iKPIC_subscribeHan
 		kp.setNodeID( tfKPID.getText() );
 
 		//Join the Smart Space taMemo.setText(""); 
-		ret = kp.join();  
+		try {
+			ret = kp.join();
+		} catch (JDOMException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}  
 		taMemo.append("Sent: " + kp.xmlTools.join() + "\n");
 
 		taMemo.append("SIB MESSAGE:\n"+ret+"\nKP-CORE MESSAGE:"+kp.getErrMess()+"("+kp.getErrID()+")\n"); 
