@@ -49,7 +49,7 @@ public class PingPongHTTPClient {
 		while(true) {
 			ret = doRequest(ret);
 			if (ret.equals("ERROR") || ret.equals("TIMEOUT")) ret = "PING";
-			//Thread.sleep(100);
+			//Thread.sleep(1000);
 		}	
 	}
 	

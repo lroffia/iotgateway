@@ -205,6 +205,7 @@ public class COAPAdapter extends MPAdapter{
 
 	@Override
 	public void doStop() {
+		if (server == null) return;
 		server.stop();
 	}
 

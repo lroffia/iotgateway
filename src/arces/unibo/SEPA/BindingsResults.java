@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Vector;
 
-import arces.unibo.KPI.SSAP_sparql_response;
+import sofia_kp.SSAP_sparql_response;
+
 
 public class BindingsResults {
 	private ArrayList<Bindings> addedBindings = null;

@@ -1,9 +1,9 @@
 package arces.unibo.gateway;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 
-import arces.unibo.SEPA.Aggregator;
 import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.BindingValue;
@@ -11,10 +11,11 @@ import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.SEPA.Consumer;
 import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.gateway.mapping.ResourceAction;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
 
+/*
 class ResourceManager {
 	static String tag ="RESOURCE MANAGER";
 	
@@ -112,6 +113,7 @@ class ResourceManager {
 	}
 	
 	public boolean stop() {
+		if (requestsListener == null || responsesListener == null) return false;
 		requestsListener.unsubscribe();
 		requestsListener.leave();
 		
@@ -121,8 +123,8 @@ class ResourceManager {
 		return true;
 	}
 }
+*/
 
-/*
 public class ResourceManager {
 	private ResourceRequestQueue requestQueue = new ResourceRequestQueue();
 	private ResourceResponseCache responseCache = new ResourceResponseCache();
@@ -392,15 +394,15 @@ public class ResourceManager {
 	}
 		
 	public boolean start() {
-		Logging.log("*****************************");
-		Logging.log("*     Resource Manager      *");
-		Logging.log("*****************************");
+		Logging.log(VERBOSITY.INFO,"RESOURCE MANAGER","*****************************");
+		Logging.log(VERBOSITY.INFO,"RESOURCE MANAGER","*     Resource Manager      *");
+		Logging.log(VERBOSITY.INFO,"RESOURCE MANAGER","*****************************");
 		
 		if(!requestListener.join()) return false;
-		if(!requestListener.subscribe(null)) return false;
+		if(requestListener.subscribe(null).equals("")) return false;
 		
 		if (!responseListener.join()) return false;
-		if (!responseListener.subscribe(null)) return false;
+		if (responseListener.subscribe(null).equals("")) return false;
 		
 		if(!dispatcher.init()) return false;
 		dispatcher.start();
@@ -418,4 +420,3 @@ public class ResourceManager {
 		
 	}
 }
-*/

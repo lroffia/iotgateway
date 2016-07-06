@@ -1,14 +1,11 @@
 package arces.unibo.SEPA;
 
-import java.io.IOException;
 import java.util.HashMap;
 
-import org.jdom2.JDOMException;
-
-import arces.unibo.KPI.KPICore;
-import arces.unibo.KPI.SIBResponse;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
+import sofia_kp.KPICore;
+import sofia_kp.SIBResponse;
 
 public abstract class Client implements IClient{	
 	protected HashMap<String,String> URI2PrefixMap = new HashMap<String,String>();
@@ -60,13 +57,7 @@ public abstract class Client implements IClient{
 	}
 	
 	public boolean join() {
-		try {
-			ret = kp.join();
-		} catch (JDOMException | IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		joined = ret.isConfirmed();
+		joined = kp.join().isConfirmed();
 		return joined;
 	}
 	
@@ -74,17 +65,9 @@ public abstract class Client implements IClient{
 	
 	public boolean leave() {
 		if (!joined) return false;
-		try {
-			ret = kp.leave();
-		} catch (JDOMException | IOException e) {
-			e.printStackTrace();
-			return false;
-		}
-		if (ret == null) {
-			joined = false;
-			return false;
-		}
-		joined = !ret.isConfirmed();
+		
+		joined = !kp.leave().isConfirmed();
+		
 		return !joined;
 	}
 	
@@ -105,6 +88,8 @@ public abstract class Client implements IClient{
 				replacedSparql = replacedSparql.replace(var,"\""+bindings.getBindingValue(var).getValue()+"\"");
 			else	
 				replacedSparql = replacedSparql.replace(var,bindings.getBindingValue(var).getValue());
+			
+			selectPattern = selectPattern.replace(var, "");
 		}
 		
 		return selectPattern+replacedSparql;

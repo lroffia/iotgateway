@@ -1,9 +1,5 @@
 package arces.unibo.SEPA;
 
-import java.io.IOException;
-
-import org.jdom2.JDOMException;
-
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
 
@@ -18,7 +14,7 @@ public class Producer extends Client implements IProducer {
 	
 	public Producer(String updateQuery,String SIB_IP,int SIB_PORT,String SIB_NAME){
 		super(SIB_IP,SIB_PORT,SIB_NAME);
-		SPARQL_UPDATE = updateQuery;
+		SPARQL_UPDATE = updateQuery.replaceAll("\n", "").replaceAll("\r", "").replaceAll("\t", "").trim();;
 	}
 	public Producer(String updateQuery) {
 		this(updateQuery,defaultIP, defaultPort, defaultName);
@@ -30,20 +26,19 @@ public class Producer extends Client implements IProducer {
 			 return false;
 		 }
 		 
-		 String sparql = prefixes() + replaceBindings(SPARQL_UPDATE,forcedBindings).replace("\n", "").replace("\r", "");
+		 String sparql = prefixes() + replaceBindings(SPARQL_UPDATE,forcedBindings);
 		 
-		 Logging.log(VERBOSITY.DEBUG,tag,"UPDATE "+sparql);
+		 Logging.log(VERBOSITY.DEBUG,tag,"<UPDATE> ==> "+sparql);
 		 
 		 nRetry = 0;
 		 retry = true;
 		 ret = null;
 		 
 		 while (retry){
-			try 
-			{
-				ret = kp.update_sparql(sparql);
-			} 
-			catch (JDOMException | IOException e) {
+
+			ret = kp.update_sparql(sparql);
+			
+			if(!ret.isConfirmed()) {
 				nRetry++;
 				Logging.log(VERBOSITY.ERROR,tag,"UPDATE FAILED ("+nRetry+"/"+maxRetries+") "+sparql);
 				if (nRetry == maxRetries) retry = false;

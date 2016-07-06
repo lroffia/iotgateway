@@ -44,6 +44,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	private DefaultTableModel MPResponsesDM;
 	private DefaultTableModel MNRequestsDM;
 	private DefaultTableModel MNResponsesDM;
+	private DefaultTableModel MPRequestsDeletedDM;
 	
 	//Tables headers
 	private String protocolMappingHeader[] = new String[] 
@@ -67,6 +68,8 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	private long resourceResponsesN = 0;
 	private long MNRequestsN = 0;
 	private long MNResponsesN = 0;
+	private long MPRequestsDeletedN = 0;
+	
 	
 	private JFrame frmSemanticGatewayManager;
 	private JTable table;
@@ -76,7 +79,6 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	private JScrollPane scrollPane_1;
 	private JButton btnAdd;
 	private JButton btnRemove;
-	private JButton btnUpdate;
 	private JTabbedPane tabbedPane;
 	private JPanel panel;
 	private JPanel panel_1;
@@ -117,6 +119,11 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	private JLabel labelMNResponsesN;
 	private JLabel labelResourceResponsesN;
 	private JLabel labelMPResponsesN;
+	private JLabel lblMpRequests_1;
+	private JLabel lblMpRequestsDeleted;
+	private JTable table_MpRequestDeleted;
+	private JButton btnClearMpRequestDeleted;
+	private JScrollPane scrollPane_9;
 	
 	/**
 	 * Launch the application.
@@ -161,6 +168,18 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		        
 		        return true;
 		    }
+			
+			@Override
+			public void setValueAt(Object aValue, int row, int column){
+				super.setValueAt(aValue, row, column);
+				mappingManager.updateProtocolMapping(getValueAt(row, 6).toString(),
+						getValueAt(row, 0).toString(),
+						getValueAt(row, 1).toString(),
+						getValueAt(row, 2).toString(),
+						getValueAt(row, 3).toString(),
+						getValueAt(row, 4).toString(),
+						getValueAt(row, 5).toString());
+			}
 		};
 		
 		protocolMappingDataModel.setColumnIdentifiers(protocolMappingHeader);
@@ -178,6 +197,18 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		        
 		        return true;
 		    }
+			
+			@Override
+			public void setValueAt(Object aValue, int row, int column){
+				super.setValueAt(aValue, row, column);
+				mappingManager.updateNetworkMapping(getValueAt(row, 6).toString(),
+						getValueAt(row, 0).toString(),
+						getValueAt(row, 1).toString(),
+						getValueAt(row, 2).toString(),
+						getValueAt(row, 3).toString(),
+						getValueAt(row, 4).toString(),
+						getValueAt(row, 5).toString());
+			}
 		};
 		
 		networkMappingDataModel.setColumnIdentifiers(networkMappingHeader);
@@ -252,6 +283,21 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		};
 		MPResponsesDM.setColumnIdentifiers(MPHeader);
 		
+		MPRequestsDeletedDM = new DefaultTableModel(0, 0){
+
+			/**
+			 * 
+			 */
+			private static final long serialVersionUID = 2300240321642218453L;
+
+			@Override
+			public boolean isCellEditable(int row, int column)
+		    {
+		        return false;
+		    }
+		};
+		MPRequestsDeletedDM.setColumnIdentifiers(MPHeader);
+		
 		MNRequestsDM = new DefaultTableModel(0, 0){
 			/**
 			 * 
@@ -311,7 +357,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_lblProtocolMappings = new GridBagConstraints();
 		gbc_lblProtocolMappings.anchor = GridBagConstraints.NORTH;
 		gbc_lblProtocolMappings.gridwidth = 3;
-		gbc_lblProtocolMappings.insets = new Insets(0, 0, 5, 5);
+		gbc_lblProtocolMappings.insets = new Insets(0, 0, 5, 0);
 		gbc_lblProtocolMappings.gridx = 0;
 		gbc_lblProtocolMappings.gridy = 0;
 		panel.add(lblProtocolMappings, gbc_lblProtocolMappings);
@@ -321,7 +367,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
 		gbc_scrollPane.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane.gridwidth = 3;
-		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane.gridx = 0;
 		gbc_scrollPane.gridy = 1;
 		panel.add(scrollPane, gbc_scrollPane);
@@ -349,7 +395,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_lblNetworkMappings = new GridBagConstraints();
 		gbc_lblNetworkMappings.gridwidth = 3;
 		gbc_lblNetworkMappings.anchor = GridBagConstraints.NORTH;
-		gbc_lblNetworkMappings.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNetworkMappings.insets = new Insets(0, 0, 5, 0);
 		gbc_lblNetworkMappings.gridx = 0;
 		gbc_lblNetworkMappings.gridy = 2;
 		panel.add(lblNetworkMappings, gbc_lblNetworkMappings);
@@ -359,7 +405,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_scrollPane_1 = new GridBagConstraints();
 		gbc_scrollPane_1.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_1.gridwidth = 3;
-		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_1.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPane_1.gridx = 0;
 		gbc_scrollPane_1.gridy = 3;
 		panel.add(scrollPane_1, gbc_scrollPane_1);
@@ -386,46 +432,21 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_btnAdd = new GridBagConstraints();
 		gbc_btnAdd.anchor = GridBagConstraints.EAST;
 		gbc_btnAdd.insets = new Insets(0, 0, 0, 5);
-		gbc_btnAdd.gridx = 0;
+		gbc_btnAdd.gridx = 1;
 		gbc_btnAdd.gridy = 4;
 		panel.add(btnAdd, gbc_btnAdd);
+		btnAdd.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				dlg.setVisible(true);
+			}
+		});
 		
 		btnRemove = new JButton("Remove");
 		GridBagConstraints gbc_btnRemove = new GridBagConstraints();
-		gbc_btnRemove.insets = new Insets(0, 0, 0, 5);
-		gbc_btnRemove.gridx = 1;
+		gbc_btnRemove.gridx = 2;
 		gbc_btnRemove.gridy = 4;
 		panel.add(btnRemove, gbc_btnRemove);
-		
-		btnUpdate = new JButton("Update");
-		btnUpdate.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				int[] rows = table.getSelectedRows();
-				for (int i = 0; i < rows.length; i++) rows[i] = table.convertRowIndexToModel(rows[i]);
-				for(int index: rows) mappingManager.updateProtocolMapping(protocolMappingDataModel.getValueAt(index, 6).toString(),
-						protocolMappingDataModel.getValueAt(index, 0).toString(),
-						protocolMappingDataModel.getValueAt(index, 1).toString(),
-						protocolMappingDataModel.getValueAt(index, 2).toString(),
-						protocolMappingDataModel.getValueAt(index, 3).toString(),
-						protocolMappingDataModel.getValueAt(index, 4).toString(),
-						protocolMappingDataModel.getValueAt(index, 5).toString());
-				
-				rows = table_1.getSelectedRows();
-				for (int i = 0; i < rows.length; i++) rows[i] = table_1.convertRowIndexToModel(rows[i]);
-				for(int index: rows) mappingManager.updateProtocolMapping(networkMappingDataModel.getValueAt(index, 6).toString(),
-						networkMappingDataModel.getValueAt(index, 0).toString(),
-						networkMappingDataModel.getValueAt(index, 1).toString(),
-						networkMappingDataModel.getValueAt(index, 2).toString(),
-						networkMappingDataModel.getValueAt(index, 3).toString(),
-						networkMappingDataModel.getValueAt(index, 4).toString(),
-						networkMappingDataModel.getValueAt(index, 5).toString());
-			}
-		});
-		GridBagConstraints gbc_btnUpdate = new GridBagConstraints();
-		gbc_btnUpdate.gridx = 2;
-		gbc_btnUpdate.gridy = 4;
-		panel.add(btnUpdate, gbc_btnUpdate);
 		btnRemove.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
@@ -438,56 +459,31 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 				for(int index: rows) mappingManager.removeNetworkMapping(networkMappingDataModel.getValueAt(index, 6).toString());
 			}
 		});
-		btnAdd.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				dlg.setVisible(true);
-			}
-		});
 		
 		panel_1 = new JPanel();
 		tabbedPane.addTab("Garbage collector", null, panel_1, null);
 		GridBagLayout gbl_panel_1 = new GridBagLayout();
-		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0};
+		gbl_panel_1.columnWidths = new int[]{0, 0, 0, 0, 0, 0, 0};
 		gbl_panel_1.rowHeights = new int[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, Double.MIN_VALUE};
-		gbl_panel_1.rowWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.columnWeights = new double[]{1.0, 0.0, 0.0, 1.0, 0.0, 0.0, Double.MIN_VALUE};
+		gbl_panel_1.rowWeights = new double[]{0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		panel_1.setLayout(gbl_panel_1);
 		
-		lblNewLabel_1 = new JLabel("RDF Store Size (Triples)");
-		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 12));
-		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
-		gbc_lblNewLabel_1.gridwidth = 2;
-		gbc_lblNewLabel_1.anchor = GridBagConstraints.NORTHEAST;
-		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_1.gridx = 0;
-		gbc_lblNewLabel_1.gridy = 0;
-		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
-		
-		lblTotalTriples = new JLabel("--");
-		lblTotalTriples.setFont(new Font("Dialog", Font.BOLD, 12));
-		GridBagConstraints gbc_lblTotalTriples = new GridBagConstraints();
-		gbc_lblTotalTriples.insets = new Insets(0, 0, 5, 0);
-		gbc_lblTotalTriples.anchor = GridBagConstraints.NORTHWEST;
-		gbc_lblTotalTriples.gridx = 2;
-		gbc_lblTotalTriples.gridy = 0;
-		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);
-		
-		lblMpRequests = new JLabel("MP Requests");
-		GridBagConstraints gbc_lblMpRequests = new GridBagConstraints();
-		gbc_lblMpRequests.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblMpRequests.insets = new Insets(0, 0, 5, 5);
-		gbc_lblMpRequests.gridx = 0;
-		gbc_lblMpRequests.gridy = 2;
-		panel_1.add(lblMpRequests, gbc_lblMpRequests);
+		lblMpRequests_1 = new JLabel("MP Requests");
+		GridBagConstraints gbc_lblMpRequests_1 = new GridBagConstraints();
+		gbc_lblMpRequests_1.gridwidth = 6;
+		gbc_lblMpRequests_1.insets = new Insets(0, 0, 5, 0);
+		gbc_lblMpRequests_1.gridx = 0;
+		gbc_lblMpRequests_1.gridy = 0;
+		panel_1.add(lblMpRequests_1, gbc_lblMpRequests_1);
 		
 		scrollPane_4 = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_4 = new GridBagConstraints();
-		gbc_scrollPane_4.gridwidth = 2;
+		gbc_scrollPane_4.gridwidth = 5;
 		gbc_scrollPane_4.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_4.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane_4.gridx = 0;
-		gbc_scrollPane_4.gridy = 3;
+		gbc_scrollPane_4.gridy = 1;
 		panel_1.add(scrollPane_4, gbc_scrollPane_4);
 		
 		table_MPRequests = new JTable(MPRequestsDM);
@@ -496,17 +492,9 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		labelMPRequestsN = new JLabel("--");
 		GridBagConstraints gbc_labelMPRequestsN = new GridBagConstraints();
 		gbc_labelMPRequestsN.insets = new Insets(0, 0, 5, 0);
-		gbc_labelMPRequestsN.gridx = 2;
-		gbc_labelMPRequestsN.gridy = 3;
+		gbc_labelMPRequestsN.gridx = 5;
+		gbc_labelMPRequestsN.gridy = 1;
 		panel_1.add(labelMPRequestsN, gbc_labelMPRequestsN);
-		
-		lblResourcePendingRequests = new JLabel("Pending Resource Requests");
-		GridBagConstraints gbc_lblResourcePendingRequests = new GridBagConstraints();
-		gbc_lblResourcePendingRequests.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblResourcePendingRequests.insets = new Insets(0, 0, 5, 5);
-		gbc_lblResourcePendingRequests.gridx = 0;
-		gbc_lblResourcePendingRequests.gridy = 4;
-		panel_1.add(lblResourcePendingRequests, gbc_lblResourcePendingRequests);
 		
 		btnClearMPRequests = new JButton("Clear");
 		btnClearMPRequests.addMouseListener(new MouseAdapter() {
@@ -518,17 +506,106 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_btnClearMPRequests = new GridBagConstraints();
 		gbc_btnClearMPRequests.anchor = GridBagConstraints.NORTHWEST;
 		gbc_btnClearMPRequests.insets = new Insets(0, 0, 5, 5);
-		gbc_btnClearMPRequests.gridx = 1;
-		gbc_btnClearMPRequests.gridy = 4;
+		gbc_btnClearMPRequests.gridx = 4;
+		gbc_btnClearMPRequests.gridy = 2;
 		panel_1.add(btnClearMPRequests, gbc_btnClearMPRequests);
+		
+		lblMpRequests = new JLabel("MP Requests");
+		GridBagConstraints gbc_lblMpRequests = new GridBagConstraints();
+		gbc_lblMpRequests.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblMpRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_lblMpRequests.gridx = 0;
+		gbc_lblMpRequests.gridy = 3;
+		panel_1.add(lblMpRequests, gbc_lblMpRequests);
+		
+		lblNewLabel = new JLabel("MP Responses");
+		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel.gridx = 3;
+		gbc_lblNewLabel.gridy = 3;
+		panel_1.add(lblNewLabel, gbc_lblNewLabel);
+		
+		scrollPane_9 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_9 = new GridBagConstraints();
+		gbc_scrollPane_9.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_9.gridwidth = 2;
+		gbc_scrollPane_9.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_9.gridx = 0;
+		gbc_scrollPane_9.gridy = 4;
+		panel_1.add(scrollPane_9, gbc_scrollPane_9);
+		
+		table_MpRequestDeleted = new JTable(MPRequestsDeletedDM);
+		scrollPane_9.setViewportView(table_MpRequestDeleted);
+		
+		lblMpRequestsDeleted = new JLabel("--");
+		GridBagConstraints gbc_lblMpRequestsDeleted = new GridBagConstraints();
+		gbc_lblMpRequestsDeleted.insets = new Insets(0, 0, 5, 5);
+		gbc_lblMpRequestsDeleted.gridx = 2;
+		gbc_lblMpRequestsDeleted.gridy = 4;
+		panel_1.add(lblMpRequestsDeleted, gbc_lblMpRequestsDeleted);
+		
+		scrollPane_3 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_3 = new GridBagConstraints();
+		gbc_scrollPane_3.gridwidth = 2;
+		gbc_scrollPane_3.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_3.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_3.gridx = 3;
+		gbc_scrollPane_3.gridy = 4;
+		panel_1.add(scrollPane_3, gbc_scrollPane_3);
+		
+		table_MPResponses = new JTable(MPResponsesDM);
+		scrollPane_3.setViewportView(table_MPResponses);
+		
+		labelMPResponsesN = new JLabel("--");
+		GridBagConstraints gbc_labelMPResponsesN = new GridBagConstraints();
+		gbc_labelMPResponsesN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelMPResponsesN.gridx = 5;
+		gbc_labelMPResponsesN.gridy = 4;
+		panel_1.add(labelMPResponsesN, gbc_labelMPResponsesN);
+		
+		btnClearMPResponses = new JButton("Clear");
+		btnClearMPResponses.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while(MPResponsesDM.getRowCount() > 0) MPResponsesDM.removeRow(0);	
+			}
+		});
+		
+		btnClearMpRequestDeleted = new JButton("Clear");
+		btnClearMpRequestDeleted.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				while(MPRequestsDeletedDM.getRowCount() > 0) MPRequestsDeletedDM.removeRow(0);		
+			}
+		});
+		GridBagConstraints gbc_btnClearMpRequestDeleted = new GridBagConstraints();
+		gbc_btnClearMpRequestDeleted.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearMpRequestDeleted.gridx = 1;
+		gbc_btnClearMpRequestDeleted.gridy = 5;
+		panel_1.add(btnClearMpRequestDeleted, gbc_btnClearMpRequestDeleted);
+		GridBagConstraints gbc_btnClearMPResponses = new GridBagConstraints();
+		gbc_btnClearMPResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearMPResponses.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearMPResponses.gridx = 4;
+		gbc_btnClearMPResponses.gridy = 5;
+		panel_1.add(btnClearMPResponses, gbc_btnClearMPResponses);
+		
+		lblResourcePendingRequests = new JLabel("Resource Pending Requests");
+		GridBagConstraints gbc_lblResourcePendingRequests = new GridBagConstraints();
+		gbc_lblResourcePendingRequests.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblResourcePendingRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourcePendingRequests.gridx = 0;
+		gbc_lblResourcePendingRequests.gridy = 6;
+		panel_1.add(lblResourcePendingRequests, gbc_lblResourcePendingRequests);
 		
 		scrollPane_2 = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_2 = new GridBagConstraints();
-		gbc_scrollPane_2.gridwidth = 2;
+		gbc_scrollPane_2.gridwidth = 5;
 		gbc_scrollPane_2.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane_2.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_2.gridx = 0;
-		gbc_scrollPane_2.gridy = 5;
+		gbc_scrollPane_2.gridy = 7;
 		panel_1.add(scrollPane_2, gbc_scrollPane_2);
 		
 		table_resourcePendingRequests = new JTable(pendingResourceRequestsDM);
@@ -537,17 +614,9 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		lblPendingResourceRequestsN = new JLabel("--");
 		GridBagConstraints gbc_lblPendingResourceRequestsN = new GridBagConstraints();
 		gbc_lblPendingResourceRequestsN.insets = new Insets(0, 0, 5, 0);
-		gbc_lblPendingResourceRequestsN.gridx = 2;
-		gbc_lblPendingResourceRequestsN.gridy = 5;
+		gbc_lblPendingResourceRequestsN.gridx = 5;
+		gbc_lblPendingResourceRequestsN.gridy = 7;
 		panel_1.add(lblPendingResourceRequestsN, gbc_lblPendingResourceRequestsN);
-		
-		lblResourceRequests = new JLabel("Resource Requests");
-		GridBagConstraints gbc_lblResourceRequests = new GridBagConstraints();
-		gbc_lblResourceRequests.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblResourceRequests.insets = new Insets(0, 0, 5, 5);
-		gbc_lblResourceRequests.gridx = 0;
-		gbc_lblResourceRequests.gridy = 6;
-		panel_1.add(lblResourceRequests, gbc_lblResourceRequests);
 		
 		btnPendingResourceRequests = new JButton("Clear");
 		btnPendingResourceRequests.addMouseListener(new MouseAdapter() {
@@ -559,9 +628,26 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_btnPendingResourceRequests = new GridBagConstraints();
 		gbc_btnPendingResourceRequests.anchor = GridBagConstraints.NORTHWEST;
 		gbc_btnPendingResourceRequests.insets = new Insets(0, 0, 5, 5);
-		gbc_btnPendingResourceRequests.gridx = 1;
-		gbc_btnPendingResourceRequests.gridy = 6;
+		gbc_btnPendingResourceRequests.gridx = 4;
+		gbc_btnPendingResourceRequests.gridy = 8;
 		panel_1.add(btnPendingResourceRequests, gbc_btnPendingResourceRequests);
+		
+		lblResourceRequests = new JLabel("Resource Requests");
+		GridBagConstraints gbc_lblResourceRequests = new GridBagConstraints();
+		gbc_lblResourceRequests.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblResourceRequests.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourceRequests.gridx = 0;
+		gbc_lblResourceRequests.gridy = 9;
+		panel_1.add(lblResourceRequests, gbc_lblResourceRequests);
+		
+		lblResourceResponses = new JLabel("Resource Responses");
+		GridBagConstraints gbc_lblResourceResponses = new GridBagConstraints();
+		gbc_lblResourceResponses.gridwidth = 2;
+		gbc_lblResourceResponses.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblResourceResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_lblResourceResponses.gridx = 3;
+		gbc_lblResourceResponses.gridy = 9;
+		panel_1.add(lblResourceResponses, gbc_lblResourceResponses);
 		
 		scrollPane_8 = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_8 = new GridBagConstraints();
@@ -569,7 +655,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_scrollPane_8.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_8.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane_8.gridx = 0;
-		gbc_scrollPane_8.gridy = 7;
+		gbc_scrollPane_8.gridy = 10;
 		panel_1.add(scrollPane_8, gbc_scrollPane_8);
 		
 		table_resourceRequests = new JTable(resourceRequestsDM);
@@ -577,18 +663,29 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		
 		labelResourceRequests = new JLabel("--");
 		GridBagConstraints gbc_labelResourceRequests = new GridBagConstraints();
-		gbc_labelResourceRequests.insets = new Insets(0, 0, 5, 0);
+		gbc_labelResourceRequests.insets = new Insets(0, 0, 5, 5);
 		gbc_labelResourceRequests.gridx = 2;
-		gbc_labelResourceRequests.gridy = 7;
+		gbc_labelResourceRequests.gridy = 10;
 		panel_1.add(labelResourceRequests, gbc_labelResourceRequests);
 		
-		lblNewLabel_2 = new JLabel("MN Requests");
-		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
-		gbc_lblNewLabel_2.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel_2.gridx = 0;
-		gbc_lblNewLabel_2.gridy = 8;
-		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		scrollPane_7 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_7 = new GridBagConstraints();
+		gbc_scrollPane_7.gridwidth = 2;
+		gbc_scrollPane_7.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_7.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_7.gridx = 3;
+		gbc_scrollPane_7.gridy = 10;
+		panel_1.add(scrollPane_7, gbc_scrollPane_7);
+		
+		table_resourceResponses = new JTable(resourceResponsesDM);
+		scrollPane_7.setViewportView(table_resourceResponses);
+		
+		labelResourceResponsesN = new JLabel("--");
+		GridBagConstraints gbc_labelResourceResponsesN = new GridBagConstraints();
+		gbc_labelResourceResponsesN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelResourceResponsesN.gridx = 5;
+		gbc_labelResourceResponsesN.gridy = 10;
+		panel_1.add(labelResourceResponsesN, gbc_labelResourceResponsesN);
 		
 		btnClearResourceRequests = new JButton("Clear");
 		btnClearResourceRequests.addMouseListener(new MouseAdapter() {
@@ -601,8 +698,38 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_btnClearResourceRequests.anchor = GridBagConstraints.NORTHWEST;
 		gbc_btnClearResourceRequests.insets = new Insets(0, 0, 5, 5);
 		gbc_btnClearResourceRequests.gridx = 1;
-		gbc_btnClearResourceRequests.gridy = 8;
+		gbc_btnClearResourceRequests.gridy = 11;
 		panel_1.add(btnClearResourceRequests, gbc_btnClearResourceRequests);
+		
+		btnClearResourceResponses = new JButton("Clear");
+		btnClearResourceResponses.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				while(resourceResponsesDM.getRowCount() > 0) resourceResponsesDM.removeRow(0);
+			}
+		});
+		GridBagConstraints gbc_btnClearResourceResponses = new GridBagConstraints();
+		gbc_btnClearResourceResponses.anchor = GridBagConstraints.NORTHWEST;
+		gbc_btnClearResourceResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_btnClearResourceResponses.gridx = 4;
+		gbc_btnClearResourceResponses.gridy = 11;
+		panel_1.add(btnClearResourceResponses, gbc_btnClearResourceResponses);
+		
+		lblNewLabel_2 = new JLabel("MN Requests");
+		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_2.gridx = 0;
+		gbc_lblNewLabel_2.gridy = 12;
+		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
+		
+		lblMnResponses = new JLabel("MN Responses");
+		GridBagConstraints gbc_lblMnResponses = new GridBagConstraints();
+		gbc_lblMnResponses.anchor = GridBagConstraints.SOUTHWEST;
+		gbc_lblMnResponses.insets = new Insets(0, 0, 5, 5);
+		gbc_lblMnResponses.gridx = 3;
+		gbc_lblMnResponses.gridy = 12;
+		panel_1.add(lblMnResponses, gbc_lblMnResponses);
 		
 		scrollPane_6 = new JScrollPane();
 		GridBagConstraints gbc_scrollPane_6 = new GridBagConstraints();
@@ -610,7 +737,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_scrollPane_6.fill = GridBagConstraints.BOTH;
 		gbc_scrollPane_6.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPane_6.gridx = 0;
-		gbc_scrollPane_6.gridy = 9;
+		gbc_scrollPane_6.gridy = 13;
 		panel_1.add(scrollPane_6, gbc_scrollPane_6);
 		
 		table_MNRequests = new JTable(MNRequestsDM);
@@ -618,18 +745,29 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		
 		labelMNRequestsN = new JLabel("--");
 		GridBagConstraints gbc_labelMNRequestsN = new GridBagConstraints();
-		gbc_labelMNRequestsN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelMNRequestsN.insets = new Insets(0, 0, 5, 5);
 		gbc_labelMNRequestsN.gridx = 2;
-		gbc_labelMNRequestsN.gridy = 9;
+		gbc_labelMNRequestsN.gridy = 13;
 		panel_1.add(labelMNRequestsN, gbc_labelMNRequestsN);
 		
-		lblMnResponses = new JLabel("MN Responses");
-		GridBagConstraints gbc_lblMnResponses = new GridBagConstraints();
-		gbc_lblMnResponses.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblMnResponses.insets = new Insets(0, 0, 5, 5);
-		gbc_lblMnResponses.gridx = 0;
-		gbc_lblMnResponses.gridy = 10;
-		panel_1.add(lblMnResponses, gbc_lblMnResponses);
+		scrollPane_5 = new JScrollPane();
+		GridBagConstraints gbc_scrollPane_5 = new GridBagConstraints();
+		gbc_scrollPane_5.gridwidth = 2;
+		gbc_scrollPane_5.fill = GridBagConstraints.BOTH;
+		gbc_scrollPane_5.insets = new Insets(0, 0, 5, 5);
+		gbc_scrollPane_5.gridx = 3;
+		gbc_scrollPane_5.gridy = 13;
+		panel_1.add(scrollPane_5, gbc_scrollPane_5);
+		
+		table_MNResponses = new JTable(MNResponsesDM);
+		scrollPane_5.setViewportView(table_MNResponses);
+		
+		labelMNResponsesN = new JLabel("--");
+		GridBagConstraints gbc_labelMNResponsesN = new GridBagConstraints();
+		gbc_labelMNResponsesN.insets = new Insets(0, 0, 5, 0);
+		gbc_labelMNResponsesN.gridx = 5;
+		gbc_labelMNResponsesN.gridy = 13;
+		panel_1.add(labelMNResponsesN, gbc_labelMNResponsesN);
 		
 		btnClearMNRequests = new JButton("Clear");
 		btnClearMNRequests.addMouseListener(new MouseAdapter() {
@@ -642,35 +780,8 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_btnClearMNRequests.anchor = GridBagConstraints.NORTHWEST;
 		gbc_btnClearMNRequests.insets = new Insets(0, 0, 5, 5);
 		gbc_btnClearMNRequests.gridx = 1;
-		gbc_btnClearMNRequests.gridy = 10;
+		gbc_btnClearMNRequests.gridy = 14;
 		panel_1.add(btnClearMNRequests, gbc_btnClearMNRequests);
-		
-		scrollPane_5 = new JScrollPane();
-		GridBagConstraints gbc_scrollPane_5 = new GridBagConstraints();
-		gbc_scrollPane_5.gridwidth = 2;
-		gbc_scrollPane_5.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_5.insets = new Insets(0, 0, 5, 5);
-		gbc_scrollPane_5.gridx = 0;
-		gbc_scrollPane_5.gridy = 11;
-		panel_1.add(scrollPane_5, gbc_scrollPane_5);
-		
-		table_MNResponses = new JTable(MNResponsesDM);
-		scrollPane_5.setViewportView(table_MNResponses);
-		
-		labelMNResponsesN = new JLabel("--");
-		GridBagConstraints gbc_labelMNResponsesN = new GridBagConstraints();
-		gbc_labelMNResponsesN.insets = new Insets(0, 0, 5, 0);
-		gbc_labelMNResponsesN.gridx = 2;
-		gbc_labelMNResponsesN.gridy = 11;
-		panel_1.add(labelMNResponsesN, gbc_labelMNResponsesN);
-		
-		lblResourceResponses = new JLabel("Resource Responses");
-		GridBagConstraints gbc_lblResourceResponses = new GridBagConstraints();
-		gbc_lblResourceResponses.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblResourceResponses.insets = new Insets(0, 0, 5, 5);
-		gbc_lblResourceResponses.gridx = 0;
-		gbc_lblResourceResponses.gridy = 12;
-		panel_1.add(lblResourceResponses, gbc_lblResourceResponses);
 		
 		btnClearMNResponses = new JButton("Clear");
 		btnClearMNResponses.addMouseListener(new MouseAdapter() {
@@ -682,83 +793,27 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		GridBagConstraints gbc_btnClearMNResponses = new GridBagConstraints();
 		gbc_btnClearMNResponses.insets = new Insets(0, 0, 5, 5);
 		gbc_btnClearMNResponses.anchor = GridBagConstraints.NORTHWEST;
-		gbc_btnClearMNResponses.gridx = 1;
-		gbc_btnClearMNResponses.gridy = 12;
+		gbc_btnClearMNResponses.gridx = 4;
+		gbc_btnClearMNResponses.gridy = 14;
 		panel_1.add(btnClearMNResponses, gbc_btnClearMNResponses);
 		
-		scrollPane_7 = new JScrollPane();
-		GridBagConstraints gbc_scrollPane_7 = new GridBagConstraints();
-		gbc_scrollPane_7.gridwidth = 2;
-		gbc_scrollPane_7.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_7.insets = new Insets(0, 0, 5, 5);
-		gbc_scrollPane_7.gridx = 0;
-		gbc_scrollPane_7.gridy = 13;
-		panel_1.add(scrollPane_7, gbc_scrollPane_7);
+		lblNewLabel_1 = new JLabel("RDF Store Size (Triples)");
+		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 12));
+		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.anchor = GridBagConstraints.NORTH;
+		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNewLabel_1.gridx = 0;
+		gbc_lblNewLabel_1.gridy = 15;
+		panel_1.add(lblNewLabel_1, gbc_lblNewLabel_1);
 		
-		table_resourceResponses = new JTable(resourceResponsesDM);
-		scrollPane_7.setViewportView(table_resourceResponses);
-		
-		labelResourceResponsesN = new JLabel("--");
-		GridBagConstraints gbc_labelResourceResponsesN = new GridBagConstraints();
-		gbc_labelResourceResponsesN.insets = new Insets(0, 0, 5, 0);
-		gbc_labelResourceResponsesN.gridx = 2;
-		gbc_labelResourceResponsesN.gridy = 13;
-		panel_1.add(labelResourceResponsesN, gbc_labelResourceResponsesN);
-		
-		lblNewLabel = new JLabel("MP Responses");
-		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
-		gbc_lblNewLabel.anchor = GridBagConstraints.SOUTHWEST;
-		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
-		gbc_lblNewLabel.gridx = 0;
-		gbc_lblNewLabel.gridy = 14;
-		panel_1.add(lblNewLabel, gbc_lblNewLabel);
-		
-		btnClearResourceResponses = new JButton("Clear");
-		btnClearResourceResponses.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				while(resourceResponsesDM.getRowCount() > 0) resourceResponsesDM.removeRow(0);
-			}
-		});
-		GridBagConstraints gbc_btnClearResourceResponses = new GridBagConstraints();
-		gbc_btnClearResourceResponses.anchor = GridBagConstraints.NORTHWEST;
-		gbc_btnClearResourceResponses.insets = new Insets(0, 0, 5, 5);
-		gbc_btnClearResourceResponses.gridx = 1;
-		gbc_btnClearResourceResponses.gridy = 14;
-		panel_1.add(btnClearResourceResponses, gbc_btnClearResourceResponses);
-		
-		scrollPane_3 = new JScrollPane();
-		GridBagConstraints gbc_scrollPane_3 = new GridBagConstraints();
-		gbc_scrollPane_3.gridwidth = 2;
-		gbc_scrollPane_3.insets = new Insets(0, 0, 5, 5);
-		gbc_scrollPane_3.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane_3.gridx = 0;
-		gbc_scrollPane_3.gridy = 15;
-		panel_1.add(scrollPane_3, gbc_scrollPane_3);
-		
-		table_MPResponses = new JTable(MPResponsesDM);
-		scrollPane_3.setViewportView(table_MPResponses);
-		
-		btnClearMPResponses = new JButton("Clear");
-		btnClearMPResponses.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				while(MPResponsesDM.getRowCount() > 0) MPResponsesDM.removeRow(0);	
-			}
-		});
-		
-		labelMPResponsesN = new JLabel("--");
-		GridBagConstraints gbc_labelMPResponsesN = new GridBagConstraints();
-		gbc_labelMPResponsesN.insets = new Insets(0, 0, 5, 0);
-		gbc_labelMPResponsesN.gridx = 2;
-		gbc_labelMPResponsesN.gridy = 15;
-		panel_1.add(labelMPResponsesN, gbc_labelMPResponsesN);
-		GridBagConstraints gbc_btnClearMPResponses = new GridBagConstraints();
-		gbc_btnClearMPResponses.insets = new Insets(0, 0, 0, 5);
-		gbc_btnClearMPResponses.anchor = GridBagConstraints.NORTHWEST;
-		gbc_btnClearMPResponses.gridx = 1;
-		gbc_btnClearMPResponses.gridy = 16;
-		panel_1.add(btnClearMPResponses, gbc_btnClearMPResponses);
+		lblTotalTriples = new JLabel("--");
+		lblTotalTriples.setFont(new Font("Dialog", Font.BOLD, 12));
+		GridBagConstraints gbc_lblTotalTriples = new GridBagConstraints();
+		gbc_lblTotalTriples.insets = new Insets(0, 0, 0, 5);
+		gbc_lblTotalTriples.anchor = GridBagConstraints.NORTH;
+		gbc_lblTotalTriples.gridx = 0;
+		gbc_lblTotalTriples.gridy = 16;
+		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);
 		
 		Logging.setVerbosityLevel(VERBOSITY.DEBUG);
 		
@@ -840,7 +895,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	}
 
 	@Override
-	public void newResourcePendingRequest(String resource, String action, String value) {
+	public void removedResourcePendingRequest(String resource, String action, String value) {
 		Vector<Object> data = new Vector<Object>();
 		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
         data.add(resource);
@@ -852,7 +907,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	}
 
 	@Override
-	public void newResourceRequest(String resource, String action, String value) {
+	public void removedResourceRequest(String resource, String action, String value) {
 		Vector<Object> data = new Vector<Object>();
 		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
 		data.add(resource);
@@ -864,7 +919,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	}
 
 	@Override
-	public void newResourceResponse(String resource, String action, String value) {
+	public void removedResourceResponse(String resource, String action, String value) {
 		Vector<Object> data = new Vector<Object>();
 		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
 		data.add(resource);
@@ -876,7 +931,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	}
 
 	@Override
-	public void newMPResponse(String protocol, String value) {
+	public void removedMPResponse(String protocol, String value) {
 		Vector<Object> data = new Vector<Object>();
 		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
 		data.add(protocol);
@@ -898,7 +953,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	}
 
 	@Override
-	public void newMNResponse(String network, String value) {
+	public void removedMNResponse(String network, String value) {
 		Vector<Object> data = new Vector<Object>();
 		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
 		data.add(network);
@@ -909,7 +964,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	}
 
 	@Override
-	public void newMNRequest(String network, String value) {
+	public void removedMNRequest(String network, String value) {
 		Vector<Object> data = new Vector<Object>();
 		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
 		data.add(network);
@@ -922,6 +977,18 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	@Override
 	public void totalTriples(long triples) {
 		lblTotalTriples.setText(String.format("%d", triples));
+		
+	}
+
+	@Override
+	public void removedMPRequest(String protocol, String value) {
+		Vector<Object> data = new Vector<Object>();
+		data.add(new java.sql.Timestamp(new java.util.Date().getTime()));
+		data.add(protocol);
+        data.add(value);
+        MPRequestsDeletedDM.addRow(data);
+        
+        lblMpRequestsDeleted.setText(String.format("%d",++MPRequestsDeletedN));
 		
 	}
 }

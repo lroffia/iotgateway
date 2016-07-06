@@ -63,7 +63,7 @@ public class SPARQL {
 			Logging.log(VERBOSITY.ERROR, tag, "SUBSCRIBE ID <" + id + "> NOT FOUND");
 			return null;
 		}
-		return subscribeMap.get(id).replace("\t", "").trim();
+		return subscribeMap.get(id);
 	}
 	
 	public static String update(String id) {
@@ -71,7 +71,7 @@ public class SPARQL {
 			Logging.log(VERBOSITY.ERROR, tag, "UPDATE ID <" + id + "> NOT FOUND");
 			return null;
 		}
-		return updateMap.get(id).replace("\t", "").trim();
+		return updateMap.get(id);
 	}
 	
 	public static String insert(String id) {
@@ -79,7 +79,7 @@ public class SPARQL {
 			Logging.log(VERBOSITY.ERROR, tag, "INSERT ID <" + id + "> NOT FOUND");
 			return null;
 		}
-		return insertMap.get(id).replace("\t", "").trim();
+		return insertMap.get(id);
 	}
 	
 	public static String delete(String id) {
@@ -87,7 +87,7 @@ public class SPARQL {
 			Logging.log(VERBOSITY.ERROR, tag, "DELETE ID <" + id + "> NOT FOUND");
 			return null;
 		}
-		return deleteMap.get(id).replace("\n", "").replace("\r", "").replace("\t", "").trim();
+		return deleteMap.get(id);
 	}
 	
 	public static void loadApplicationProfile(String fileName){

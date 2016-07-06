@@ -86,7 +86,7 @@ public class MNDispatcher {
 				
 				if (mnRequestList.isEmpty()) {
 					bindings = new Bindings();
-					ResourceAction response = new ResourceAction(resource, action, "MN-MAPPING NOT FOUND FOR "+resourceAction.toString());
+					ResourceAction response = new ResourceAction(resource, action, "MN-MAPPING NOT FOUND");// FOR "+resourceAction.toString());
 					bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));
 					bindings.addBinding("?resource", new BindingURIValue(response.getResourceURI()));
 					bindings.addBinding("?action", new BindingURIValue(response.getActionURI()));
@@ -157,7 +157,7 @@ public class MNDispatcher {
 				//Mapping MN Response to Resource Response
 				ResourceAction resourceAction = mnMap.mnResponse2ResourceAction(response);
 				
-				if (resourceAction == null) resourceAction = new ResourceAction("iot:NULL","iot:NULL","MN-MAPPING NOT FOUND FOR "+response.toString());
+				if (resourceAction == null) resourceAction = new ResourceAction("iot:NULL","iot:NULL","MN-MAPPING NOT FOUND");// FOR "+response.toString());
 				
 				bindings = new Bindings();
 				bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));						

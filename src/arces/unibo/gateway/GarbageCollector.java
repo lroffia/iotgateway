@@ -31,13 +31,16 @@ class GarbageCollector {
 	public void setListener(GarbageCollectorListener listener) {this.listener = listener;}
 	
 	public interface GarbageCollectorListener {
-		public void newResourcePendingRequest(String resource,String action, String value);
-		public void newResourceRequest(String resource,String action, String value);
-		public void newResourceResponse(String resource,String action, String value);
-		public void newMPResponse(String protocol, String value);
 		public void newMPRequest(String protocol, String value);
-		public void newMNResponse(String network, String value);
-		public void newMNRequest(String network, String value);
+		
+		public void removedResourcePendingRequest(String resource,String action, String value);
+		public void removedResourceRequest(String resource,String action, String value);
+		public void removedResourceResponse(String resource,String action, String value);
+		public void removedMPResponse(String protocol, String value);
+		public void removedMNResponse(String network, String value);
+		public void removedMNRequest(String network, String value);
+		public void removedMPRequest(String protocol, String value);
+		
 		public void totalTriples(long triples);
 	}
 	
@@ -63,7 +66,12 @@ class GarbageCollector {
 
 		@Override
 		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+			if(!monitor || listener == null) return;
 			
+			for (Bindings garbage : bindingsResults)
+				listener.removedMPRequest(
+						garbage.getBindingValue("?protocol").getValue(),
+						garbage.getBindingValue("?value").getValue());		
 		}
 
 		@Override
@@ -109,7 +117,7 @@ class GarbageCollector {
 	
 	class ResourcePendingRequestRemover extends Aggregator {
 		public ResourcePendingRequestRemover() {
-			super(SPARQL.subscribe("RESOURCE_PENDING_REQUEST"), SPARQL.delete("RESOURCE_PENDING_REQUEST"));
+			super(SPARQL.subscribe("RESOURCE_PENDING_REQUEST"), SPARQL.delete("REQUEST"));
 		}
 	
 		@Override
@@ -130,7 +138,7 @@ class GarbageCollector {
 			if (!monitor || listener == null)  return;
 			
 			for (Bindings garbage : bindingsResults) 
-				listener.newResourcePendingRequest(
+				listener.removedResourcePendingRequest(
 						garbage.getBindingValue("?resource").getValue(), 
 						garbage.getBindingValue("?action").getValue(), 
 						garbage.getBindingValue("?value").getValue());	
@@ -154,7 +162,7 @@ class GarbageCollector {
 	
 	class MPResponseRemover extends Aggregator {
 		public MPResponseRemover() {
-			super(SPARQL.subscribe("MP_RESPONSE"),SPARQL.delete("MP_RESPONSE_AND_REQUEST"));
+			super(SPARQL.subscribe("MP_RESPONSE"),SPARQL.delete("REQUEST_RESPONSE"));
 		}
 	
 		@Override
@@ -176,7 +184,7 @@ class GarbageCollector {
 			if (!monitor || listener == null) return;
 			
 			for (Bindings garbage : bindingsResults)	
-				listener.newMPResponse(
+				listener.removedMPResponse(
 						garbage.getBindingValue("?protocol").getValue(), 
 						garbage.getBindingValue("?value").getValue());	
 		}
@@ -187,7 +195,7 @@ class GarbageCollector {
 	
 	class ResourceResponseRemover extends Aggregator {		
 		public ResourceResponseRemover() {
-			super(SPARQL.subscribe("RESOURCE_RESPONSE"), SPARQL.delete("RESOURCE_RESPONSE"));
+			super(SPARQL.subscribe("RESOURCE_RESPONSE"), SPARQL.delete("RESPONSE"));
 		}
 	
 		@Override
@@ -211,7 +219,7 @@ class GarbageCollector {
 			if (!monitor || listener == null) return;
 			
 			for (Bindings garbage : bindingsResults)
-				listener.newResourceResponse(
+				listener.removedResourceResponse(
 						garbage.getBindingValue("?resource").getValue(), 
 						garbage.getBindingValue("?action").getValue(), 
 						garbage.getBindingValue("?value").getValue());
@@ -225,7 +233,7 @@ class GarbageCollector {
 	
 	class ResourceRequestRemover extends Aggregator {		
 		public ResourceRequestRemover() {
-			super(SPARQL.subscribe("RESOURCE_REQUEST"), SPARQL.delete("RESOURCE_REQUEST"));
+			super(SPARQL.subscribe("RESOURCE_REQUEST"), SPARQL.delete("REQUEST"));
 		}
 	
 		@Override
@@ -248,7 +256,7 @@ class GarbageCollector {
 			if(!monitor || listener == null) return;
 			
 			for (Bindings garbage : bindingsResults)
-				listener.newResourceRequest(
+				listener.removedResourceRequest(
 						garbage.getBindingValue("?resource").getValue(), 
 						garbage.getBindingValue("?action").getValue(), 
 						garbage.getBindingValue("?value").getValue());	
@@ -262,7 +270,7 @@ class GarbageCollector {
 	
 	class MNResponseRemover extends Aggregator {		
 		public MNResponseRemover() {
-			super(SPARQL.subscribe("MN_RESPONSE"), SPARQL.delete("MN_RESPONSE"));
+			super(SPARQL.subscribe("MN_RESPONSE"), SPARQL.delete("RESPONSE"));
 		}
 	
 		@Override
@@ -285,7 +293,7 @@ class GarbageCollector {
 			if (!monitor || listener == null) return;
 			
 			for (Bindings garbage : bindingsResults)
-				listener.newMNResponse(
+				listener.removedMNResponse(
 						garbage.getBindingValue("?network").getValue(), 
 						garbage.getBindingValue("?value").getValue());
 		}
@@ -298,7 +306,7 @@ class GarbageCollector {
 	
 	class MNRequestRemover extends Aggregator {		
 		public MNRequestRemover() {
-			super(SPARQL.subscribe("MN_REQUEST"), SPARQL.delete("MN_REQUEST"));
+			super(SPARQL.subscribe("MN_REQUEST"), SPARQL.delete("REQUEST"));
 		}
 	
 		@Override
@@ -321,7 +329,7 @@ class GarbageCollector {
 			if (!monitor || listener == null) return;
 				
 			for (Bindings garbage : bindingsResults)
-				listener.newMNRequest(
+				listener.removedMNRequest(
 						garbage.getBindingValue("?network").getValue(), 
 						garbage.getBindingValue("?value").getValue());	
 		}
@@ -418,6 +426,7 @@ class GarbageCollector {
 	}
 	
 	public boolean stop(){
+		if (resourcePendingRequest == null) return false;
 		boolean ret = resourcePendingRequest.unsubscribe();	
 		ret = ret && mpResponse.unsubscribe();
 		ret = ret && resourceResponse.unsubscribe();

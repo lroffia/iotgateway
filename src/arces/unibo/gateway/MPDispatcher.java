@@ -148,7 +148,8 @@ public class MPDispatcher {
 	class MPRequestDispatcher extends Aggregator {
 		private static final String tag = "MP REQUEST DISPATCHER";
 		
-		public MPRequestDispatcher(){ super(SPARQL.subscribe("MP_REQUEST"),SPARQL.insert("RESOURCE_PENDING_REQUEST"));}
+		//public MPRequestDispatcher(){ super(SPARQL.subscribe("MP_REQUEST"),SPARQL.insert("RESOURCE_PENDING_REQUEST"));}
+		public MPRequestDispatcher(){ super(SPARQL.subscribe("MP_REQUEST"),SPARQL.insert("RESOURCE_REQUEST"));}
 		
 		public String subscribe() {return super.subscribe(null);}
 		
@@ -245,7 +246,7 @@ public class MPDispatcher {
 				ArrayList<MPRequest> requests = getRequests(resource);
 				
 				if (requests == null) {
-					Logging.log(VERBOSITY.WARNING,tag,"NO MP-REQUEST FOUND FOR "+resource.toString());
+					Logging.log(VERBOSITY.WARNING,tag,"MP-REQUEST NOT FOUND");// FOR "+resource.toString());
 					return;
 				}
 				

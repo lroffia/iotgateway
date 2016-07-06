@@ -1,20 +1,16 @@
 package arces.unibo.SEPA;
 
-import java.io.IOException;
 import java.util.Vector;
-
-import org.jdom2.JDOMException;
-
-import arces.unibo.KPI.SIBResponse;
-import arces.unibo.KPI.SSAP_sparql_response;
-import arces.unibo.KPI.iKPIC_subscribeHandler2;
 
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
+import sofia_kp.SIBResponse;
+import sofia_kp.SSAP_sparql_response;
+import sofia_kp.iKPIC_subscribeHandler2;
 
 public class GenericClient extends Client {
 	private String subID ="";
-	private NotificationHandler mHandler = null;
+	private iKPIC_subscribeHandler2 mHandler = null;
 	private Notification listener = null;
 	
 	public interface Notification {
@@ -33,14 +29,9 @@ public class GenericClient extends Client {
 		
 		String sparql = prefixes() + super.replaceBindings(SPARQL_UPDATE,forced).replace("\n", "").replace("\r", "");
 		
-		try 
-		{
-			ret = kp.update_sparql(sparql);
-		} 
-		catch (JDOMException | IOException e) {
-			Logging.log(VERBOSITY.FATAL,"SEPA","Update FAILED "+sparql);
-			return false;
-		}
+
+		ret = kp.update_sparql(sparql);
+
 		
 		if (ret == null) return false;
 		 
@@ -53,11 +44,10 @@ public class GenericClient extends Client {
 		String sparql = prefixes() + super.replaceBindings(SPARQL_QUERY,forced).replace("\n", "").replace("\r", "");
 		
 		SIBResponse ret;
-		try 
-		{
-			ret = kp.querySPARQL(sparql);
-		} 
-		catch (JDOMException | IOException e) {
+
+		ret = kp.querySPARQL(sparql);
+		
+		if (!ret.isConfirmed()) {
 			Logging.log(VERBOSITY.FATAL,"SEPA","Query FAILED "+sparql);
 			return null;
 		}
@@ -76,17 +66,12 @@ public class GenericClient extends Client {
 		
 		Logging.log(VERBOSITY.DEBUG,"SEPA","Subscribe "+sparql);
 		
-		try 
-		{
-			ret = kp.subscribeSPARQL(sparql, mHandler);
-		} 
-		catch (JDOMException | IOException e) 
-		{
-			e.printStackTrace();
-			return null;
-		}
+
+		ret = kp.subscribeSPARQL(sparql, mHandler);
+
 		
-		if (ret == null) return null;		
+		if (ret == null) return null;
+		if (!ret.isConfirmed()) return null;
 		
 		subID = ret.subscription_id;
 		

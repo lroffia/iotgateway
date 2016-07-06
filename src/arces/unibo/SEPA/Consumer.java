@@ -1,26 +1,24 @@
 package arces.unibo.SEPA;
 
-import java.io.IOException;
 import java.util.Vector;
 
-import org.jdom2.JDOMException;
-
-import arces.unibo.KPI.SSAP_sparql_response;
-import arces.unibo.KPI.iKPIC_subscribeHandler2;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
+import sofia_kp.SSAP_sparql_response;
+import sofia_kp.iKPIC_subscribeHandler2;
 
 public abstract class Consumer extends Client implements IConsumer {
 	private String SPARQL_SUBSCRIBE = "";
 	private String subID ="";
-	private NotificationHandler mHandler = null;
+	private iKPIC_subscribeHandler2 mHandler = null;
 
 	private String tag = "SEPA CONSUMER";
 	
 	public Consumer(String subscribeQuery,String SIB_IP,int SIB_PORT,String SIB_NAME){
 		super(SIB_IP,SIB_PORT,SIB_NAME);
-		SPARQL_SUBSCRIBE = subscribeQuery;	
+		SPARQL_SUBSCRIBE = subscribeQuery.replaceAll("\n", "").replaceAll("\r", "").replaceAll("\t", "").trim();;
 	}
+	
 	public Consumer(String subscribeQuery) {
 		this(subscribeQuery,defaultIP, defaultPort, defaultName);
 	}
@@ -30,20 +28,12 @@ public abstract class Consumer extends Client implements IConsumer {
 		
 		mHandler = new NotificationHandler();
 		
-		String sparql = prefixes() + replaceBindings(SPARQL_SUBSCRIBE,forcedBindings).replace("\n", "").replace("\r", "");
+		String sparql = prefixes() + replaceBindings(SPARQL_SUBSCRIBE,forcedBindings);
 		
-		Logging.log(VERBOSITY.DEBUG,tag,"SUBSCRIBE "+sparql);
+		Logging.log(VERBOSITY.DEBUG,tag,"<SUBSCRIBE> ==> "+sparql);
 		
-		try 
-		{
-			ret = kp.subscribeSPARQL(sparql, mHandler);
-		} 
-		catch (JDOMException | IOException e) 
-		{
-			e.printStackTrace();
-			return null;
-		}
-		
+		ret = kp.subscribeSPARQL(sparql, mHandler);
+
 		if (ret == null) return null;		
 		subID = ret.subscription_id;
 		if(!ret.isConfirmed()) return null;
@@ -71,7 +61,7 @@ public abstract class Consumer extends Client implements IConsumer {
 		public void kpic_RDFEventHandler(Vector<Vector<String>> newTriples, Vector<Vector<String>> oldTriples, String indSequence, String subID ){}
 		
 		public void kpic_SPARQLEventHandler(SSAP_sparql_response newResults, SSAP_sparql_response oldResults, String indSequence, String subID ){				
-			Logging.log(VERBOSITY.DEBUG, tag, "EVENT " + subID + " n. "+ indSequence);
+			Logging.log(VERBOSITY.DEBUG, tag, "NOTIFY " + subID + " n. "+ indSequence);
 			
 			BindingsResults results = new BindingsResults(newResults,oldResults,URI2PrefixMap);
 			

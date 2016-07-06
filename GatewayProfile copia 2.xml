@@ -5,40 +5,28 @@
   		<namespace ID="rdfs"><![CDATA[http://www.w3.org/2000/01/rdf-schema#]]></namespace>
   	</namespaces>
   	<deletes>
-  		<delete ID="MP_MAPPING">
-  			<forcedBindings>
-    			<binding name="?mapping" value="" type="URI"/>
-    		</forcedBindings>
+  		<delete ID="MAPPING" ><![CDATA[DELETE { ?mapping ?p ?o } WHERE { ?mapping ?p ?o }]]></delete>
+  		<delete ID="REQUEST" ><![CDATA[DELETE { ?request ?p ?o } WHERE { ?request ?p ?o }]]></delete>
+  		<delete ID="RESPONSE" ><![CDATA[DELETE { ?response ?p ?o } WHERE { ?reponse ?p ?o }]]></delete>
+  		<delete ID="RESOURCE" ><![CDATA[DELETE { ?resource ?p ?o } WHERE { ?resource ?p ?o }]]></delete>
+  		
+  		<delete ID="MP_MAPPING"><forcedBindings><binding name="?mapping" value="" type="URI"/></forcedBindings>
     		<![CDATA[DELETE { ?mapping ?p ?o } WHERE { ?mapping rdf:type iot:MP-Mapping . ?mapping ?p ?o }]]></delete>
-    	<delete ID="MN_MAPPING">
-    		<forcedBindings>
-    			<binding name="?mapping" value="" type="URI"/>
-    		</forcedBindings>
+    	<delete ID="MN_MAPPING"><forcedBindings><binding name="?mapping" value="" type="URI"/></forcedBindings>
     		<![CDATA[DELETE { ?mapping ?p ?o } WHERE { ?mapping rdf:type iot:MN-Mapping . ?mapping ?p ?o }]]></delete>
-    	<delete ID="RESOURCE_PENDING_REQUEST">
-    		<forcedBindings>
-    			<binding name="?request" value="" type="URI"/>
-    		</forcedBindings>
+    	<delete ID="RESOURCE_PENDING_REQUEST"><forcedBindings><binding name="?request" value="" type="URI"/></forcedBindings>
     		<![CDATA[DELETE { ?request ?p ?o } WHERE { ?request rdf:type iot:Resource-Pending-Request . ?request ?p ?o }]]></delete>
     	<delete ID="MP_RESPONSE_AND_REQUEST">
     		<forcedBindings>
     			<binding name="?request" value="" type="URI"/>
+    			<binding name="?response" value="" type="URI"/>
     		</forcedBindings>
-	    	<![CDATA[
-	    	DELETE { ?request iot:hasMPResponse ?response . 
-	      		?response rdf:type iot:MP-Response . 
-	      		?response iot:hasMPResponseString ?responseValue . 
-	      		?request rdf:type iot:MP-Request . 
-	      		?request iot:hasProtocol ?protocol . 
-	      		?request iot:hasMPRequestString ?requestValue } 
-	    	WHERE { ?request iot:hasMPResponse ?response . 
-	      		?response rdf:type iot:MP-Response . 
-	      		?response iot:hasMPResponseString ?responseValue . 
-	      		?request rdf:type iot:MP-Request . 
-	      		?request iot:hasProtocol ?protocol . 
-	      		?request iot:hasMPRequestString ?requestValue
-	      		 }]]>
-    	</delete>
+	    	<![CDATA[DELETE { 
+	    	?response ?p ?o .
+	    	?request ?p1 ?o1 } 
+	    	WHERE { 
+	    	?response ?p ?o .
+	    	?request ?p1 ?o1 }]]></delete>
     	<delete ID="RESOURCE_RESPONSE">
     		<forcedBindings>
     			<binding name="?response" value="" type="URI"/>
@@ -71,30 +59,21 @@
     		<forcedBindings>
     			<binding name="?resource" value="" type="URI"/>
     		</forcedBindings>
-      		<![CDATA[INSERT DATA { ?resource rdf:type iot:Resource }]]>
-    	</insert>
+      		<![CDATA[INSERT DATA { ?resource rdf:type iot:Resource }]]></insert>
     	<insert ID="MP_REQUEST">
     		<forcedBindings>
     			<binding name="?protocol" value="" type="URI"/>
     			<binding name="?request" value="" type="URI"/>
     			<binding name="?value" value="" type="literal"/>
     		</forcedBindings>
-      		<![CDATA[INSERT DATA { 
-      		?request rdf:type iot:MP-Request . 
-      		?request iot:hasProtocol ?protocol . 
-      		?request iot:hasMPRequestString ?value }]]>
-    	</insert>
+      		<![CDATA[INSERT DATA { ?request rdf:type iot:MP-Request . ?request iot:hasProtocol ?protocol . ?request iot:hasMPRequestString ?value }]]></insert>
     	<insert ID="MN_RESPONSE">
     		<forcedBindings>
     			<binding name="?network" value="" type="URI"/>
     			<binding name="?response" value="" type="URI"/>
     			<binding name="?value" value="" type="literal"/>
     		</forcedBindings>
-      		<![CDATA[INSERT DATA { 
-      		?response rdf:type iot:MN-Response . 
-      		?response iot:hasNetwork ?network . 
-      		?response iot:hasMNResponseString ?value }]]>
-    	</insert>
+      		<![CDATA[INSERT DATA { ?response rdf:type iot:MN-Response . ?response iot:hasNetwork ?network . ?response iot:hasMNResponseString ?value }]]></insert>
     	<insert ID="MN_MAPPING">
 			<forcedBindings>
     			<binding name="?mapping" value="" type="URI"/>
@@ -112,8 +91,7 @@
       		?mapping iot:hasAction ?action . 
       		?mapping iot:hasValue ?value . 
       		?mapping iot:hasMNRequestPattern ?requestPattern . 
-      		?mapping iot:hasMNResponsePattern ?responsePattern }]]>
-    	</insert>	
+      		?mapping iot:hasMNResponsePattern ?responsePattern }]]></insert>	
     	<insert ID="MP_MAPPING">
     		<forcedBindings>
     			<binding name="?mapping" value="" type="URI"/>
@@ -131,8 +109,7 @@
      		 ?mapping iot:hasAction ?action . 
      		 ?mapping iot:hasValue ?value . 
      		 ?mapping iot:hasMPRequestPattern ?requestPattern . 
-     		 ?mapping iot:hasMPResponsePattern ?responsePattern }]]>
-    	</insert>	
+     		 ?mapping iot:hasMPResponsePattern ?responsePattern }]]></insert>	
     	<insert ID="RESOURCE_PENDING_REQUEST">
     		<forcedBindings>
     			<binding name="?request" value="" type="URI"/>
@@ -144,8 +121,7 @@
       		?request rdf:type iot:Resource-Pending-Request . 
       		?request iot:hasValue ?value . 
       		?request iot:hasAction ?action . 
-      		?request iot:hasResource ?resource }]]>
-    	</insert>
+      		?request iot:hasResource ?resource }]]></insert>
     	<insert ID="MP_RESPONSE">
     		<forcedBindings>
     			<binding name="?request" value="" type="URI"/>
@@ -153,10 +129,9 @@
     			<binding name="?value" value="" type="literal"/>
     		</forcedBindings>
       		<![CDATA[INSERT DATA { 
-      		?request iot:hasMPResponse ?response . 
+      		?response iot:generatedBy ?request . 
       		?response rdf:type iot:MP-Response . 
-      		?response iot:hasMPResponseString ?value }]]>
-    	</insert>	
+      		?response iot:hasMPResponseString ?value }]]></insert>	
         <insert ID="MN_REQUEST">
         	<forcedBindings>
     			<binding name="?request" value="" type="URI"/>
@@ -166,8 +141,7 @@
       		<![CDATA[INSERT DATA { 
       		?request rdf:type iot:MN-Request . 
       		?request iot:hasNetwork ?network . 
-      		?request iot:hasMNRequestString ?value }]]>
-    	</insert>
+      		?request iot:hasMNRequestString ?value }]]></insert>
         <insert ID="RESOURCE_RESPONSE">
         	<forcedBindings>
     			<binding name="?response" value="" type="URI"/>
@@ -179,8 +153,7 @@
       		?response rdf:type iot:Resource-Response . 
       		?response iot:hasAction ?action . 
       		?response iot:hasResource ?resource . 
-      		?response iot:hasValue ?value }]]>
-   		 </insert>
+      		?response iot:hasValue ?value }]]></insert>
     	<insert ID="RESOURCE_REQUEST">
 	    	<forcedBindings>
 	    		<binding name="?action" value="" type="URI"/>
@@ -192,14 +165,13 @@
       		?request rdf:type iot:Resource-Request . 
       		?request iot:hasValue ?value . 
       		?request iot:hasAction ?action . 
-      		?request iot:hasResource ?resource }]]>
-    	</insert>
+      		?request iot:hasResource ?resource }]]></insert>
     </inserts>
   	<subscribes>
     	<subscribe ID="MP_RESPONSE">
-      		<![CDATA[SELECT ?request ?value ?protocol WHERE { 
+      		<![CDATA[SELECT ?response ?request ?value ?protocol WHERE { 
       		?response rdf:type iot:MP-Response . 
-      		?request iot:hasMPResponse ?response . 
+      		?response iot:generatedBy ?request . 
       		?response iot:hasMPResponseString ?value . 
       		?request iot:hasProtocol ?protocol }]]>
     	</subscribe>
@@ -261,7 +233,8 @@
 	      ?request rdf:type iot:Resource-Pending-Request . 
 	      ?request iot:hasValue ?value . 
 	      ?request iot:hasAction ?action . 
-	      ?request iot:hasResource ?resource }]]>
+	      ?request iot:hasResource ?resource .
+	      OPTIONAL { ?resource rdf:type iot:Resource . ?resource iot:hasValue ?oldValue }}]]>
 	    </subscribe>
 	    <subscribe ID="MN_RESPONSE">
 	    <![CDATA[SELECT ?response ?network ?value WHERE { 
@@ -276,9 +249,9 @@
    			<binding name="?value" value="" type="literal"/>
     	</forcedBindings>
   		<update ID="RESOURCE">
-  		<![CDATA[]]> 
+  		<![CDATA[
   		DELETE DATA { ?resource iot:hasValue ?oldValue }
   		INSERT DATA { ?resource iot:hasValue ?value }
-  		WHERE { OPTIONAL { ?resource iot:hasValue ?oldValue } . ?resource rdf:type iot:Resource }</update>
+  		WHERE { ?resource rdf:type iot:Resource . OPTIONAL { ?resource iot:hasValue ?oldValue } }]]> </update>
   	</updates>
 </ApplicationProfile>

@@ -30,6 +30,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		private MappingCreator creator;
 		private MappingRemover remover;
 		private MappingListener listener;
+		private MappingUpdater updater;
 		private MPMappingEventListener event = null;
 		
 		public void setEventListener(MPMappingEventListener e) {
@@ -92,8 +93,25 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			}
 		}
 		
+		private class MappingUpdater extends Producer {			
+			public MappingUpdater() {super(SPARQL.update("MP_MAPPING"));}
+			
+			public boolean updateMapping(String mapping, String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
+				Bindings bindings = new Bindings();
+				bindings.addBinding("?mapping", new BindingURIValue(mapping));
+				bindings.addBinding("?protocol", new BindingURIValue(protocol));
+				bindings.addBinding("?resource", new BindingURIValue(resource));
+				bindings.addBinding("?action", new BindingURIValue(action));
+				bindings.addBinding("?value", new BindingLiteralValue(value));
+				bindings.addBinding("?requestPattern", new BindingLiteralValue(requestPattern));
+				bindings.addBinding("?responsePattern", new BindingLiteralValue(responsePattern));
+				
+				return update(bindings);
+			}
+		}
+		
 		private class MappingRemover extends Producer {			
-			public MappingRemover() {super(SPARQL.delete("MP_MAPPING"));}
+			public MappingRemover() {super(SPARQL.delete("MAPPING"));}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
@@ -110,6 +128,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			creator = new MappingCreator();
 			remover = new MappingRemover();
 			listener = new MappingListener();
+			updater = new MappingUpdater();
 		}
 		
 		public boolean removeAllMapping(){
@@ -124,10 +143,16 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			return creator.addMapping(protocol, requestPattern, responsePattern, resource, action, value);
 		}
 		
+		public boolean updateMapping(String mapping, String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
+			return updater.updateMapping( mapping,  protocol, requestPattern, responsePattern, resource, action, value);
+		}
+			
+		
 		public boolean start(){			
 			if(!creator.join()) return false;
 			if(!remover.join()) return false;
 			if(!listener.join()) return false;
+			if(!updater.join()) return false;
 			
 			String subID = listener.subscribe(null);
 			
@@ -144,12 +169,12 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 
 		public boolean stop() {
-			boolean ret1 = creator.leave();
-			boolean ret2 = remover.leave();
-			boolean ret3 = listener.unsubscribe();
-			boolean ret4 = listener.leave();
-			
-			return (ret1 && ret2 && ret3 && ret4);
+			boolean ret = creator.leave();
+			ret = ret && remover.leave();
+			ret = ret && listener.unsubscribe();
+			ret = ret && listener.leave();
+					
+			return ret;
 		}
 	}
 	
@@ -159,6 +184,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		private MappingCreator creator;
 		private MappingRemover remover;
 		private MappingListener listener;
+		private MappingUpdater updater;
 		private MNMappingEventListener event = null;
 		
 		public void setEventListener(MNMappingEventListener e) {
@@ -223,8 +249,25 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			}
 		}
 		
+		private class MappingUpdater extends Producer {
+			public MappingUpdater() {super(SPARQL.update("MN_MAPPING"));}
+			
+			public boolean updateMapping(String mapping,String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
+				Bindings bindings = new Bindings();
+				bindings.addBinding("?mapping", new BindingURIValue(mapping));
+				bindings.addBinding("?network", new BindingURIValue(protocol));
+				bindings.addBinding("?resource", new BindingURIValue(resource));
+				bindings.addBinding("?action", new BindingURIValue(action));
+				bindings.addBinding("?value", new BindingLiteralValue(value));
+				bindings.addBinding("?requestPattern", new BindingLiteralValue(requestPattern));
+				bindings.addBinding("?responsePattern", new BindingLiteralValue(responsePattern));
+				
+				return update(bindings);
+			}
+		}
+		
 		private class MappingRemover extends Producer {
-			public MappingRemover() {super(SPARQL.delete("MN_MAPPING"));}
+			public MappingRemover() {super(SPARQL.delete("MAPPING"));}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
@@ -240,6 +283,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			creator = new MappingCreator();
 			remover = new MappingRemover();
 			listener = new MappingListener();
+			updater = new MappingUpdater();
 		}
 		
 		public boolean removeAllMapping(){
@@ -254,10 +298,15 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			return creator.addMapping(protocol, requestPattern, responsePattern, resource, action, value);
 		}
 		
+		public boolean updateMapping(String mapping,String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
+			return updater.updateMapping( mapping, protocol, requestPattern, responsePattern, resource, action, value);
+		}
+		
 		public boolean start(){
 			if(!creator.join()) return false;
 			if(!remover.join()) return false;
 			if(!listener.join()) return false;
+			if(!updater.join()) return false;
 			
 			String subID = listener.subscribe(null);
 			
@@ -274,11 +323,11 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 
 		public boolean stop() {
-			boolean ret1 = creator.leave();
-			boolean ret2 = remover.leave();
-			boolean ret3 = listener.unsubscribe();
-			boolean ret4 = listener.leave();
-			return (ret1 && ret2 && ret3 && ret4);
+			boolean ret = creator.leave();
+			ret = ret && remover.leave();
+			ret = ret && listener.unsubscribe();
+			ret = ret && listener.leave();
+			return ret;
 		}
 	}
 	
@@ -381,9 +430,9 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	}
 	
 	public boolean stop(){
-		boolean ret1 = mnMappingManager.stop();
-		boolean ret2 = mpMappingManager.stop();
-		return (ret1 && ret2);
+		boolean ret = mnMappingManager.stop();
+		ret = ret && mpMappingManager.stop();
+		return ret;
 	}
 	
 	public boolean addProtocolMapping(String protocol,String requestStringPattern,String responseStringPattern,String resource,String action,String value){
@@ -403,13 +452,18 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	}
 	
 	public boolean updateNetworkMapping(String mapping,String network,String requestStringPattern,String responseStringPattern,String resource,String action,String value) {
-		if (removeNetworkMapping(mapping)) return addNetworkMapping(network, requestStringPattern, responseStringPattern, resource, action, value);
-		return false;
+		//TODO Capire come mai non funziona la UPDATE
+		//return mnMappingManager.updateMapping(mapping, network, requestStringPattern, responseStringPattern, resource, action, value);
+		boolean ret = mnMappingManager.removeMapping(mapping);
+		return ret && mnMappingManager.addMapping(network, requestStringPattern, responseStringPattern, resource, action, value);
+		
 	}
 	
 	public boolean updateProtocolMapping(String mapping,String protocol,String requestStringPattern,String responseStringPattern,String resource,String action,String value) {
-		if (removeProtocolMapping(mapping)) return addProtocolMapping(protocol, requestStringPattern, responseStringPattern, resource, action, value);
-		return false;
+		//TODO Capire come mai non funziona la UPDATE
+		//return mpMappingManager.updateMapping(mapping, protocol, requestStringPattern, responseStringPattern, resource, action, value);
+		boolean ret = mpMappingManager.removeMapping(mapping);
+		return ret && mpMappingManager.addMapping(protocol, requestStringPattern, responseStringPattern, resource, action, value);
 	}
 	
 	public boolean removeAllMapping(){
@@ -437,4 +491,5 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	public void removedMPMappings(ArrayList<MPMapping> mappings) {
 		if (listener != null) listener.removedMPMappings(mappings);
 	}
+	
 }
