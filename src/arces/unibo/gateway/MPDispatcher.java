@@ -10,7 +10,7 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.gateway.mapping.ResourceAction;
 import arces.unibo.gateway.mapping.mappers.protocol.COAPMapper;
 import arces.unibo.gateway.mapping.mappers.protocol.HTTPMapper;
@@ -55,7 +55,7 @@ public class MPDispatcher {
 	}
 	
 	public class MPMapper extends Mapper{
-		public MPMapper(Map map) {super(SPARQL.subscribe("MP_MAPPING"), map);}
+		public MPMapper(Map map) {super(SPARQLApplicationProfile.subscribe("MP_MAPPING"), map);}
 
 		@Override
 		public String name() {return "MP MAPPER";}
@@ -148,8 +148,9 @@ public class MPDispatcher {
 	class MPRequestDispatcher extends Aggregator {
 		private static final String tag = "MP REQUEST DISPATCHER";
 		
-		//public MPRequestDispatcher(){ super(SPARQL.subscribe("MP_REQUEST"),SPARQL.insert("RESOURCE_PENDING_REQUEST"));}
-		public MPRequestDispatcher(){ super(SPARQL.subscribe("MP_REQUEST"),SPARQL.insert("RESOURCE_REQUEST"));}
+		public MPRequestDispatcher(){ 
+			super(SPARQLApplicationProfile.subscribe("MP_REQUEST"),
+					SPARQLApplicationProfile.insert("RESOURCE_PENDING_REQUEST"));}
 		
 		public String subscribe() {return super.subscribe(null);}
 		
@@ -228,7 +229,7 @@ public class MPDispatcher {
 	class MPResponseDispatcher extends Aggregator {
 		private static final String tag = "MP RESPONSE DISPATCHER";
 		
-		public MPResponseDispatcher(){super(SPARQL.subscribe("RESOURCE_RESPONSE"),SPARQL.insert("MP_RESPONSE"));}
+		public MPResponseDispatcher(){super(SPARQLApplicationProfile.subscribe("RESOURCE_RESPONSE"),SPARQLApplicationProfile.insert("MP_RESPONSE"));}
 		
 		public String subscribe() {return super.subscribe(null);}
 		

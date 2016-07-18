@@ -16,7 +16,7 @@ public abstract class Client implements IClient{
 	private boolean joined = false;
 	
 	protected static String defaultIP = "127.0.0.1";
-	protected static int defaultPort = 7766;
+	protected static int defaultPort = 10123;
 	protected static String defaultName ="IoTGateway";
 	
 	public void addNamespace(String prefix,String uri){

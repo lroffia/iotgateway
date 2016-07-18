@@ -3,13 +3,14 @@ package arces.unibo.gateway;
 import java.util.ArrayList;
 import java.util.UUID;
 
+
 import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.SEPA.Consumer;
 import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MPMapping;
 import arces.unibo.gateway.mapping.ResourceAction;
@@ -38,7 +39,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 				
 		private class MappingListener extends Consumer {			
-			public MappingListener() {super(SPARQL.subscribe("MP_MAPPING"));}
+			public MappingListener() {super(SPARQLApplicationProfile.subscribe("MP_MAPPING"));}
 
 			@Override
 			public void notify(BindingsResults notify) {}
@@ -76,7 +77,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingCreator extends Producer {			
-			public MappingCreator() {super(SPARQL.insert("MP_MAPPING"));}
+			public MappingCreator() {super(SPARQLApplicationProfile.insert("MP_MAPPING"));}
 			
 			public boolean addMapping(String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -94,7 +95,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingUpdater extends Producer {			
-			public MappingUpdater() {super(SPARQL.update("MP_MAPPING"));}
+			public MappingUpdater() {super(SPARQLApplicationProfile.update("MP_MAPPING"));}
 			
 			public boolean updateMapping(String mapping, String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -111,7 +112,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingRemover extends Producer {			
-			public MappingRemover() {super(SPARQL.delete("MAPPING"));}
+			public MappingRemover() {super(SPARQLApplicationProfile.delete("MAPPING"));}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
@@ -192,7 +193,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 			
 		private class MappingListener extends Consumer {
-			public MappingListener() {super(SPARQL.subscribe("MN_MAPPING"));}
+			public MappingListener() {super(SPARQLApplicationProfile.subscribe("MN_MAPPING"));}
 
 			@Override
 			public void notify(BindingsResults notify) {}
@@ -232,7 +233,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingCreator extends Producer {
-			public MappingCreator() {super(SPARQL.insert("MN_MAPPING"));}
+			public MappingCreator() {super(SPARQLApplicationProfile.insert("MN_MAPPING"));}
 			
 			public boolean addMapping(String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -250,7 +251,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingUpdater extends Producer {
-			public MappingUpdater() {super(SPARQL.update("MN_MAPPING"));}
+			public MappingUpdater() {super(SPARQLApplicationProfile.update("MN_MAPPING"));}
 			
 			public boolean updateMapping(String mapping,String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -267,7 +268,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingRemover extends Producer {
-			public MappingRemover() {super(SPARQL.delete("MAPPING"));}
+			public MappingRemover() {super(SPARQLApplicationProfile.delete("MAPPING"));}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
@@ -350,17 +351,23 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		Logging.log(VERBOSITY.INFO, tag,"Adding default protocol mappings");
 		
 		// TODO add default mapping here
-		if(!addProtocolMapping("iot:HTTP", "action=PING", "PING->*", "iot:Resource_PING", "iot:GET", "*")) return false;
-		if(!addProtocolMapping("iot:HTTP", "action=PONG", "PONG->*", "iot:Resource_PONG", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=PING", "*", "iot:Resource_PING", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=PONG", "*", "iot:Resource_PONG", "iot:GET", "*")) return false;
 		
-		/*if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM1&resource=TEMPERATURE", "Room1 temperature * ", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
-		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM2&resource=TEMPERATURE", "Room2 temperature * ", "iot:Resource_TEMPERATURE_2", "iot:GET", "*")) return false;
-		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM3&resource=TEMPERATURE", "Room3 temperature * ", "iot:Resource_TEMPERATURE_3", "iot:GET", "*")) return false;
-		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM4&resource=TEMPERATURE", "Room4 temperature * ", "iot:Resource_TEMPERATURE_4", "iot:GET", "*")) return false;
-		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM0&resource=TEMPERATURE", "Room0 temperature * ", "iot:Resource_TEMPERATURE_0", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM1&resource=TEMPERATURE", "Room1 temperature * Celsius degree", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM2&resource=TEMPERATURE", "Room2 temperature * Celsius degree", "iot:Resource_TEMPERATURE_2", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM3&resource=TEMPERATURE", "Room3 temperature * Celsius degree", "iot:Resource_TEMPERATURE_3", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM0&resource=TEMPERATURE", "Room0 temperature * Celsius degree", "iot:Resource_TEMPERATURE_0", "iot:GET", "*")) return false;
+		
 		if(!addProtocolMapping("iot:HTTP", "action=SET&location=ROOM0&resource=VALVE&value=*", "Room0 valve * ", "iot:Resource_VALVE_0", "iot:SET", "*")) return false;
 		
-		if(!addProtocolMapping("iot:HTTP", "action=GET&location=SERVER_MML&core=0&resource=TEMPERATURE", "MML Server Core 0 Temperature *", "iot:Resource_SERVER_MML_TEMPERATURE_0", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM0&resource=BATTERY", "Room0 battery level * volts", "iot:Resource_BATTERY_0", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM1&resource=BATTERY", "Room1 battery level * volts", "iot:Resource_BATTERY_1", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM2&resource=BATTERY", "Room2 battery level * volts", "iot:Resource_BATTERY_2", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM3&resource=BATTERY", "Room3 battery level * volts", "iot:Resource_BATTERY_3", "iot:GET", "*")) return false;
+
+		
+		/*if(!addProtocolMapping("iot:HTTP", "action=GET&location=SERVER_MML&core=0&resource=TEMPERATURE", "MML Server Core 0 Temperature *", "iot:Resource_SERVER_MML_TEMPERATURE_0", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=SERVER_MML&core=1&resource=TEMPERATURE", "MML Server Core 1 Temperature *", "iot:Resource_SERVER_MML_TEMPERATURE_1", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=SERVER_MML&core=2&resource=TEMPERATURE", "MML Server Core 2 Temperature *", "iot:Resource_SERVER_MML_TEMPERATURE_2", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=SERVER_MML&core=3&resource=TEMPERATURE", "MML Server Core 3 Temperature *", "iot:Resource_SERVER_MML_TEMPERATURE_3", "iot:GET", "*")) return false;
@@ -394,13 +401,19 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!addNetworkMapping("iot:PINGPONG", "PING", "PONG", "iot:Resource_PING", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:PINGPONG", "PONG", "PING", "iot:Resource_PONG", "iot:GET", "*")) return false;
 
-/*		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO1", "TEMPERATURE!NODO1&*", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
+		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO1", "TEMPERATURE!NODO1&*", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO2", "TEMPERATURE!NODO2&*", "iot:Resource_TEMPERATURE_2", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO3", "TEMPERATURE!NODO3&*", "iot:Resource_TEMPERATURE_3", "iot:GET", "*")) return false;
-		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO4", "TEMPERATURE!NODO4&*", "iot:Resource_TEMPERATURE_4", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO0", "TEMPERATURE!NODO0&*", "iot:Resource_TEMPERATURE_0", "iot:GET", "*")) return false;
-		if(!addNetworkMapping("iot:DASH7", "VALVE@NODO0&*", "VALVE!NODO0&*", "iot:Resource_VALVE_0", "iot:SET", "*")) return false;
 		
+		if(!addNetworkMapping("iot:DASH7", "VALVE@NODO0&*", "VALVE!NODO0&*", "iot:Resource_VALVE_0", "iot:SET", "*")) return false;
+
+		if(!addNetworkMapping("iot:DASH7", "BATTERY@NODO1", "BATTERY!NODO1&*", "iot:Resource_BATTERY_1", "iot:GET", "*")) return false;
+		if(!addNetworkMapping("iot:DASH7", "BATTERY@NODO2", "BATTERY!NODO2&*", "iot:Resource_BATTERY_2", "iot:GET", "*")) return false;
+		if(!addNetworkMapping("iot:DASH7", "BATTERY@NODO3", "BATTERY!NODO3&*", "iot:Resource_BATTERY_3", "iot:GET", "*")) return false;
+		if(!addNetworkMapping("iot:DASH7", "BATTERY@NODO0", "BATTERY!NODO0&*", "iot:Resource_BATTERY_0", "iot:GET", "*")) return false;
+		
+		/*		
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core0/temperature", "toffano/mml/Core0/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_0", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core1/temperature", "toffano/mml/Core1/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_1", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core2/temperature", "toffano/mml/Core2/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_2", "iot:GET", "*")) return false;

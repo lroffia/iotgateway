@@ -14,10 +14,11 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.gateway.GarbageCollector.GarbageCollectorListener;
 import arces.unibo.gateway.MappingInputDialog.MappingInputDialogListener;
 import arces.unibo.gateway.MappingManager.MappingEventListener;
@@ -33,7 +34,6 @@ import javax.swing.JPanel;
 import java.awt.BorderLayout;
 
 public class GatewayManager implements MappingEventListener, MappingInputDialogListener, GarbageCollectorListener {
-
 	//Tables models
 	private DefaultTableModel protocolMappingDataModel;
 	private DefaultTableModel networkMappingDataModel;
@@ -817,7 +817,12 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		
 		Logging.setVerbosityLevel(VERBOSITY.DEBUG);
 		
-		SPARQL.loadApplicationProfile(GatewayManager.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml");
+		String path = GatewayManager.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml";
+		
+		if(!SPARQLApplicationProfile.load(path)) {
+			Logging.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ path);
+			return;
+		}
 		
 		mappingManager = new MappingManager();
 		mappingManager.setMappingEventListener(this);

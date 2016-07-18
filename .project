@@ -3,6 +3,7 @@
 	<name>IoTGateway</name>
 	<comment></comment>
 	<projects>
+		<project>californium</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

@@ -14,7 +14,7 @@ import org.jdom2.input.SAXBuilder;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
 
-public class SPARQL {	
+public class SPARQLApplicationProfile {	
 	private static final String tag ="SPARQL PARSER";
 	
 	private static HashMap<String,String> updateMap = new HashMap<>();
@@ -90,23 +90,20 @@ public class SPARQL {
 		return deleteMap.get(id);
 	}
 	
-	public static void loadApplicationProfile(String fileName){
+	public static boolean load(String fileName){
 		SAXBuilder builder = new SAXBuilder();
 		File inputFile = new File(fileName);
 		
-		if (!inputFile.exists()) return;
-		
-		try 
-		{
+		try {
 			doc = builder.build(inputFile);
-		} 
-		catch (JDOMException | IOException e) {
+		} catch (JDOMException | IOException e) {
 			Logging.log(VERBOSITY.FATAL, tag, e.getMessage());
+			return false;
 		}
 		
 		Element root = doc.getRootElement();
 		
-		if (root == null) return;
+		if (root == null) return false;
 		
 		List<Element> nodes = root.getChildren();
 		
@@ -162,5 +159,6 @@ public class SPARQL {
 			}
 		}
 		
+		return true;
 	}
 }

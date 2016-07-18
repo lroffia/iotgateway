@@ -1,9 +1,9 @@
 package arces.unibo.gateway;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.UUID;
 
+import arces.unibo.SEPA.Aggregator;
 import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.BindingValue;
@@ -11,19 +11,22 @@ import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.SEPA.Consumer;
 import arces.unibo.SEPA.Producer;
-import arces.unibo.gateway.mapping.ResourceAction;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
+
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
 
-/*
+
 class ResourceManager {
 	static String tag ="RESOURCE MANAGER";
-	
+		
 	ResourcePendingRequestListener requestsListener;
 	ResourceResponseListener responsesListener;
 	
 	class ResourcePendingRequestListener extends Consumer {		
-		public ResourcePendingRequestListener() {super(SPARQL.subscribe("RESOURCE_PENDING_REQUEST"));}
+		public ResourcePendingRequestListener() {
+			super(SPARQLApplicationProfile.subscribe("RESOURCE_PENDING_REQUEST"));
+		}
 
 		@Override
 		public void notify(BindingsResults notify) {}
@@ -38,12 +41,12 @@ class ResourceManager {
 				Producer resourceResponse;
 				
 				if (resourceValue != null && action.getValue().equals("iot:GET")) {
-					resourceResponse = new Producer(SPARQL.insert("RESOURCE_RESPONSE"));
+					resourceResponse = new Producer(SPARQLApplicationProfile.insert("RESOURCE_RESPONSE"));
 					bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));
 					bindings.addBinding("?value", new BindingLiteralValue(resourceValue.getValue()));
 				}
 				else {
-					resourceResponse = new Producer(SPARQL.insert("RESOURCE_REQUEST"));
+					resourceResponse = new Producer(SPARQLApplicationProfile.insert("RESOURCE_REQUEST"));
 					bindings.addBinding("?request", new BindingURIValue("iot:Resource-Request_"+UUID.randomUUID().toString()));	
 				}
 				
@@ -63,7 +66,10 @@ class ResourceManager {
 	}
 	
 	class ResourceResponseListener extends Aggregator {		
-		public ResourceResponseListener() {super(SPARQL.subscribe("RESOURCE_RESPONSE"),SPARQL.update("RESOURCE"));}
+		public ResourceResponseListener() {
+			super(SPARQLApplicationProfile.subscribe("RESOURCE_RESPONSE"),
+					SPARQLApplicationProfile.update("RESOURCE"));
+		}
 
 		@Override
 		public void notify(BindingsResults notify) {}
@@ -123,8 +129,8 @@ class ResourceManager {
 		return true;
 	}
 }
-*/
 
+/*
 public class ResourceManager {
 	private ResourceRequestQueue requestQueue = new ResourceRequestQueue();
 	private ResourceResponseCache responseCache = new ResourceResponseCache();
@@ -420,3 +426,4 @@ public class ResourceManager {
 		
 	}
 }
+*/

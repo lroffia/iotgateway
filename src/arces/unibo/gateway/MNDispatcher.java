@@ -9,7 +9,7 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.gateway.mapping.ResourceAction;
 import arces.unibo.gateway.mapping.mappers.network.DASH7Mapper;
 import arces.unibo.gateway.mapping.mappers.network.INetworkMapper;
@@ -57,7 +57,7 @@ public class MNDispatcher {
 	public class MNRequestDispatcher extends Aggregator {	
 		private static final String tag = "MN REQUEST DISPATCHER";
 		
-		public MNRequestDispatcher() {super(SPARQL.subscribe("RESOURCE_REQUEST"),SPARQL.insert("MN_REQUEST"));}
+		public MNRequestDispatcher() {super(SPARQLApplicationProfile.subscribe("RESOURCE_REQUEST"),SPARQLApplicationProfile.insert("MN_REQUEST"));}
 		
 		public String subscribe() {return super.subscribe(null);}
 		
@@ -141,7 +141,7 @@ public class MNDispatcher {
 	public class MNResponseDispatcher extends Aggregator {		
 		private static final String tag = "MN RESPONSE DISPATCHER";
 		
-		public MNResponseDispatcher() {super(SPARQL.subscribe("MN_RESPONSE"),SPARQL.insert("RESOURCE_RESPONSE"));}
+		public MNResponseDispatcher() {super(SPARQLApplicationProfile.subscribe("MN_RESPONSE"),SPARQLApplicationProfile.insert("RESOURCE_RESPONSE"));}
 
 		public String subscribe() {return super.subscribe(null);}
 		
@@ -182,7 +182,7 @@ public class MNDispatcher {
 	}
 
 	public class MNMapper extends Mapper {	
-		public MNMapper(Map map) {super(SPARQL.subscribe("MN_MAPPING"), map);}
+		public MNMapper(Map map) {super(SPARQLApplicationProfile.subscribe("MN_MAPPING"), map);}
 
 		@Override
 		public void notify(BindingsResults notify) {}

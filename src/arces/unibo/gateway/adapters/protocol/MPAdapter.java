@@ -7,7 +7,7 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.gateway.mapping.MPRequest;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
@@ -30,7 +30,7 @@ public abstract class MPAdapter {
 		}
 		
 		public MPRequestResponseDispatcher(){
-			super(SPARQL.subscribe("MP_RESPONSE"),SPARQL.insert("MP_REQUEST"));
+			super(SPARQLApplicationProfile.subscribe("MP_RESPONSE"),SPARQLApplicationProfile.insert("MP_REQUEST"));
 		}
 		
 		@Override

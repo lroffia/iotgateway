@@ -530,11 +530,11 @@ public class Dashboard implements GenericClient.Notification {
 		listSubscribes.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
 				if (e.getValueIsAdjusting()) return;
-				sparqlQuery.setText(SPARQL.subscribe(listSubscribes.getModel().getElementAt(listSubscribes.getSelectedIndex()).toString()));
+				sparqlQuery.setText(SPARQLApplicationProfile.subscribe(listSubscribes.getModel().getElementAt(listSubscribes.getSelectedIndex()).toString()));
 				
 				queryForcedBindingsDM.clearBindings();
 				
-				Bindings bindings = SPARQL.subscribeBindings(listSubscribes.getModel().getElementAt(listSubscribes.getSelectedIndex()).toString());
+				Bindings bindings = SPARQLApplicationProfile.subscribeBindings(listSubscribes.getModel().getElementAt(listSubscribes.getSelectedIndex()).toString());
 				if (bindings == null) return;
 				for (String variable : bindings.getVariables()) {
 					queryForcedBindingsDM.addBindings(variable, bindings.getBindingValue(variable).isLiteral());
@@ -794,7 +794,7 @@ public class Dashboard implements GenericClient.Notification {
 			public void mousePressed(MouseEvent e) {
 				if (!rdbtnUpdate.isSelected()) {
 					updateListModel.clear();
-					for (String element : SPARQL.getUpdateIds()) updateListModel.addElement(element);	
+					for (String element : SPARQLApplicationProfile.getUpdateIds()) updateListModel.addElement(element);	
 				}
 				super.mousePressed(e);
 			}
@@ -806,7 +806,7 @@ public class Dashboard implements GenericClient.Notification {
 			public void mousePressed(MouseEvent e) {
 				if (!rdbtnInsert.isSelected()) {
 					updateListModel.clear();
-					for (String element : SPARQL.getInsertIds()) updateListModel.addElement(element);	
+					for (String element : SPARQLApplicationProfile.getInsertIds()) updateListModel.addElement(element);	
 				}
 				super.mousePressed(e);
 			}
@@ -820,28 +820,28 @@ public class Dashboard implements GenericClient.Notification {
 		btnLoadProfile.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				SPARQL.loadApplicationProfile(Dashboard.class.getProtectionDomain().getCodeSource().getLocation().getPath()+txtAppProfile.getText());
+				SPARQLApplicationProfile.load(Dashboard.class.getProtectionDomain().getCodeSource().getLocation().getPath()+txtAppProfile.getText());
 				
 				subscribeListModel.clear();
-				for (String element : SPARQL.getSubscribeIds()) subscribeListModel.addElement(element);
+				for (String element : SPARQLApplicationProfile.getSubscribeIds()) subscribeListModel.addElement(element);
 				
 				Set<String> list = null;
-				if(rdbtnInsert.isSelected()) list = SPARQL.getInsertIds();
-				else if (rdbtnUpdate.isSelected()) list = SPARQL.getUpdateIds();
-				else list = SPARQL.getDeleteIds();
+				if(rdbtnInsert.isSelected()) list = SPARQLApplicationProfile.getInsertIds();
+				else if (rdbtnUpdate.isSelected()) list = SPARQLApplicationProfile.getUpdateIds();
+				else list = SPARQLApplicationProfile.getDeleteIds();
 				
 				updateListModel.clear();
 				for (String element : list) updateListModel.addElement(element);
 				
 				if (kp!= null) kp.clearNamespaces();
 				
-				for (String prefix : SPARQL.getPrefixes()) {
+				for (String prefix : SPARQLApplicationProfile.getPrefixes()) {
 					Vector<Object> data = new Vector<Object>();
 				 	data.add(prefix);
-			        data.add(SPARQL.getNamespaceURI(prefix));
+			        data.add(SPARQLApplicationProfile.getNamespaceURI(prefix));
 					namespacesDM.addRow(data);
 					
-					if (kp!=null) kp.addNamespace(prefix, SPARQL.getNamespaceURI(prefix));
+					if (kp!=null) kp.addNamespace(prefix, SPARQLApplicationProfile.getNamespaceURI(prefix));
 				}
 			}
 		});
@@ -900,7 +900,7 @@ public class Dashboard implements GenericClient.Notification {
 			public void mousePressed(MouseEvent e) {
 				if (!rdbtnDelete.isSelected()) {
 					updateListModel.clear();
-					for (String element : SPARQL.getDeleteIds()) updateListModel.addElement(element);	
+					for (String element : SPARQLApplicationProfile.getDeleteIds()) updateListModel.addElement(element);	
 				}
 				super.mousePressed(e);
 			}
@@ -930,16 +930,16 @@ public class Dashboard implements GenericClient.Notification {
 				Bindings bindings = null;
 				
 				if (rdbtnInsert.isSelected()) {
-					sparqlUpdate.setText(SPARQL.insert(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString()));
-					bindings = SPARQL.insertBindings(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString());
+					sparqlUpdate.setText(SPARQLApplicationProfile.insert(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString()));
+					bindings = SPARQLApplicationProfile.insertBindings(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString());
 				}
 				else if (rdbtnDelete.isSelected()) {
-					sparqlUpdate.setText(SPARQL.delete(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString()));
-					bindings = SPARQL.deleteBindings(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString());
+					sparqlUpdate.setText(SPARQLApplicationProfile.delete(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString()));
+					bindings = SPARQLApplicationProfile.deleteBindings(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString());
 				}
 				else {
-					sparqlUpdate.setText(SPARQL.update(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString()));
-					bindings = SPARQL.updateBindings(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString());
+					sparqlUpdate.setText(SPARQLApplicationProfile.update(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString()));
+					bindings = SPARQLApplicationProfile.updateBindings(listUpdates.getModel().getElementAt(listUpdates.getSelectedIndex()).toString());
 				}
 				
 				if (bindings == null) return;

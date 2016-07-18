@@ -7,7 +7,7 @@ import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.SEPA.Consumer;
 import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
 
@@ -29,7 +29,7 @@ class GarbageCollector {
 	private GarbageCollectorListener listener;
 	
 	public void setListener(GarbageCollectorListener listener) {this.listener = listener;}
-	
+		
 	public interface GarbageCollectorListener {
 		public void newMPRequest(String protocol, String value);
 		
@@ -46,7 +46,7 @@ class GarbageCollector {
 	
 	public class MPRequestMonitor extends Consumer {
 		public MPRequestMonitor() {
-			super(SPARQL.subscribe("MP_REQUEST"));
+			super(SPARQLApplicationProfile.subscribe("MP_REQUEST"));
 		}
 
 		public String subscribe() {return subscribe(null);}
@@ -84,7 +84,7 @@ class GarbageCollector {
 		private  long triplesNumber;
 		
 		public TriplesMonitor() {
-			super(SPARQL.subscribe("ALL"));
+			super(SPARQLApplicationProfile.subscribe("ALL"));
 			triplesNumber = 0;
 		}
 
@@ -117,7 +117,7 @@ class GarbageCollector {
 	
 	class ResourcePendingRequestRemover extends Aggregator {
 		public ResourcePendingRequestRemover() {
-			super(SPARQL.subscribe("RESOURCE_PENDING_REQUEST"), SPARQL.delete("REQUEST"));
+			super(SPARQLApplicationProfile.subscribe("RESOURCE_PENDING_REQUEST"), SPARQLApplicationProfile.delete("REQUEST"));
 		}
 	
 		@Override
@@ -152,7 +152,7 @@ class GarbageCollector {
 	
 	class Eraser extends Producer{
 		public Eraser(){
-			super(SPARQL.delete("ALL"));
+			super(SPARQLApplicationProfile.delete("ALL"));
 		}
 		
 		public boolean update() {
@@ -162,7 +162,7 @@ class GarbageCollector {
 	
 	class MPResponseRemover extends Aggregator {
 		public MPResponseRemover() {
-			super(SPARQL.subscribe("MP_RESPONSE"),SPARQL.delete("REQUEST_RESPONSE"));
+			super(SPARQLApplicationProfile.subscribe("MP_RESPONSE"),SPARQLApplicationProfile.delete("REQUEST_RESPONSE"));
 		}
 	
 		@Override
@@ -195,7 +195,7 @@ class GarbageCollector {
 	
 	class ResourceResponseRemover extends Aggregator {		
 		public ResourceResponseRemover() {
-			super(SPARQL.subscribe("RESOURCE_RESPONSE"), SPARQL.delete("RESPONSE"));
+			super(SPARQLApplicationProfile.subscribe("RESOURCE_RESPONSE"), SPARQLApplicationProfile.delete("RESPONSE"));
 		}
 	
 		@Override
@@ -233,7 +233,7 @@ class GarbageCollector {
 	
 	class ResourceRequestRemover extends Aggregator {		
 		public ResourceRequestRemover() {
-			super(SPARQL.subscribe("RESOURCE_REQUEST"), SPARQL.delete("REQUEST"));
+			super(SPARQLApplicationProfile.subscribe("RESOURCE_REQUEST"), SPARQLApplicationProfile.delete("REQUEST"));
 		}
 	
 		@Override
@@ -270,7 +270,7 @@ class GarbageCollector {
 	
 	class MNResponseRemover extends Aggregator {		
 		public MNResponseRemover() {
-			super(SPARQL.subscribe("MN_RESPONSE"), SPARQL.delete("RESPONSE"));
+			super(SPARQLApplicationProfile.subscribe("MN_RESPONSE"), SPARQLApplicationProfile.delete("RESPONSE"));
 		}
 	
 		@Override
@@ -306,7 +306,7 @@ class GarbageCollector {
 	
 	class MNRequestRemover extends Aggregator {		
 		public MNRequestRemover() {
-			super(SPARQL.subscribe("MN_REQUEST"), SPARQL.delete("REQUEST"));
+			super(SPARQLApplicationProfile.subscribe("MN_REQUEST"), SPARQLApplicationProfile.delete("REQUEST"));
 		}
 	
 		@Override

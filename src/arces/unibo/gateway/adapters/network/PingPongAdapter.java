@@ -2,35 +2,68 @@ package arces.unibo.gateway.adapters.network;
 
 import java.io.IOException;
 
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
 
 public class PingPongAdapter extends MNAdapter {
 	
 	public static void main(String[] args) throws IOException {
-		PingPongAdapter adapter;
+		byte[] line = new byte[80];
+		byte[] chars;
+		int nBytes = 0;
+		String IP = "127.0.0.1";
+		int PORT = 10123;
+		String namespace = "IoTGateway";
 		
-		if (args.length < 4) {
-			adapter = new PingPongAdapter();
+		String path = PingPongAdapter.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml";
+		
+		if(!SPARQLApplicationProfile.load(path)) {
+			Logging.log(VERBOSITY.FATAL, "ADAPTER SETTINGS", "Failed to load: "+ path);
+			return;
 		}
-		else {
-			adapter =new PingPongAdapter(args[1],Integer.parseInt(args[2]),args[3]);
+		
+		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway IP (press return for default, "+IP+" )");		
+		nBytes = System.in.read(line);
+
+		if (nBytes > 1) {
+			chars = new byte[nBytes-1];
+			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
+			IP = new String(chars);
 		}
+		
+		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway PORT (press return for default, " + PORT+ " )");
+		nBytes = System.in.read(line);
+		
+		if (nBytes > 1) {
+			chars = new byte[nBytes-1];
+			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
+			PORT = Integer.parseInt(new String(chars));
+		}
+		
+		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway Namespace (press return for default, " +namespace +" )");
+		nBytes = System.in.read(line);
+		
+		if (nBytes > 1) {
+			chars = new byte[nBytes-1];
+			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
+			namespace = new String(chars);
+		}
+		
+		PingPongAdapter adapter;
+		adapter =new PingPongAdapter(IP,PORT,namespace);
 		
 		if(adapter.start()) {
-			if (args.length == 4) 
-				Logging.log(VERBOSITY.INFO,adapter.adapterName(),"Running @ "+args[1]+":"+args[2]+" Namespace: "+args[3]);
-			else 
-				Logging.log(VERBOSITY.INFO,adapter.adapterName(),"PingPong Adapter running on LOCAL gateway");
+			Logging.log(VERBOSITY.INFO,adapter.adapterName(), adapter.adapterName() + " is connected to gateway "+IP+":"+PORT+"@"+namespace);
 			Logging.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
-			if (adapter.stop()) Logging.log(VERBOSITY.INFO,adapter.adapterName(),"PingPong Adapter is stopped");
+			if(adapter.stop()) Logging.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() +" stopped");
 		}
 		else {
-			Logging.log(VERBOSITY.FATAL,adapter.adapterName(),"FAILED to start @ "+args[1]+":"+args[2]+" Namespace: "+args[3]);
+			Logging.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() +" is NOT running");
 			Logging.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
-		}
+		}	
 			
 	}
 	

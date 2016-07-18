@@ -8,7 +8,7 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.SPARQL;
+import arces.unibo.SEPA.SPARQLApplicationProfile;
 import arces.unibo.tools.Logging;
 import arces.unibo.tools.Logging.VERBOSITY;
 
@@ -33,11 +33,11 @@ public abstract class MNAdapter {
 	class MNRequestResponseDispatcher extends Aggregator {
 		
 		public MNRequestResponseDispatcher(){
-			super(SPARQL.subscribe("MN_REQUEST"),SPARQL.insert("MN_RESPONSE"));
+			super(SPARQLApplicationProfile.subscribe("MN_REQUEST"),SPARQLApplicationProfile.insert("MN_RESPONSE"));
 		}
 		
 		public MNRequestResponseDispatcher(String SIB_IP,int SIB_PORT,String SIB_NAME){
-			super(SPARQL.subscribe("MN_REQUEST"),SPARQL.insert("MN_RESPONSE"),SIB_IP, SIB_PORT,SIB_NAME);
+			super(SPARQLApplicationProfile.subscribe("MN_REQUEST"),SPARQLApplicationProfile.insert("MN_RESPONSE"),SIB_IP, SIB_PORT,SIB_NAME);
 		}
 		
 		public String  subscribe(){
