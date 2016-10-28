@@ -7,10 +7,9 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
+import arces.unibo.SEPA.Logger;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.MPRequest;
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
 
 public abstract class MPAdapter {
 	public abstract String adapterName();
@@ -30,12 +29,12 @@ public abstract class MPAdapter {
 		}
 		
 		public MPRequestResponseDispatcher(){
-			super(SPARQLApplicationProfile.subscribe("MP_RESPONSE"),SPARQLApplicationProfile.insert("MP_REQUEST"));
+			super("MP_RESPONSE","INSERT_MP_REQUEST");
 		}
 		
 		@Override
 		public void notify(BindingsResults notify) {
-			Logging.log(VERBOSITY.DEBUG,adapterName(),"MP RESPONSE NOTIFICATION");
+			Logger.log(VERBOSITY.DEBUG,adapterName(),"MP RESPONSE NOTIFICATION");
 		}
 
 		@Override
@@ -44,7 +43,7 @@ public abstract class MPAdapter {
 				String requestURI = binding.getBindingValue("?request").getValue();
 				String responseString = binding.getBindingValue("?value").getValue();
 				
-				Logging.log(VERBOSITY.INFO,adapterName(),"<< MP-Response<"+responseString+">");
+				Logger.log(VERBOSITY.INFO,adapterName(),"<< MP-Response<"+responseString+">");
 				
 				mpResponse(requestURI,responseString);
 			}
@@ -68,11 +67,11 @@ public abstract class MPAdapter {
 		String subID = dispatcher.subscribe();
 		
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
+			Logger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
 			return false;
 		}
 		
-		Logging.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
+		Logger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
 		
 		return doStart();
 	}
@@ -94,10 +93,10 @@ public abstract class MPAdapter {
 		bindings.addBinding("?protocol", new BindingURIValue(request.getProtocol()));
 		
 		//SPARQL UPDATE
-		Logging.log(VERBOSITY.INFO,adapterName(),">> " + request.toString());
+		Logger.log(VERBOSITY.INFO,adapterName(),">> " + request.toString());
 		
 		if(!dispatcher.update(bindings)) {
-			Logging.log(VERBOSITY.ERROR,adapterName(),"***RDF STORE UPDATE FAILED***");
+			Logger.log(VERBOSITY.ERROR,adapterName(),"***RDF STORE UPDATE FAILED***");
 			return null;
 		}
 		

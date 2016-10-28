@@ -6,10 +6,9 @@ import arces.unibo.SEPA.Aggregator;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.SEPA.Consumer;
+import arces.unibo.SEPA.Logger;
 import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 
 class GarbageCollector {
 	static String tag = "GARBAGE COLLECTOR";
@@ -28,6 +27,9 @@ class GarbageCollector {
 	
 	private GarbageCollectorListener listener;
 	
+	public GarbageCollector() {
+		
+	}
 	public void setListener(GarbageCollectorListener listener) {this.listener = listener;}
 		
 	public interface GarbageCollectorListener {
@@ -46,7 +48,7 @@ class GarbageCollector {
 	
 	public class MPRequestMonitor extends Consumer {
 		public MPRequestMonitor() {
-			super(SPARQLApplicationProfile.subscribe("MP_REQUEST"));
+			super("MP_REQUEST");
 		}
 
 		public String subscribe() {return subscribe(null);}
@@ -84,7 +86,7 @@ class GarbageCollector {
 		private  long triplesNumber;
 		
 		public TriplesMonitor() {
-			super(SPARQLApplicationProfile.subscribe("ALL"));
+			super("ALL");
 			triplesNumber = 0;
 		}
 
@@ -97,27 +99,27 @@ class GarbageCollector {
 		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
 			triplesNumber += bindingsResults.size();
 			if (listener != null) listener.totalTriples(triplesNumber);
-			Logging.log(VERBOSITY.INFO, tag, "Total triples: "+triplesNumber);
+			Logger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);
 		}
 
 		@Override
 		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
 			triplesNumber -= bindingsResults.size();
 			if (listener != null) listener.totalTriples(triplesNumber);
-			Logging.log(VERBOSITY.INFO, tag, "Total triples: "+triplesNumber);
+			Logger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);
 		}
 
 		@Override
 		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
 			triplesNumber = bindingsResults.size();
 			if (listener != null) listener.totalTriples(triplesNumber);
-			Logging.log(VERBOSITY.INFO, tag, "Initial triples: "+triplesNumber);
+			Logger.log(VERBOSITY.DEBUG, tag, "Initial triples: "+triplesNumber);
 		}
 	}
 	
 	class ResourcePendingRequestRemover extends Aggregator {
 		public ResourcePendingRequestRemover() {
-			super(SPARQLApplicationProfile.subscribe("RESOURCE_PENDING_REQUEST"), SPARQLApplicationProfile.delete("REQUEST"));
+			super("RESOURCE_PENDING_REQUEST", "DELETE_RESOURCE_PENDING_REQUEST");
 		}
 	
 		@Override
@@ -129,7 +131,7 @@ class GarbageCollector {
 		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
 			if (monitor) return;
 			
-			Logging.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE PENDING REQUEST "+bindingsResults.toString());
+			Logger.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE PENDING REQUEST "+bindingsResults.toString());
 			for (Bindings garbage : bindingsResults) update(garbage);
 		}
 
@@ -152,7 +154,7 @@ class GarbageCollector {
 	
 	class Eraser extends Producer{
 		public Eraser(){
-			super(SPARQLApplicationProfile.delete("ALL"));
+			super("DELETE_ALL");
 		}
 		
 		public boolean update() {
@@ -162,7 +164,7 @@ class GarbageCollector {
 	
 	class MPResponseRemover extends Aggregator {
 		public MPResponseRemover() {
-			super(SPARQLApplicationProfile.subscribe("MP_RESPONSE"),SPARQLApplicationProfile.delete("REQUEST_RESPONSE"));
+			super("MP_RESPONSE","DELETE_REQUEST_RESPONSE");
 		}
 	
 		@Override
@@ -174,7 +176,7 @@ class GarbageCollector {
 		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
 			if (monitor) return;
 			
-			Logging.log(VERBOSITY.DEBUG, tag, "DELETE MP RESPONSE "+bindingsResults.toString());
+			Logger.log(VERBOSITY.DEBUG, tag, "DELETE MP RESPONSE "+bindingsResults.toString());
 			
 			for (Bindings garbage : bindingsResults) update(garbage);
 		}
@@ -195,7 +197,7 @@ class GarbageCollector {
 	
 	class ResourceResponseRemover extends Aggregator {		
 		public ResourceResponseRemover() {
-			super(SPARQLApplicationProfile.subscribe("RESOURCE_RESPONSE"), SPARQLApplicationProfile.delete("RESPONSE"));
+			super("RESOURCE_RESPONSE", "DELETE_RESOURCE_RESPONSE");
 		}
 	
 		@Override
@@ -209,7 +211,7 @@ class GarbageCollector {
 		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
 			if (monitor) return;
 			
-			Logging.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE RESPONSE "+bindingsResults.toString());
+			Logger.log(VERBOSITY.INFO, tag, "DELETE RESOURCE RESPONSE "+bindingsResults.toString());
 			
 			for (Bindings garbage : bindingsResults) update(garbage);			
 		}
@@ -233,7 +235,7 @@ class GarbageCollector {
 	
 	class ResourceRequestRemover extends Aggregator {		
 		public ResourceRequestRemover() {
-			super(SPARQLApplicationProfile.subscribe("RESOURCE_REQUEST"), SPARQLApplicationProfile.delete("REQUEST"));
+			super("RESOURCE_REQUEST", "DELETE_RESOURCE_REQUEST");
 		}
 	
 		@Override
@@ -247,7 +249,7 @@ class GarbageCollector {
 		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
 			if (monitor) return;
 			
-			Logging.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE REQUEST "+bindingsResults.toString());
+			Logger.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE REQUEST "+bindingsResults.toString());
 			for (Bindings garbage : bindingsResults) update(garbage);
 		}
 
@@ -270,7 +272,7 @@ class GarbageCollector {
 	
 	class MNResponseRemover extends Aggregator {		
 		public MNResponseRemover() {
-			super(SPARQLApplicationProfile.subscribe("MN_RESPONSE"), SPARQLApplicationProfile.delete("RESPONSE"));
+			super("MN_RESPONSE", "DELETE_MN_RESPONSE");
 		}
 	
 		@Override
@@ -284,7 +286,7 @@ class GarbageCollector {
 		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
 			if (monitor) return;
 				
-			Logging.log(VERBOSITY.DEBUG, tag, "DELETE MN RESPONSE "+bindingsResults.toString());
+			Logger.log(VERBOSITY.DEBUG, tag, "DELETE MN RESPONSE "+bindingsResults.toString());
 			for (Bindings garbage : bindingsResults) update(garbage);
 		}
 
@@ -306,7 +308,7 @@ class GarbageCollector {
 	
 	class MNRequestRemover extends Aggregator {		
 		public MNRequestRemover() {
-			super(SPARQLApplicationProfile.subscribe("MN_REQUEST"), SPARQLApplicationProfile.delete("REQUEST"));
+			super("MN_REQUEST", "DELETE_MN_REQUEST");
 		}
 	
 		@Override
@@ -320,7 +322,7 @@ class GarbageCollector {
 		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
 			if (monitor) return;
 			
-			Logging.log(VERBOSITY.DEBUG, tag, "DELETE MN REQUEST "+bindingsResults.toString());
+			Logger.log(VERBOSITY.DEBUG, tag, "DELETE MN REQUEST "+bindingsResults.toString());
 			for (Bindings garbage : bindingsResults) update(garbage);
 		}
 
@@ -367,61 +369,61 @@ class GarbageCollector {
 		
 		String subID = resourcePendingRequest.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag, "Resource pending request subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag, "Resource pending request subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"Resource pending request subscription \t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"Resource pending request subscription \t"+subID);
 		
 		subID = mpResponse.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag,"MP Response subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag,"MP Response subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"MP Response subscription \t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"MP Response subscription \t"+subID);
 		
 		subID = resourceResponse.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag,"Resource response subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag,"Resource response subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"Resource response subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"Resource response subscription\t"+subID);
 		
 		subID = resourceRequest.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag,"Resource request subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag,"Resource request subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"Resource request subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"Resource request subscription\t"+subID);
 		
 		subID = mnResponse.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag,"MN Response subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag,"MN Response subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"MN Response subscription \t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"MN Response subscription \t"+subID);
 		
 		subID = mnRequest.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag,"MN Request subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag,"MN Request subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"MN Response subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"MN Response subscription\t"+subID);
 		
 		subID = triplesMonitor.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag,"Triples monitor subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag,"Triples monitor subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"Triples monitor subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"Triples monitor subscription\t"+subID);
 		
 		subID = mpRequestMonitor.subscribe();
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL, tag,"MP-Request monitor subscription FAILED");
+			Logger.log(VERBOSITY.FATAL, tag,"MP-Request monitor subscription FAILED");
 			return false;
 		}
-		Logging.log(VERBOSITY.DEBUG, tag,"MP-Request monitor subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG, tag,"MP-Request monitor subscription\t"+subID);
 		
-		Logging.log(VERBOSITY.INFO, tag,"Started");
+		Logger.log(VERBOSITY.INFO, tag,"Started");
 		return true;
 	}
 	

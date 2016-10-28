@@ -5,10 +5,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Semaphore;
 
+import arces.unibo.SEPA.Logger;
 import arces.unibo.SEPA.SPARQLApplicationProfile;
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
-
+import arces.unibo.SEPA.Logger.VERBOSITY;
 import dash7Adapter.STDash7Coordinator;
 import dash7Adapter.STDash7Coordinator.BatteryNotify;
 import dash7Adapter.STDash7Coordinator.StatusNotify;
@@ -31,7 +30,6 @@ import dash7Adapter.STDash7Coordinator.ValveNotify;
  * */
 
 public class DASH7Adapter extends MNAdapter implements Observer{
-
 	STDash7Coordinator dash7Coordinator = null;
 	private RequestThread running = null;
 	private String response = "";
@@ -103,59 +101,22 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	}
 	
 	public static void main(String[] args) throws IOException {		
-		byte[] line = new byte[80];
-		byte[] chars;
-		int nBytes = 0;
-		String IP = "127.0.0.1";
-		int PORT = 10123;
-		String namespace = "IoTGateway";
-		
-		String path = DASH7Adapter.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml";
-		
-		if(!SPARQLApplicationProfile.load(path)) {
-			Logging.log(VERBOSITY.FATAL, "ADAPTER SETTINGS", "Failed to load: "+ path);
-			return;
-		}
-		
-		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway IP (press return for default, "+IP+" )");		
-		nBytes = System.in.read(line);
 
-		if (nBytes > 1) {
-			chars = new byte[nBytes-1];
-			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
-			IP = new String(chars);
-		}
-		
-		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway PORT (press return for default, " + PORT+ " )");
-		nBytes = System.in.read(line);
-		
-		if (nBytes > 1) {
-			chars = new byte[nBytes-1];
-			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
-			PORT = Integer.parseInt(new String(chars));
-		}
-		
-		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway Namespace (press return for default, " +namespace +" )");
-		nBytes = System.in.read(line);
-		
-		if (nBytes > 1) {
-			chars = new byte[nBytes-1];
-			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
-			namespace = new String(chars);
-		}
-		
 		DASH7Adapter adapter;
-		adapter =new DASH7Adapter(IP,PORT,namespace);
+		adapter =new DASH7Adapter();
 		
 		if(adapter.start()) {
-			Logging.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " is connected to gateway "+IP+":"+PORT+"@"+namespace);
-			Logging.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
+			Logger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " is connected to gateway "+
+					SPARQLApplicationProfile.getParameters().getUrl()+":"+
+					SPARQLApplicationProfile.getParameters().getPort()+"@"+
+					SPARQLApplicationProfile.getParameters().getName());
+			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
-			if(adapter.stop()) Logging.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
+			if(adapter.stop()) Logger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
 		}
 		else {
-			Logging.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
-			Logging.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
+			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
+			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
 		}	
 	}
@@ -164,13 +125,9 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		super();
 	}
 	
-	public DASH7Adapter(String SIB_IP,int SIB_PORT,String SIB_NAME){
-		super(SIB_IP, SIB_PORT,SIB_NAME);
-	}
-	
 	@Override
 	public boolean doStart() {
-		Logging.log(VERBOSITY.INFO,this.adapterName(),"Starting...");
+		Logger.log(VERBOSITY.INFO,this.adapterName(),"Starting...");
 		
 		dash7Coordinator = new STDash7Coordinator();
 		dash7Coordinator.addObserver(this);
@@ -180,11 +137,11 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 			dash7Coordinator.startRunning();
 		} 
 		catch (IOException e) {
-			Logging.log(VERBOSITY.FATAL,this.adapterName(),e.getMessage());
+			Logger.log(VERBOSITY.FATAL,this.adapterName(),e.getMessage());
 			return false;
 		}
 		
-		Logging.log(VERBOSITY.INFO,this.adapterName(),"Started");
+		Logger.log(VERBOSITY.INFO,this.adapterName(),"Started");
 		
 		return true;
 	}

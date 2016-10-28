@@ -3,20 +3,17 @@ package arces.unibo.gateway;
 import java.util.ArrayList;
 import java.util.UUID;
 
-
 import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.SEPA.Consumer;
+import arces.unibo.SEPA.Logger;
 import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MPMapping;
 import arces.unibo.gateway.mapping.ResourceAction;
-
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
 
 public class MappingManager implements MPMappingEventListener, MNMappingEventListener {
 	static String tag = "MAPPING MANAGER";
@@ -39,7 +36,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 				
 		private class MappingListener extends Consumer {			
-			public MappingListener() {super(SPARQLApplicationProfile.subscribe("MP_MAPPING"));}
+			public MappingListener() {super("MP_MAPPING");}
 
 			@Override
 			public void notify(BindingsResults notify) {}
@@ -77,7 +74,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingCreator extends Producer {			
-			public MappingCreator() {super(SPARQLApplicationProfile.insert("MP_MAPPING"));}
+			public MappingCreator() {super("INSERT_MP_MAPPING");}
 			
 			public boolean addMapping(String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -95,7 +92,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingUpdater extends Producer {			
-			public MappingUpdater() {super(SPARQLApplicationProfile.update("MP_MAPPING"));}
+			public MappingUpdater() {super("UPDATE_MP_MAPPING");}
 			
 			public boolean updateMapping(String mapping, String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -112,7 +109,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingRemover extends Producer {			
-			public MappingRemover() {super(SPARQLApplicationProfile.delete("MAPPING"));}
+			public MappingRemover() {super("DELETE_MP_MAPPING");}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
@@ -158,13 +155,13 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			String subID = listener.subscribe(null);
 			
 			if (subID == null) {
-				Logging.log(VERBOSITY.FATAL, tag,"Subscription FAILED");
+				Logger.log(VERBOSITY.FATAL, tag,"Subscription FAILED");
 				return false;
 			}
 			
-			Logging.log(VERBOSITY.DEBUG, tag,"Subscription\t"+subID);
+			Logger.log(VERBOSITY.DEBUG, tag,"Subscription\t"+subID);
 			
-			Logging.log(VERBOSITY.INFO, tag, "Started");
+			Logger.log(VERBOSITY.INFO, tag, "Started");
 			
 			return true;
 		}
@@ -193,7 +190,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 			
 		private class MappingListener extends Consumer {
-			public MappingListener() {super(SPARQLApplicationProfile.subscribe("MN_MAPPING"));}
+			public MappingListener() {super("MN_MAPPING");}
 
 			@Override
 			public void notify(BindingsResults notify) {}
@@ -233,7 +230,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingCreator extends Producer {
-			public MappingCreator() {super(SPARQLApplicationProfile.insert("MN_MAPPING"));}
+			public MappingCreator() {super("INSERT_MN_MAPPING");}
 			
 			public boolean addMapping(String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -251,7 +248,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingUpdater extends Producer {
-			public MappingUpdater() {super(SPARQLApplicationProfile.update("MN_MAPPING"));}
+			public MappingUpdater() {super("UPDATE_MN_MAPPING");}
 			
 			public boolean updateMapping(String mapping,String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
@@ -268,7 +265,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 		
 		private class MappingRemover extends Producer {
-			public MappingRemover() {super(SPARQLApplicationProfile.delete("MAPPING"));}
+			public MappingRemover() {super("DELETE_MN_MAPPING");}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
@@ -312,13 +309,13 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			String subID = listener.subscribe(null);
 			
 			if (subID == null) {
-				Logging.log(VERBOSITY.FATAL, tag, "Subscription FAILED");
+				Logger.log(VERBOSITY.FATAL, tag, "Subscription FAILED");
 				return false;
 			}
 			
-			Logging.log(VERBOSITY.DEBUG, tag,"Subscription\t"+subID); 
+			Logger.log(VERBOSITY.DEBUG, tag,"Subscription\t"+subID); 
 			
-			Logging.log(VERBOSITY.INFO, tag, "Started");
+			Logger.log(VERBOSITY.INFO, tag, "Started");
 			
 			return true;
 		}
@@ -348,12 +345,13 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	}
 	private boolean addDefaultProtocolMapping() {
 		//Protocols default mappings
-		Logging.log(VERBOSITY.INFO, tag,"Adding default protocol mappings");
+		Logger.log(VERBOSITY.INFO, tag,"Adding default protocol mappings");
 		
 		// TODO add default mapping here
-		if(!addProtocolMapping("iot:HTTP", "action=PING", "*", "iot:Resource_PING", "iot:GET", "*")) return false;
-		if(!addProtocolMapping("iot:HTTP", "action=PONG", "*", "iot:Resource_PONG", "iot:GET", "*")) return false;
-		
+		if(!addProtocolMapping("iot:HTTP", "action=GET&resource=PINGPONG", "*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
+		if(!addProtocolMapping("iot:HTTP", "action=SET&resource=PINGPONG&value=*", "*", "iot:Resource_PINGPONG", "iot:SET", "*")) return false;
+
+		/*
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM1&resource=TEMPERATURE", "Room1 temperature * Celsius degree", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM2&resource=TEMPERATURE", "Room2 temperature * Celsius degree", "iot:Resource_TEMPERATURE_2", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM3&resource=TEMPERATURE", "Room3 temperature * Celsius degree", "iot:Resource_TEMPERATURE_3", "iot:GET", "*")) return false;
@@ -365,7 +363,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM1&resource=BATTERY", "Room1 battery level * volts", "iot:Resource_BATTERY_1", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM2&resource=BATTERY", "Room2 battery level * volts", "iot:Resource_BATTERY_2", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM3&resource=BATTERY", "Room3 battery level * volts", "iot:Resource_BATTERY_3", "iot:GET", "*")) return false;
-
+*/
 		
 		/*if(!addProtocolMapping("iot:HTTP", "action=GET&location=SERVER_MML&core=0&resource=TEMPERATURE", "MML Server Core 0 Temperature *", "iot:Resource_SERVER_MML_TEMPERATURE_0", "iot:GET", "*")) return false;
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=SERVER_MML&core=1&resource=TEMPERATURE", "MML Server Core 1 Temperature *", "iot:Resource_SERVER_MML_TEMPERATURE_1", "iot:GET", "*")) return false;
@@ -395,12 +393,13 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	private boolean addDefaultNetworkMapping() {
 				
 		//Networks default mappings
-		Logging.log(VERBOSITY.INFO, tag,"Adding default network mappings");
+		Logger.log(VERBOSITY.INFO, tag,"Adding default network mappings");
 		
 		// TODO add default mapping here
-		if(!addNetworkMapping("iot:PINGPONG", "PING", "PONG", "iot:Resource_PING", "iot:GET", "*")) return false;
-		if(!addNetworkMapping("iot:PINGPONG", "PONG", "PING", "iot:Resource_PONG", "iot:GET", "*")) return false;
+		if(!addNetworkMapping("iot:PINGPONG", "GET", "GET&*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
+		if(!addNetworkMapping("iot:PINGPONG", "SET=*", "SET&*", "iot:Resource_PINGPONG", "iot:SET", "*")) return false;
 
+		/*
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO1", "TEMPERATURE!NODO1&*", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO2", "TEMPERATURE!NODO2&*", "iot:Resource_TEMPERATURE_2", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO3", "TEMPERATURE!NODO3&*", "iot:Resource_TEMPERATURE_3", "iot:GET", "*")) return false;
@@ -412,7 +411,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!addNetworkMapping("iot:DASH7", "BATTERY@NODO2", "BATTERY!NODO2&*", "iot:Resource_BATTERY_2", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "BATTERY@NODO3", "BATTERY!NODO3&*", "iot:Resource_BATTERY_3", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "BATTERY@NODO0", "BATTERY!NODO0&*", "iot:Resource_BATTERY_0", "iot:GET", "*")) return false;
-		
+		*/
 		/*		
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core0/temperature", "toffano/mml/Core0/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_0", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core1/temperature", "toffano/mml/Core1/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_1", "iot:GET", "*")) return false;
@@ -435,8 +434,9 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!mnMappingManager.start()) return false;
 		if(!mpMappingManager.start()) return false;
 			
-		Logging.log(VERBOSITY.INFO, tag,"Started");
+		Logger.log(VERBOSITY.INFO, tag,"Started");
 		
+		removeAllMapping();
 		addDefaultMapping();
 		
 		return true;

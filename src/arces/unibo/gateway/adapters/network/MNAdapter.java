@@ -8,9 +8,8 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
+import arces.unibo.SEPA.Logger;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 
 public abstract class MNAdapter {
 	private MNRequestResponseDispatcher dispatcher;
@@ -26,18 +25,10 @@ public abstract class MNAdapter {
 		dispatcher = new MNRequestResponseDispatcher();	
 	}
 	
-	public MNAdapter(String SIB_IP,int SIB_PORT,String SIB_NAME){
-		dispatcher = new MNRequestResponseDispatcher(SIB_IP, SIB_PORT,SIB_NAME);
-	}
-	
 	class MNRequestResponseDispatcher extends Aggregator {
 		
 		public MNRequestResponseDispatcher(){
-			super(SPARQLApplicationProfile.subscribe("MN_REQUEST"),SPARQLApplicationProfile.insert("MN_RESPONSE"));
-		}
-		
-		public MNRequestResponseDispatcher(String SIB_IP,int SIB_PORT,String SIB_NAME){
-			super(SPARQLApplicationProfile.subscribe("MN_REQUEST"),SPARQLApplicationProfile.insert("MN_RESPONSE"),SIB_IP, SIB_PORT,SIB_NAME);
+			super("MN_REQUEST","INSERT_MN_RESPONSE");
 		}
 		
 		public String  subscribe(){
@@ -85,18 +76,18 @@ public abstract class MNAdapter {
 	
 	public boolean start(){
 		if (!dispatcher.join()) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"Join FAILED");
+			Logger.log(VERBOSITY.FATAL,adapterName(),"Join FAILED");
 			return false;
 		}
 		
 		String subID = dispatcher.subscribe();
 		
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
+			Logger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
 			return false;
 		}
 		
-		Logging.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
+		Logger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
 		
 		return doStart();
 	}

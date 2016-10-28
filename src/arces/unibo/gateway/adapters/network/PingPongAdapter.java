@@ -2,73 +2,49 @@ package arces.unibo.gateway.adapters.network;
 
 import java.io.IOException;
 
+import arces.unibo.SEPA.BindingLiteralValue;
+import arces.unibo.SEPA.BindingURIValue;
+import arces.unibo.SEPA.Bindings;
+import arces.unibo.SEPA.Logger;
+import arces.unibo.SEPA.Producer;
 import arces.unibo.SEPA.SPARQLApplicationProfile;
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 
 public class PingPongAdapter extends MNAdapter {
+	static String status = "INIT";
 	
-	public static void main(String[] args) throws IOException {
-		byte[] line = new byte[80];
-		byte[] chars;
-		int nBytes = 0;
-		String IP = "127.0.0.1";
-		int PORT = 10123;
-		String namespace = "IoTGateway";
-		
-		String path = PingPongAdapter.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml";
-		
-		if(!SPARQLApplicationProfile.load(path)) {
-			Logging.log(VERBOSITY.FATAL, "ADAPTER SETTINGS", "Failed to load: "+ path);
-			return;
-		}
-		
-		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway IP (press return for default, "+IP+" )");		
-		nBytes = System.in.read(line);
-
-		if (nBytes > 1) {
-			chars = new byte[nBytes-1];
-			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
-			IP = new String(chars);
-		}
-		
-		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway PORT (press return for default, " + PORT+ " )");
-		nBytes = System.in.read(line);
-		
-		if (nBytes > 1) {
-			chars = new byte[nBytes-1];
-			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
-			PORT = Integer.parseInt(new String(chars));
-		}
-		
-		Logging.log(VERBOSITY.INFO,"ADAPTER SETTINGS","Gateway Namespace (press return for default, " +namespace +" )");
-		nBytes = System.in.read(line);
-		
-		if (nBytes > 1) {
-			chars = new byte[nBytes-1];
-			for(int i=0 ; i < nBytes-1 ; i++) chars[i] = line[i];
-			namespace = new String(chars);
-		}
-		
-		PingPongAdapter adapter;
-		adapter =new PingPongAdapter(IP,PORT,namespace);
-		
-		if(adapter.start()) {
-			Logging.log(VERBOSITY.INFO,adapter.adapterName(), adapter.adapterName() + " is connected to gateway "+IP+":"+PORT+"@"+namespace);
-			Logging.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
-			System.in.read();
-			if(adapter.stop()) Logging.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() +" stopped");
-		}
-		else {
-			Logging.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() +" is NOT running");
-			Logging.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
-			System.in.read();
-		}	
-			
+	static Producer resourceCreator;
+	
+	static private void addResource(String uri,String value) {
+		Bindings bindings = new Bindings();
+		bindings.addBinding("?resource", new BindingURIValue(uri));
+		bindings.addBinding("?value", new BindingLiteralValue(value));
+		resourceCreator.update(bindings);	
 	}
 	
-	public PingPongAdapter(String SIB_IP,int SIB_PORT,String SIB_NAME){
-		super(SIB_IP, SIB_PORT,SIB_NAME);
+	public static void main(String[] args) throws IOException {
+		
+		PingPongAdapter adapter;
+		adapter =new PingPongAdapter();
+		
+		if(adapter.start()) {
+			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Connected to gateway "+
+					SPARQLApplicationProfile.getParameters().getUrl()+":"+
+					SPARQLApplicationProfile.getParameters().getPort()+"@"+
+					SPARQLApplicationProfile.getParameters().getName());
+			
+			resourceCreator = new Producer("INSERT_RESOURCE");
+			if (!resourceCreator.join()) return ;
+			addResource("iot:Resource_PINGPONG",status);
+			resourceCreator.leave();
+		}
+		else{
+			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");	
+		}
+		Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
+		System.in.read();
+		
+		adapter.stop();		
 	}
 	
 	public PingPongAdapter(){
@@ -82,19 +58,21 @@ public class PingPongAdapter extends MNAdapter {
 
 	@Override
 	public void mnRequest(String request) {
-		if (request.equals("PING")) {
-			Logging.log(VERBOSITY.INFO,adapterName(),"PING-->PONG");
-			mnResponse("PONG");
+		Logger.log(VERBOSITY.INFO,adapterName(),"<< Request<"+request+">");
+		String response = "GET&"+status;
+		if(request.contains("SET")) {
+			String[] values = request.split("=");
+			status = values[1];
+			response = "SET&"+status;
 		}
-		else {
-			Logging.log(VERBOSITY.INFO,adapterName(),"PONG-->PING");
-			mnResponse("PING");
-		}	
+	
+		Logger.log(VERBOSITY.INFO,adapterName(),">> Response<"+response+">");
+		mnResponse(response);
 	}
 
 	@Override
 	protected boolean doStart() {
-		Logging.log(VERBOSITY.INFO,adapterName(),"Started");
+		Logger.log(VERBOSITY.INFO,adapterName(),"Started");
 		return true;
 	}
 

@@ -10,11 +10,10 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
+import arces.unibo.SEPA.Logger;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 
 public class MQTTAdapter extends MNAdapter implements MqttCallback {
-
 	private MqttClient mqttClient;
 	private String serverURI = "tcp://mml.arces.unibo.it:10996"; // tcp://iot.eclipse.org:1883";
 	private String clientID = "MQTTAdapter";
@@ -40,7 +39,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient = new MqttClient(serverURI,clientID);
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"Failed to create MQTT client "+e.getMessage());
+			Logger.log(VERBOSITY.FATAL,adapterName(),"Failed to create MQTT client "+e.getMessage());
 			return false;
 		}
 		
@@ -49,7 +48,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.connect();
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"Failed to connect "+e.getMessage());
+			Logger.log(VERBOSITY.FATAL,adapterName(),"Failed to connect "+e.getMessage());
 			return false;
 		}
 		
@@ -60,14 +59,14 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.subscribe(topicsFilter);
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"Failed to subscribe "+e.getMessage());
+			Logger.log(VERBOSITY.FATAL,adapterName(),"Failed to subscribe "+e.getMessage());
 			return false;
 		}
 		
 		String topics = "";
 		for (int i=0; i < topicsFilter.length;i++) topics += "\""+ topicsFilter[i] + "\" ";
 		
-		Logging.log(VERBOSITY.INFO,adapterName(),"MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
+		Logger.log(VERBOSITY.INFO,adapterName(),"MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
 		
 		return true;
 	}
@@ -79,7 +78,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			if (topicsFilter != null) mqttClient.unsubscribe(topicsFilter);
 		} 
 		catch (MqttException e1) {
-			Logging.log(VERBOSITY.ERROR,adapterName(),"Failed to unsubscribe "+e1.getMessage());
+			Logger.log(VERBOSITY.ERROR,adapterName(),"Failed to unsubscribe "+e1.getMessage());
 		}
 		
 		try 
@@ -87,7 +86,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.disconnect();
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.ERROR,adapterName(),"Failed to disconnect "+e.getMessage());
+			Logger.log(VERBOSITY.ERROR,adapterName(),"Failed to disconnect "+e.getMessage());
 		}
 	}
 

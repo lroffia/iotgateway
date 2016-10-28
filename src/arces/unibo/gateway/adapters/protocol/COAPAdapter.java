@@ -17,12 +17,11 @@ import org.eclipse.californium.core.server.resources.CoapExchange;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
 import arces.unibo.SEPA.Consumer;
+import arces.unibo.SEPA.Logger;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 import arces.unibo.gateway.adapters.protocol.COAPAdapter.COAPAdapterServer.GatewayCOAPResource.Running;
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
 
 public class COAPAdapter extends MPAdapter{
-
 	private COAPAdapterServer server;
 	private static HashMap<String,Running> iotHandlers = new HashMap<String,Running>();
 	private COAPResourceListener resourceListener;
@@ -174,7 +173,7 @@ public class COAPAdapter extends MPAdapter{
 			server = new COAPAdapterServer();
 		} 
 		catch (SocketException e) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"FAILED to start "+e.getMessage());
+			Logger.log(VERBOSITY.FATAL,adapterName(),"FAILED to start "+e.getMessage());
 			return false;
 		}
 		
@@ -185,20 +184,20 @@ public class COAPAdapter extends MPAdapter{
 		resourceListener = new COAPResourceListener();
 		
 		if (!resourceListener.join()) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"FAILED to join gateway");
+			Logger.log(VERBOSITY.FATAL,adapterName(),"FAILED to join gateway");
 			return false;
 		}
 		
 		String subID = resourceListener.subscribe(null);
 		
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL,adapterName(),"FAILED to subscribe");
+			Logger.log(VERBOSITY.FATAL,adapterName(),"FAILED to subscribe");
 			return false;
 		}
 		
-		Logging.log(VERBOSITY.DEBUG,adapterName(),"Resource subscription "+subID);
+		Logger.log(VERBOSITY.DEBUG,adapterName(),"Resource subscription "+subID);
 		
-		Logging.log(VERBOSITY.INFO,adapterName(),"COAP server is running on port "+ server.COAP_PORT + " and Resource Listener subscribed");
+		Logger.log(VERBOSITY.INFO,adapterName(),"COAP server is running on port "+ server.COAP_PORT + " and Resource Listener subscribed");
 		
 		return true;
 	}

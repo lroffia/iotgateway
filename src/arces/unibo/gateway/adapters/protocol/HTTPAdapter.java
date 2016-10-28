@@ -8,9 +8,8 @@ import java.util.HashMap;
 
 import com.sun.net.httpserver.*;
 
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
-
+import arces.unibo.SEPA.Logger;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 
 public class HTTPAdapter extends MPAdapter {
 	private static int HTTP_PORT = 8000; 
@@ -28,7 +27,7 @@ public class HTTPAdapter extends MPAdapter {
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
-			Logging.log(VERBOSITY.FATAL,adapterName(),e.getMessage());
+			Logger.log(VERBOSITY.FATAL,adapterName(),e.getMessage());
 			return false;
 		}
 		
@@ -37,7 +36,7 @@ public class HTTPAdapter extends MPAdapter {
 	    server.setExecutor(null);
 	    server.start();
 	    
-	    Logging.log(VERBOSITY.INFO,adapterName(),"Started on port "+HTTP_PORT);
+	    Logger.log(VERBOSITY.INFO,adapterName(),"Started on port "+HTTP_PORT);
 	    
 	    return true;
 	}
@@ -102,7 +101,7 @@ public class HTTPAdapter extends MPAdapter {
 					os.close();
 				} 
 				catch (IOException e) {
-					Logging.log(VERBOSITY.FATAL,adapterName(),"Send HTTP Response failed");
+					Logger.log(VERBOSITY.FATAL,adapterName(),"Send HTTP Response failed");
 				}
 			}
 		}

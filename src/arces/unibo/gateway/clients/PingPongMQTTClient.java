@@ -5,8 +5,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
+import arces.unibo.SEPA.Logger;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 
 public class PingPongMQTTClient {
 	private static MqttClient client;
@@ -22,7 +22,7 @@ public class PingPongMQTTClient {
 			client = new MqttClient(serverURI,clientID,dataStore);
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			Logger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
 			return;
 		}
 		
@@ -31,7 +31,7 @@ public class PingPongMQTTClient {
 			client.connect();
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			Logger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
 			return;
 		}
 		
@@ -41,7 +41,7 @@ public class PingPongMQTTClient {
 			client.publish("PONG", new MqttMessage(new byte[]{'P','O','N','G'}));
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			Logger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
 			return;
 		}
 		
@@ -50,7 +50,7 @@ public class PingPongMQTTClient {
 			client.disconnect();
 		} 
 		catch (MqttException e) {
-			Logging.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			Logger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
 			return;
 		}
 	}

@@ -10,15 +10,13 @@ import arces.unibo.SEPA.BindingLiteralValue;
 import arces.unibo.SEPA.BindingURIValue;
 import arces.unibo.SEPA.Bindings;
 import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
+import arces.unibo.SEPA.Logger;
+
+import arces.unibo.SEPA.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.ResourceAction;
 import arces.unibo.gateway.mapping.mappers.protocol.COAPMapper;
 import arces.unibo.gateway.mapping.mappers.protocol.HTTPMapper;
 import arces.unibo.gateway.mapping.mappers.protocol.IProtocolMapper;
-
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
-
 import arces.unibo.gateway.mapping.MPMapping;
 import arces.unibo.gateway.mapping.MPRequest;
 import arces.unibo.gateway.mapping.MPResponse;
@@ -45,7 +43,7 @@ public class MPDispatcher {
 			
 			for(IProtocolMapper mapper : mappers) {
 				addMapper(mapper.getMapperURI(), mapper);
-				Logging.log(VERBOSITY.INFO, "MP MAP",mapper.getMapperURI() + "\tmapper added");
+				Logger.log(VERBOSITY.INFO, "MP MAP",mapper.getMapperURI() + "\tmapper added");
 			}
 		}
 		
@@ -55,7 +53,7 @@ public class MPDispatcher {
 	}
 	
 	public class MPMapper extends Mapper{
-		public MPMapper(Map map) {super(SPARQLApplicationProfile.subscribe("MP_MAPPING"), map);}
+		public MPMapper(Map map) {super("MP_MAPPING", map);}
 
 		@Override
 		public String name() {return "MP MAPPER";}
@@ -97,7 +95,7 @@ public class MPDispatcher {
 					}
 				}
 				MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
-				if(map.addMapping(mapping)) Logging.log(VERBOSITY.INFO, name() ,"ADDED MAPPING " + mapping.toString());
+				if(map.addMapping(mapping)) Logger.log(VERBOSITY.INFO, name() ,"ADDED MAPPING " + mapping.toString());
 			}
 		}
 
@@ -135,7 +133,7 @@ public class MPDispatcher {
 					}
 				}
 				MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
-				if(map.removeMapping(mapping)) Logging.log(VERBOSITY.INFO, name(),"REMOVED MAPPING " + mapping.toString());
+				if(map.removeMapping(mapping)) Logger.log(VERBOSITY.INFO, name(),"REMOVED MAPPING " + mapping.toString());
 			}
 		}
 
@@ -149,8 +147,7 @@ public class MPDispatcher {
 		private static final String tag = "MP REQUEST DISPATCHER";
 		
 		public MPRequestDispatcher(){ 
-			super(SPARQLApplicationProfile.subscribe("MP_REQUEST"),
-					SPARQLApplicationProfile.insert("RESOURCE_PENDING_REQUEST"));}
+			super("MP_REQUEST","INSERT_RESOURCE_PENDING_REQUEST");}
 		
 		public String subscribe() {return super.subscribe(null);}
 		
@@ -167,23 +164,23 @@ public class MPDispatcher {
 				//Mapping MP-Request to Resource-Pending-Request
 				MPRequest request = new MPRequest(protocolURI, requestString,mpRequest);
 				
-				Logging.log(VERBOSITY.INFO,tag,"<< " + request.toString());
+				Logger.log(VERBOSITY.INFO,tag,"<< " + request.toString());
 				
 				ResourceAction resourceAction = mpMap.mpRequest2ResourceAction(request);
 				
 				//MP-Mapping NOT FOUND
 				if (resourceAction == null){
 					MPResponse response = new MPResponse(protocolURI,"MP-MAPPING NOT FOUND FOR "+request.toString());
+					
 					bindings = new Bindings();
 					bindings.addBinding("?request", new BindingURIValue(mpRequest));
 					bindings.addBinding("?response", new BindingURIValue(response.getURI()));
 					bindings.addBinding("?value", new BindingLiteralValue(response.getResponseString()));
 					bindings.addBinding("?protocol", new BindingURIValue(response.getProtocol()));
 					
-					Logging.log(VERBOSITY.INFO,tag,">> " + response.toString());
+					Logger.log(VERBOSITY.WARNING,tag,">> " + response.toString());
 					
-					if(!mpResponseDispatcher.update(bindings)) 
-						Logging.log(VERBOSITY.ERROR,tag,"***RDF STORE UPDATE FAILED***");
+					mpResponseDispatcher.update(bindings);
 						
 					continue;
 				}
@@ -195,7 +192,7 @@ public class MPDispatcher {
 				bindings.addBinding("?action", new BindingURIValue(resourceAction.getActionURI()));
 				bindings.addBinding("?value", new BindingLiteralValue(resourceAction.getValue()));
 				
-				Logging.log(VERBOSITY.INFO,tag,">> " + resourceAction.toString());
+				Logger.log(VERBOSITY.INFO,tag, ">> Resource-Pending-Request " + resourceAction.toString());
 				
 				if(update(bindings)) {		
 					//MP-Request cache matching
@@ -211,7 +208,6 @@ public class MPDispatcher {
 					mpRequestsList.add(request);
 					requestMap.put(resourceAction, mpRequestsList);
 				}
-				else Logging.log(VERBOSITY.ERROR,tag,"***RDF STORE UPDATE FAILED***");
 			}
 		}
 
@@ -229,7 +225,7 @@ public class MPDispatcher {
 	class MPResponseDispatcher extends Aggregator {
 		private static final String tag = "MP RESPONSE DISPATCHER";
 		
-		public MPResponseDispatcher(){super(SPARQLApplicationProfile.subscribe("RESOURCE_RESPONSE"),SPARQLApplicationProfile.insert("MP_RESPONSE"));}
+		public MPResponseDispatcher(){super("RESOURCE_RESPONSE","INSERT_MP_RESPONSE");}
 		
 		public String subscribe() {return super.subscribe(null);}
 		
@@ -244,10 +240,12 @@ public class MPDispatcher {
 						bindings.getBindingValue("?action").getValue(),  
 						bindings.getBindingValue("?value").getValue());
 				
+				Logger.log(VERBOSITY.INFO,tag,"<< Resource-Response " + resource.toString());
+				
 				ArrayList<MPRequest> requests = getRequests(resource);
 				
 				if (requests == null) {
-					Logging.log(VERBOSITY.WARNING,tag,"MP-REQUEST NOT FOUND");// FOR "+resource.toString());
+					Logger.log(VERBOSITY.WARNING,tag,"MP-REQUEST NOT FOUND FOR "+resource.toString());
 					return;
 				}
 				
@@ -265,10 +263,9 @@ public class MPDispatcher {
 					bindings.addBinding("?value", new BindingLiteralValue(response.getResponseString()));
 					bindings.addBinding("?protocol", new BindingURIValue(response.getProtocol()));
 					
-					Logging.log(VERBOSITY.INFO,tag,resource.toString() + " --> " + response.toString());
+					Logger.log(VERBOSITY.INFO,tag,">> " + response.toString());
 					
-					if(!update(bindings)) 
-						Logging.log(VERBOSITY.ERROR,tag,"***RDF STORE UPDATE FAILED***");
+					update(bindings);
 				}
 				
 				removeResourceActionRequest(resource);
@@ -300,42 +297,42 @@ public class MPDispatcher {
 		String subID = mpMapper.subscribe();
 		
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL,tag,"Mapper subscription FAILED");
+			Logger.log(VERBOSITY.FATAL,tag,"Mapper subscription FAILED");
 			return false;
 		}
 		
-		Logging.log(VERBOSITY.DEBUG,tag,"Mapper subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG,tag,"Mapper subscription\t"+subID);
 		
 		subID = mpRequestDispatcher.subscribe();
 		
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL,tag,"Request dispatcher subscription FAILED");
+			Logger.log(VERBOSITY.FATAL,tag,"Request dispatcher subscription FAILED");
 			return false;
 		}
 		
-		Logging.log(VERBOSITY.DEBUG,tag,"Request dispatcher subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG,tag,"Request dispatcher subscription\t"+subID);
 		
 		subID = mpResponseDispatcher.subscribe();
 		
 		if (subID == null) {
-			Logging.log(VERBOSITY.FATAL,tag,"Response dispatcher subscription FAILED");
+			Logger.log(VERBOSITY.FATAL,tag,"Response dispatcher subscription FAILED");
 			return false;
 		}
 		
-		Logging.log(VERBOSITY.DEBUG,tag,"Response dispatcher subscription\t"+subID);
+		Logger.log(VERBOSITY.DEBUG,tag,"Response dispatcher subscription\t"+subID);
 		
-		Logging.log(VERBOSITY.INFO,tag,"Started");
+		Logger.log(VERBOSITY.INFO,tag,"Started");
 		
 		return true;
 	}
 	
 	public boolean stop(){				
 		boolean ret1 = mpResponseDispatcher.unsubscribe();
-		if (!ret1) Logging.log(VERBOSITY.ERROR,tag,"Response Dispatcher unsubscribe FAILED");
+		if (!ret1) Logger.log(VERBOSITY.ERROR,tag,"Response Dispatcher unsubscribe FAILED");
 		boolean ret2 = mpRequestDispatcher.unsubscribe();
-		if (!ret2) Logging.log(VERBOSITY.ERROR,tag,"Request Dispatcher unsubscribe FAILED");
+		if (!ret2) Logger.log(VERBOSITY.ERROR,tag,"Request Dispatcher unsubscribe FAILED");
 		boolean ret3 = mpMapper.unsubscribe();
-		if (!ret3) Logging.log(VERBOSITY.ERROR,tag,"Mapper unsubscribe FAILED");
+		if (!ret3) Logger.log(VERBOSITY.ERROR,tag,"Mapper unsubscribe FAILED");
 		
 		return (ret1 && ret2 && ret3);
 	}

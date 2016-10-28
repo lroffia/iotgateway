@@ -18,14 +18,14 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 
+import arces.unibo.SEPA.Logger;
 import arces.unibo.SEPA.SPARQLApplicationProfile;
+import arces.unibo.SEPA.Logger.VERBOSITY;
 import arces.unibo.gateway.GarbageCollector.GarbageCollectorListener;
 import arces.unibo.gateway.MappingInputDialog.MappingInputDialogListener;
 import arces.unibo.gateway.MappingManager.MappingEventListener;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MPMapping;
-import arces.unibo.tools.Logging;
-import arces.unibo.tools.Logging.VERBOSITY;
 
 import java.util.ArrayList;
 import java.util.Vector;
@@ -33,7 +33,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
 
-public class GatewayManager implements MappingEventListener, MappingInputDialogListener, GarbageCollectorListener {
+public class GatewayManager implements MappingEventListener, MappingInputDialogListener, GarbageCollectorListener {	
 	//Tables models
 	private DefaultTableModel protocolMappingDataModel;
 	private DefaultTableModel networkMappingDataModel;
@@ -510,16 +510,18 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_btnClearMPRequests.gridy = 2;
 		panel_1.add(btnClearMPRequests, gbc_btnClearMPRequests);
 		
-		lblMpRequests = new JLabel("MP Requests");
+		lblMpRequests = new JLabel("MP Requests (removed)");
 		GridBagConstraints gbc_lblMpRequests = new GridBagConstraints();
+		gbc_lblMpRequests.gridwidth = 2;
 		gbc_lblMpRequests.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_lblMpRequests.insets = new Insets(0, 0, 5, 5);
 		gbc_lblMpRequests.gridx = 0;
 		gbc_lblMpRequests.gridy = 3;
 		panel_1.add(lblMpRequests, gbc_lblMpRequests);
 		
-		lblNewLabel = new JLabel("MP Responses");
+		lblNewLabel = new JLabel("MP Responses (removed)");
 		GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+		gbc_lblNewLabel.gridwidth = 2;
 		gbc_lblNewLabel.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel.gridx = 3;
@@ -591,8 +593,9 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_btnClearMPResponses.gridy = 5;
 		panel_1.add(btnClearMPResponses, gbc_btnClearMPResponses);
 		
-		lblResourcePendingRequests = new JLabel("Resource Pending Requests");
+		lblResourcePendingRequests = new JLabel("Resource Pending Requests (removed)");
 		GridBagConstraints gbc_lblResourcePendingRequests = new GridBagConstraints();
+		gbc_lblResourcePendingRequests.gridwidth = 5;
 		gbc_lblResourcePendingRequests.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_lblResourcePendingRequests.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourcePendingRequests.gridx = 0;
@@ -632,15 +635,16 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_btnPendingResourceRequests.gridy = 8;
 		panel_1.add(btnPendingResourceRequests, gbc_btnPendingResourceRequests);
 		
-		lblResourceRequests = new JLabel("Resource Requests");
+		lblResourceRequests = new JLabel("Resource Requests (removed)");
 		GridBagConstraints gbc_lblResourceRequests = new GridBagConstraints();
+		gbc_lblResourceRequests.gridwidth = 2;
 		gbc_lblResourceRequests.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_lblResourceRequests.insets = new Insets(0, 0, 5, 5);
 		gbc_lblResourceRequests.gridx = 0;
 		gbc_lblResourceRequests.gridy = 9;
 		panel_1.add(lblResourceRequests, gbc_lblResourceRequests);
 		
-		lblResourceResponses = new JLabel("Resource Responses");
+		lblResourceResponses = new JLabel("Resource Responses (removed)");
 		GridBagConstraints gbc_lblResourceResponses = new GridBagConstraints();
 		gbc_lblResourceResponses.gridwidth = 2;
 		gbc_lblResourceResponses.anchor = GridBagConstraints.SOUTHWEST;
@@ -715,16 +719,18 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_btnClearResourceResponses.gridy = 11;
 		panel_1.add(btnClearResourceResponses, gbc_btnClearResourceResponses);
 		
-		lblNewLabel_2 = new JLabel("MN Requests");
+		lblNewLabel_2 = new JLabel("MN Requests (removed)");
 		GridBagConstraints gbc_lblNewLabel_2 = new GridBagConstraints();
+		gbc_lblNewLabel_2.gridwidth = 2;
 		gbc_lblNewLabel_2.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_lblNewLabel_2.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_2.gridx = 0;
 		gbc_lblNewLabel_2.gridy = 12;
 		panel_1.add(lblNewLabel_2, gbc_lblNewLabel_2);
 		
-		lblMnResponses = new JLabel("MN Responses");
+		lblMnResponses = new JLabel("MN Responses (removed)");
 		GridBagConstraints gbc_lblMnResponses = new GridBagConstraints();
+		gbc_lblMnResponses.gridwidth = 2;
 		gbc_lblMnResponses.anchor = GridBagConstraints.SOUTHWEST;
 		gbc_lblMnResponses.insets = new Insets(0, 0, 5, 5);
 		gbc_lblMnResponses.gridx = 3;
@@ -800,6 +806,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		lblNewLabel_1 = new JLabel("RDF Store Size (Triples)");
 		lblNewLabel_1.setFont(new Font("Dialog", Font.BOLD, 12));
 		GridBagConstraints gbc_lblNewLabel_1 = new GridBagConstraints();
+		gbc_lblNewLabel_1.gridwidth = 5;
 		gbc_lblNewLabel_1.anchor = GridBagConstraints.NORTH;
 		gbc_lblNewLabel_1.insets = new Insets(0, 0, 5, 5);
 		gbc_lblNewLabel_1.gridx = 0;
@@ -809,18 +816,17 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		lblTotalTriples = new JLabel("--");
 		lblTotalTriples.setFont(new Font("Dialog", Font.BOLD, 12));
 		GridBagConstraints gbc_lblTotalTriples = new GridBagConstraints();
+		gbc_lblTotalTriples.gridwidth = 5;
 		gbc_lblTotalTriples.insets = new Insets(0, 0, 0, 5);
 		gbc_lblTotalTriples.anchor = GridBagConstraints.NORTH;
 		gbc_lblTotalTriples.gridx = 0;
 		gbc_lblTotalTriples.gridy = 16;
 		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);
-		
-		Logging.setVerbosityLevel(VERBOSITY.DEBUG);
-		
+				
 		String path = GatewayManager.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml";
 		
 		if(!SPARQLApplicationProfile.load(path)) {
-			Logging.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ path);
+			Logger.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ path);
 			return;
 		}
 		
