@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import arces.unibo.SEPA.application.Logger;
 import arces.unibo.SEPA.application.ApplicationProfile;
 import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.gateway.adapters.network.MNAdapter;
 import arces.unibo.gateway.adapters.protocol.HTTPAdapter;
 import arces.unibo.gateway.adapters.protocol.MPAdapter;
 import arces.unibo.gateway.adapters.protocol.WebSocketAdapter;
