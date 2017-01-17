@@ -4,19 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import arces.unibo.SEPA.Aggregator;
-import arces.unibo.SEPA.BindingLiteralValue;
-import arces.unibo.SEPA.BindingURIValue;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Logger;
-
-import arces.unibo.SEPA.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.ResourceAction;
 import arces.unibo.gateway.mapping.mappers.network.DASH7Mapper;
 import arces.unibo.gateway.mapping.mappers.network.INetworkMapper;
 import arces.unibo.gateway.mapping.mappers.network.MQTTMapper;
 import arces.unibo.gateway.mapping.mappers.network.PingPongMapper;
+import arces.unibo.SEPA.application.Aggregator;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.commons.RDFTermLiteral;
+import arces.unibo.SEPA.commons.RDFTermURI;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MNRequest;
 import arces.unibo.gateway.mapping.MNResponse;
@@ -32,6 +33,8 @@ public class MNDispatcher {
 	private MNMapper mnMapper;
 	private MNMap mnMap;
 	private HashMap<ResourceAction,ArrayList<MNRequest>> requestMap = new HashMap<ResourceAction,ArrayList<MNRequest>>();
+	
+	private ApplicationProfile appProfile;
 	
 	public class MNMap extends Map {
 		private ArrayList<INetworkMapper> mappers = new ArrayList<INetworkMapper>();
@@ -56,28 +59,25 @@ public class MNDispatcher {
 	public class MNRequestDispatcher extends Aggregator {	
 		private static final String tag = "MN REQUEST DISPATCHER";
 		
-		public MNRequestDispatcher() {super("RESOURCE_REQUEST","INSERT_MN_REQUEST");}
+		public MNRequestDispatcher() {super(appProfile,"RESOURCE_REQUEST","INSERT_MN_REQUEST");}
 		
 		public String subscribe() {return super.subscribe(null);}
-		
-		@Override
-		public void notify(BindingsResults notify) {}
 
 		public void dispatch(MNRequest request){
 			Bindings bindings = new Bindings();
-			bindings.addBinding("?request", new BindingURIValue("iot:MN-Request_"+UUID.randomUUID().toString()));
-			bindings.addBinding("?network", new BindingURIValue(request.getNetwork()));
-			bindings.addBinding("?value", new BindingLiteralValue(request.getRequestString()));
+			bindings.addBinding("?request", new RDFTermURI("iot:MN-Request_"+UUID.randomUUID().toString()));
+			bindings.addBinding("?network", new RDFTermURI(request.getNetwork()));
+			bindings.addBinding("?value", new RDFTermLiteral(request.getRequestString()));
 			
 			update(bindings);
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			for(Bindings bindings : bindingsResults){
-				String value = bindings.getBindingValue("?value").getValue();
-				String action = bindings.getBindingValue("?action").getValue();
-				String resource = bindings.getBindingValue("?resource").getValue();
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for(Bindings bindings : bindingsResults.getBindings()){
+				String value = bindings.getBindingValue("value");
+				String action = bindings.getBindingValue("action");
+				String resource = bindings.getBindingValue("resource");
 				ResourceAction resourceRequest= new ResourceAction(resource, action, value);
 				
 				Logger.log(VERBOSITY.INFO, tag, "<< Resource-Request "+resourceRequest.toString());
@@ -88,10 +88,10 @@ public class MNDispatcher {
 				if (mnRequestList.isEmpty()) {
 					bindings = new Bindings();
 					ResourceAction response = new ResourceAction(resource, action, "MN-MAPPING NOT FOUND FOR "+resourceRequest.toString());
-					bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));
-					bindings.addBinding("?resource", new BindingURIValue(response.getResourceURI()));
-					bindings.addBinding("?action", new BindingURIValue(response.getActionURI()));
-					bindings.addBinding("?value", new BindingLiteralValue(response.getValue()));
+					bindings.addBinding("response", new RDFTermURI("iot:Resource-Response_"+UUID.randomUUID().toString()));
+					bindings.addBinding("resource", new RDFTermURI(response.getResourceURI()));
+					bindings.addBinding("action", new RDFTermURI(response.getActionURI()));
+					bindings.addBinding("value", new RDFTermLiteral(response.getValue()));
 
 					Logger.log(VERBOSITY.WARNING, tag, ">> Resource-Response "+response.toString());
 					
@@ -116,9 +116,9 @@ public class MNDispatcher {
 				//Dispatch MN Requests
 				for(MNRequest mnRequest : mnRequestList){
 					bindings = new Bindings();
-					bindings.addBinding("?request", new BindingURIValue(mnRequest.getURI()));
-					bindings.addBinding("?network", new BindingURIValue(mnRequest.getNetwork()));
-					bindings.addBinding("?value", new BindingLiteralValue(mnRequest.getRequestString()));
+					bindings.addBinding("request", new RDFTermURI(mnRequest.getURI()));
+					bindings.addBinding("network", new RDFTermURI(mnRequest.getNetwork()));
+					bindings.addBinding("value", new RDFTermLiteral(mnRequest.getRequestString()));
 					
 					Logger.log(VERBOSITY.INFO, tag,">> "+mnRequest.toString());
 					
@@ -128,30 +128,41 @@ public class MNDispatcher {
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);			
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);	
+			
 		}
 	}
 	
 	public class MNResponseDispatcher extends Aggregator {		
 		private static final String tag = "MN RESPONSE DISPATCHER";
 		
-		public MNResponseDispatcher() {super("MN_RESPONSE","INSERT_RESOURCE_RESPONSE");}
+		public MNResponseDispatcher() {super(appProfile,"MN_RESPONSE","INSERT_RESOURCE_RESPONSE");}
 
 		public String subscribe() {return super.subscribe(null);}
-		
-		@Override
-		public void notify(BindingsResults notify) {}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			for (Bindings bindings : bindingsResults){
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+		}
 
-				MNResponse response = new MNResponse(bindings.getBindingValue("?network").getValue(), bindings.getBindingValue("?value").getValue());
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for (Bindings bindings : bindingsResults.getBindings()){
+
+				MNResponse response = new MNResponse(bindings.getBindingValue("network"), bindings.getBindingValue("value"));
 				
 				Logger.log(VERBOSITY.INFO, tag,"<< "+response.toString());
 				
@@ -165,35 +176,42 @@ public class MNDispatcher {
 				else Logger.log(VERBOSITY.INFO, tag,">> Resource-Response "+resourceAction.toString());
 				
 				bindings = new Bindings();
-				bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));						
-				bindings.addBinding("?resource", new BindingURIValue(resourceAction.getResourceURI()));
-				bindings.addBinding("?action", new BindingURIValue(resourceAction.getActionURI()));
-				bindings.addBinding("?value", new BindingLiteralValue(resourceAction.getValue()));
+				bindings.addBinding("response", new RDFTermURI("iot:Resource-Response_"+UUID.randomUUID().toString()));						
+				bindings.addBinding("resource", new RDFTermURI(resourceAction.getResourceURI()));
+				bindings.addBinding("action", new RDFTermURI(resourceAction.getActionURI()));
+				bindings.addBinding("value", new RDFTermLiteral(resourceAction.getValue()));
 				
 				update(bindings);
 			}
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {}
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);	
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);	
+			
 		}
 	}
 
 	public class MNMapper extends Mapper {	
-		public MNMapper(Map map) {super("MN_MAPPING", map);}
-
-		@Override
-		public void notify(BindingsResults notify) {}
+		public MNMapper(Map map) {super(appProfile,"MN_MAPPING", map);}
 
 		@Override
 		public String name() {return "MN MAPPER";}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindings) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub	
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			String network="";
 			String resource="";
 			String action="";
@@ -202,26 +220,26 @@ public class MNDispatcher {
 			String value = "";
 			
 			Logger.log(VERBOSITY.INFO, name(), "ADDED MAPPINGS");
-			for (Bindings results : bindings){
+			for (Bindings results : bindingsResults.getBindings()){
 				for(String var : results.getVariables()){
-					String bindingValue = results.getBindingValue(var).getValue();
+					String bindingValue = results.getBindingValue(var);
 					switch(var){
-						case "?network":
+						case "network":
 							network = bindingValue;
 							break;
-						case "?resource":
+						case "resource":
 							resource = bindingValue;
 							break;
-						case "?action":
+						case "action":
 							action = bindingValue;
 							break;
-						case "?requestPattern":
+						case "requestPattern":
 							requestPattern = bindingValue;
 							break;
-						case "?responsePattern":
+						case "responsePattern":
 							responsePattern = bindingValue;
 							break;
-						case "?value":
+						case "value":
 							value = bindingValue;
 							break;
 					}
@@ -230,10 +248,11 @@ public class MNDispatcher {
 				if (map.addMapping(mapping)) 
 					Logger.log(VERBOSITY.INFO, name(), mapping.toString());
 			}
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindings) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			String network="";
 			String resource="";
 			String action="";
@@ -242,26 +261,26 @@ public class MNDispatcher {
 			String value = "";
 			
 			Logger.log(VERBOSITY.INFO, name(), "REMOVED MAPPINGS");
-			for (Bindings results : bindings){
+			for (Bindings results : bindingsResults.getBindings()){
 				for(String var : results.getVariables()){
-					String bindingValue = results.getBindingValue(var).getValue();
+					String bindingValue = results.getBindingValue(var);
 					switch(var){
-						case "?network":
+						case "network":
 							network = bindingValue;
 							break;
-						case "?resource":
+						case "resource":
 							resource = bindingValue;
 							break;
-						case "?action":
+						case "action":
 							action = bindingValue;
 							break;
-						case "?requestPattern":
+						case "requestPattern":
 							requestPattern = bindingValue;
 							break;
-						case "?responsePattern":
+						case "responsePattern":
 							responsePattern = bindingValue;
 							break;
-						case "?value":
+						case "value":
 							value = bindingValue;
 							break;
 					}
@@ -269,15 +288,17 @@ public class MNDispatcher {
 				MNMapping mapping = new MNMapping(network,requestPattern,responsePattern,new ResourceAction(resource,action,value));
 				if (map.removeMapping(mapping)) Logger.log(VERBOSITY.INFO, name(), mapping.toString());
 			}
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
 		}
 	}
 	
-	public MNDispatcher() {
+	public MNDispatcher(ApplicationProfile appProfile) {
+		this.appProfile = appProfile;
 		mnMap = new MNMap();
 		mnRequestDispatcher = new MNRequestDispatcher();
 		mnResponseDispatcher = new MNResponseDispatcher();

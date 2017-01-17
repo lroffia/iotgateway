@@ -5,8 +5,8 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 
 public class PingPongMQTTClient {
 	private static MqttClient client;

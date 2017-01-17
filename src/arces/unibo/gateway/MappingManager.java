@@ -3,14 +3,16 @@ package arces.unibo.gateway;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import arces.unibo.SEPA.BindingLiteralValue;
-import arces.unibo.SEPA.BindingURIValue;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Consumer;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Consumer;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.Producer;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.commons.RDFTermLiteral;
+import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MPMapping;
 import arces.unibo.gateway.mapping.ResourceAction;
@@ -24,7 +26,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	
 	public class MPMappingManager {
 		static final String tag = "MP MAPPING";
-		
+	
 		private MappingCreator creator;
 		private MappingRemover remover;
 		private MappingListener listener;
@@ -36,85 +38,96 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 				
 		private class MappingListener extends Consumer {			
-			public MappingListener() {super("MP_MAPPING");}
+			public MappingListener(ApplicationProfile appProfile) {super(appProfile,"MP_MAPPING");}
 
 			@Override
-			public void notify(BindingsResults notify) {}
+			public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+				// TODO Auto-generated method stub
+				
+			}
 
 			@Override
-			public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+			public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 				ArrayList<MPMapping> mappings = new ArrayList<MPMapping>();
-				for (Bindings binding : bindingsResults) {
+				for (Bindings binding : bindingsResults.getBindings()) {
 					mappings.add(new MPMapping(
-							binding.getBindingValue("?mapping").getValue(),
-							binding.getBindingValue("?protocol").getValue(),
-							binding.getBindingValue("?requestPattern").getValue(),
-							binding.getBindingValue("?responsePattern").getValue(),
-							new ResourceAction(binding.getBindingValue("?resource").getValue(),binding.getBindingValue("?action").getValue(),binding.getBindingValue("?value").getValue())));
+							binding.getBindingValue("mapping"),
+							binding.getBindingValue("protocol"),
+							binding.getBindingValue("requestPattern"),
+							binding.getBindingValue("responsePattern"),
+							new ResourceAction(
+									binding.getBindingValue("resource"),
+									binding.getBindingValue("action"),
+									binding.getBindingValue("value"))));
 				}
 				if(event != null) event.addedMPMappings(mappings);
 			}
 
 			@Override
-			public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+			public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 				ArrayList<MPMapping> mappings = new ArrayList<MPMapping>();
-				for (Bindings binding : bindingsResults) {
+				for (Bindings binding : bindingsResults.getBindings()) {
 					mappings.add(new MPMapping(
-							binding.getBindingValue("?mapping").getValue(),
-							binding.getBindingValue("?protocol").getValue(),
-							binding.getBindingValue("?requestPattern").getValue(),
-							binding.getBindingValue("?responsePattern").getValue(),
-							new ResourceAction(binding.getBindingValue("?resource").getValue(),binding.getBindingValue("?action").getValue(),binding.getBindingValue("?value").getValue())));
+							binding.getBindingValue("mapping"),
+							binding.getBindingValue("protocol"),
+							binding.getBindingValue("requestPattern"),
+							binding.getBindingValue("responsePattern"),
+							new ResourceAction(
+									binding.getBindingValue("resource"),
+									binding.getBindingValue("action"),
+									binding.getBindingValue("value"))));
 				}
 				if(event != null) event.removedMPMappings(mappings);	
 			}
 
 			@Override
-			public void notifyFirst(ArrayList<Bindings> bindingsResults) {notifyAdded(bindingsResults);}	
+			public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+				notifyAdded(bindingsResults,spuid,0);
+			}
 		}
 		
 		private class MappingCreator extends Producer {			
-			public MappingCreator() {super("INSERT_MP_MAPPING");}
+			public MappingCreator(ApplicationProfile appProfile) {super(appProfile,"INSERT_MP_MAPPING");}
 			
 			public boolean addMapping(String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
 				String mapping = "iot:MP-Mapping_"+UUID.randomUUID().toString();
-				bindings.addBinding("?mapping", new BindingURIValue(mapping));
-				bindings.addBinding("?protocol", new BindingURIValue(protocol));
-				bindings.addBinding("?resource", new BindingURIValue(resource));
-				bindings.addBinding("?action", new BindingURIValue(action));
-				bindings.addBinding("?value", new BindingLiteralValue(value));
-				bindings.addBinding("?requestPattern", new BindingLiteralValue(requestPattern));
-				bindings.addBinding("?responsePattern", new BindingLiteralValue(responsePattern));
+				bindings.addBinding("mapping", new RDFTermURI(mapping));
+				bindings.addBinding("protocol", new RDFTermURI(protocol));
+				bindings.addBinding("resource", new RDFTermURI(resource));
+				bindings.addBinding("action", new RDFTermURI(action));
+				bindings.addBinding("value", new RDFTermLiteral(value));
+				bindings.addBinding("requestPattern", new RDFTermLiteral(requestPattern));
+				bindings.addBinding("responsePattern", new RDFTermLiteral(responsePattern));
 				
 				return update(bindings);
 			}
 		}
 		
 		private class MappingUpdater extends Producer {			
-			public MappingUpdater() {super("UPDATE_MP_MAPPING");}
+			public MappingUpdater(ApplicationProfile appProfile) {super(appProfile,"UPDATE_MP_MAPPING");}
 			
 			public boolean updateMapping(String mapping, String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
-				bindings.addBinding("?mapping", new BindingURIValue(mapping));
-				bindings.addBinding("?protocol", new BindingURIValue(protocol));
-				bindings.addBinding("?resource", new BindingURIValue(resource));
-				bindings.addBinding("?action", new BindingURIValue(action));
-				bindings.addBinding("?value", new BindingLiteralValue(value));
-				bindings.addBinding("?requestPattern", new BindingLiteralValue(requestPattern));
-				bindings.addBinding("?responsePattern", new BindingLiteralValue(responsePattern));
+				bindings.addBinding("mapping", new RDFTermURI(mapping));
+				bindings.addBinding("protocol", new RDFTermURI(protocol));
+				bindings.addBinding("resource", new RDFTermURI(resource));
+				bindings.addBinding("action", new RDFTermURI(action));
+				bindings.addBinding("value", new RDFTermURI(value));
+				bindings.addBinding("requestPattern", new RDFTermLiteral(requestPattern));
+				bindings.addBinding("responsePattern", new RDFTermLiteral(responsePattern));
 				
 				return update(bindings);
 			}
 		}
 		
 		private class MappingRemover extends Producer {			
-			public MappingRemover() {super("DELETE_MP_MAPPING");}
+			public MappingRemover(ApplicationProfile appProfile) {super(appProfile,"DELETE_MP_MAPPING");}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
 
-				bindings.addBinding("?mapping", new BindingURIValue(mapping));
+				bindings.addBinding("mapping", new RDFTermURI(mapping));
 				
 				return update(bindings);
 			}
@@ -122,11 +135,11 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			public boolean removeAllMapping(){return update(null);}
 		}
 
-		public MPMappingManager() {
-			creator = new MappingCreator();
-			remover = new MappingRemover();
-			listener = new MappingListener();
-			updater = new MappingUpdater();
+		public MPMappingManager(ApplicationProfile appProfile) {
+			creator = new MappingCreator(appProfile);
+			remover = new MappingRemover(appProfile);
+			listener = new MappingListener(appProfile);
+			updater = new MappingUpdater(appProfile);
 		}
 		
 		public boolean removeAllMapping(){
@@ -190,86 +203,92 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		}
 			
 		private class MappingListener extends Consumer {
-			public MappingListener() {super("MN_MAPPING");}
+			public MappingListener(ApplicationProfile appProfile) {super(appProfile,"MN_MAPPING");}
 
 			@Override
-			public void notify(BindingsResults notify) {}
+			public void notify(ARBindingsResults notify, String spuid, Integer sequence) {}
 
 			@Override
-			public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+			public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 				ArrayList<MNMapping> mappings = new ArrayList<MNMapping>();
-				for (Bindings binding : bindingsResults) {
+				for (Bindings binding : bindingsResults.getBindings()) {
 					mappings.add(new MNMapping(
-							binding.getBindingValue("?mapping").getValue(),
-							binding.getBindingValue("?network").getValue(),
-							binding.getBindingValue("?requestPattern").getValue(),
-							binding.getBindingValue("?responsePattern").getValue(),
-							new ResourceAction(binding.getBindingValue("?resource").getValue(),binding.getBindingValue("?action").getValue(),binding.getBindingValue("?value").getValue())));
+							binding.getBindingValue("mapping"),
+							binding.getBindingValue("network"),
+							binding.getBindingValue("requestPattern"),
+							binding.getBindingValue("responsePattern"),
+							new ResourceAction(
+									binding.getBindingValue("resource"),
+									binding.getBindingValue("action"),
+									binding.getBindingValue("value"))));
 				}
 				if(event != null) event.addedMNMappings(mappings);
 			}
 
 			@Override
-			public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+			public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 				ArrayList<MNMapping> mappings = new ArrayList<MNMapping>();
-				for (Bindings binding : bindingsResults) {
+				for (Bindings binding : bindingsResults.getBindings()) {
 					mappings.add(new MNMapping(
-							binding.getBindingValue("?mapping").getValue(),
-							binding.getBindingValue("?network").getValue(),
-							binding.getBindingValue("?requestPattern").getValue(),
-							binding.getBindingValue("?responsePattern").getValue(),
-							new ResourceAction(binding.getBindingValue("?resource").getValue(),binding.getBindingValue("?action").getValue(),binding.getBindingValue("?value").getValue())));
+							binding.getBindingValue("mapping"),
+							binding.getBindingValue("network"),
+							binding.getBindingValue("requestPattern"),
+							binding.getBindingValue("responsePattern"),
+							new ResourceAction(
+									binding.getBindingValue("resource"),
+									binding.getBindingValue("action"),
+									binding.getBindingValue("value"))));
 				}
 				if(event != null) event.removedMNMappings(mappings);	
 			}
 
 			@Override
-			public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-				notifyAdded(bindingsResults);
-			}	
+			public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+				notifyAdded(bindingsResults,spuid,0);
+			}
 		}
 		
 		private class MappingCreator extends Producer {
-			public MappingCreator() {super("INSERT_MN_MAPPING");}
+			public MappingCreator(ApplicationProfile appProfile) {super(appProfile,"INSERT_MN_MAPPING");}
 			
 			public boolean addMapping(String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
 				String mapping = "iot:MN-Mapping_"+UUID.randomUUID().toString();
-				bindings.addBinding("?mapping", new BindingURIValue(mapping));
-				bindings.addBinding("?network", new BindingURIValue(protocol));
-				bindings.addBinding("?resource", new BindingURIValue(resource));
-				bindings.addBinding("?action", new BindingURIValue(action));
-				bindings.addBinding("?value", new BindingLiteralValue(value));
-				bindings.addBinding("?requestPattern", new BindingLiteralValue(requestPattern));
-				bindings.addBinding("?responsePattern", new BindingLiteralValue(responsePattern));
+				bindings.addBinding("mapping", new RDFTermURI(mapping));
+				bindings.addBinding("network", new RDFTermURI(protocol));
+				bindings.addBinding("resource", new RDFTermURI(resource));
+				bindings.addBinding("action", new RDFTermURI(action));
+				bindings.addBinding("value", new RDFTermLiteral(value));
+				bindings.addBinding("requestPattern", new RDFTermLiteral(requestPattern));
+				bindings.addBinding("responsePattern", new RDFTermLiteral(responsePattern));
 				
 				return update(bindings);
 			}
 		}
 		
 		private class MappingUpdater extends Producer {
-			public MappingUpdater() {super("UPDATE_MN_MAPPING");}
+			public MappingUpdater(ApplicationProfile appProfile) {super(appProfile,"UPDATE_MN_MAPPING");}
 			
 			public boolean updateMapping(String mapping,String protocol,String requestPattern,String responsePattern,String resource,String action,String value){
 				Bindings bindings = new Bindings();
-				bindings.addBinding("?mapping", new BindingURIValue(mapping));
-				bindings.addBinding("?network", new BindingURIValue(protocol));
-				bindings.addBinding("?resource", new BindingURIValue(resource));
-				bindings.addBinding("?action", new BindingURIValue(action));
-				bindings.addBinding("?value", new BindingLiteralValue(value));
-				bindings.addBinding("?requestPattern", new BindingLiteralValue(requestPattern));
-				bindings.addBinding("?responsePattern", new BindingLiteralValue(responsePattern));
+				bindings.addBinding("mapping", new RDFTermURI(mapping));
+				bindings.addBinding("network", new RDFTermURI(protocol));
+				bindings.addBinding("resource", new RDFTermURI(resource));
+				bindings.addBinding("action", new RDFTermURI(action));
+				bindings.addBinding("value", new RDFTermLiteral(value));
+				bindings.addBinding("requestPattern", new RDFTermLiteral(requestPattern));
+				bindings.addBinding("responsePattern", new RDFTermLiteral(responsePattern));
 				
 				return update(bindings);
 			}
 		}
 		
 		private class MappingRemover extends Producer {
-			public MappingRemover() {super("DELETE_MN_MAPPING");}
+			public MappingRemover(ApplicationProfile appProfile) {super(appProfile,"DELETE_MN_MAPPING");}
 			
 			public boolean removeMapping(String mapping){
 				Bindings bindings = new Bindings();
-				bindings.addBinding("?mapping", new BindingURIValue(mapping));
+				bindings.addBinding("mapping", new RDFTermURI(mapping));
 				
 				return update(bindings);
 			}
@@ -277,11 +296,11 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 			public boolean removeAllMapping(){return update(null);}
 		}
 
-		public MNMappingManager() {
-			creator = new MappingCreator();
-			remover = new MappingRemover();
-			listener = new MappingListener();
-			updater = new MappingUpdater();
+		public MNMappingManager(ApplicationProfile appProfile) {
+			creator = new MappingCreator(appProfile);
+			remover = new MappingRemover(appProfile);
+			listener = new MappingListener(appProfile);
+			updater = new MappingUpdater(appProfile);
 		}
 		
 		public boolean removeAllMapping(){
@@ -423,9 +442,9 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		return true;
 	}
 	
-	public MappingManager() {
-		mpMappingManager = new MPMappingManager();
-		mnMappingManager = new MNMappingManager();	
+	public MappingManager(ApplicationProfile appProfile) {
+		mpMappingManager = new MPMappingManager(appProfile);
+		mnMappingManager = new MNMappingManager(appProfile);	
 		mpMappingManager.setEventListener(this);
 		mnMappingManager.setEventListener(this);
 	}

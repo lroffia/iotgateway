@@ -18,9 +18,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 import arces.unibo.gateway.GarbageCollector.GarbageCollectorListener;
 import arces.unibo.gateway.MappingInputDialog.MappingInputDialogListener;
 import arces.unibo.gateway.MappingManager.MappingEventListener;
@@ -46,6 +46,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	private DefaultTableModel MNResponsesDM;
 	private DefaultTableModel MPRequestsDeletedDM;
 	
+	private static String APP_PROFILE = "GatewayProfile.sap";
 	//Tables headers
 	private String protocolMappingHeader[] = new String[] 
 			{"Protocol URI", "Request string pattern", "Response string pattern", "Resource URI", "Action URI", "Action value","Mapping URI"};
@@ -70,6 +71,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	private long MNResponsesN = 0;
 	private long MPRequestsDeletedN = 0;
 	
+	ApplicationProfile appProfile = new ApplicationProfile();
 	
 	private JFrame frmSemanticGatewayManager;
 	private JTable table;
@@ -146,6 +148,21 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	 */
 	public GatewayManager() {
 		initialize();
+		
+		Logger.loadSettings();
+		
+		if(!appProfile.load(APP_PROFILE)) {
+			Logger.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ APP_PROFILE);
+			return;
+		}
+		
+		mappingManager = new MappingManager(appProfile);
+		mappingManager.setMappingEventListener(this);
+		mappingManager.start();
+		
+		garbageCollector = new GarbageCollector(appProfile);
+		garbageCollector.setListener(this);
+		garbageCollector.start(false, true); 
 	}
 
 	/**
@@ -821,22 +838,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_lblTotalTriples.anchor = GridBagConstraints.NORTH;
 		gbc_lblTotalTriples.gridx = 0;
 		gbc_lblTotalTriples.gridy = 16;
-		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);
-				
-		String path = GatewayManager.class.getProtectionDomain().getCodeSource().getLocation().getPath()+"GatewayProfile.xml";
-		
-		if(!SPARQLApplicationProfile.load(path)) {
-			Logger.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ path);
-			return;
-		}
-		
-		mappingManager = new MappingManager();
-		mappingManager.setMappingEventListener(this);
-		mappingManager.start();
-		
-		garbageCollector = new GarbageCollector();
-		garbageCollector.setListener(this);
-		garbageCollector.start(false, true);
+		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);				
 	}
 
 	@Override

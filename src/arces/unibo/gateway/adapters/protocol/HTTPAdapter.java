@@ -8,16 +8,17 @@ import java.util.HashMap;
 
 import com.sun.net.httpserver.*;
 
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 
 public class HTTPAdapter extends MPAdapter {
-	private static int HTTP_PORT = 8000; 
+	private static int HTTP_PORT = 8888; 
 	private static HttpServer server = null;
 	private static HashMap<String,IoTHandler.Running> iotHandlers = new HashMap<String,IoTHandler.Running>();
 	
-	public HTTPAdapter() {
-		super();
+	public HTTPAdapter(ApplicationProfile appProfile) {
+		super(appProfile);
 	}
 	
 	public boolean doStart(){		

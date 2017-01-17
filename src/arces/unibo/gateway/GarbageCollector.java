@@ -1,17 +1,19 @@
 package arces.unibo.gateway;
 
-import java.util.ArrayList;
-
-import arces.unibo.SEPA.Aggregator;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Consumer;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Aggregator;
+import arces.unibo.SEPA.application.Consumer;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.Producer;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 
 class GarbageCollector {
 	static String tag = "GARBAGE COLLECTOR";
+
+	public ApplicationProfile appProfile;
 	
 	private ResourcePendingRequestRemover resourcePendingRequest;
 	private MPResponseRemover mpResponse;
@@ -27,9 +29,10 @@ class GarbageCollector {
 	
 	private GarbageCollectorListener listener;
 	
-	public GarbageCollector() {
-		
+	public GarbageCollector(ApplicationProfile appProfile) {
+		this.appProfile = appProfile;
 	}
+	
 	public void setListener(GarbageCollectorListener listener) {this.listener = listener;}
 		
 	public interface GarbageCollectorListener {
@@ -48,37 +51,43 @@ class GarbageCollector {
 	
 	public class MPRequestMonitor extends Consumer {
 		public MPRequestMonitor() {
-			super("MP_REQUEST");
+			super(appProfile,"MP_REQUEST");
 		}
 
 		public String subscribe() {return subscribe(null);}
-		
-		@Override
-		public void notify(BindingsResults notify) {}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if(!monitor || listener == null) return;
 			
-			for (Bindings garbage : bindingsResults)
+			for (Bindings garbage : bindingsResults.getBindings())
 				listener.newMPRequest(
-						garbage.getBindingValue("?protocol").getValue(),
-						garbage.getBindingValue("?value").getValue());	
+						garbage.getBindingValue("protocol"),
+						garbage.getBindingValue("value"));	
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if(!monitor || listener == null) return;
 			
-			for (Bindings garbage : bindingsResults)
+			for (Bindings garbage : bindingsResults.getBindings())
 				listener.removedMPRequest(
-						garbage.getBindingValue("?protocol").getValue(),
-						garbage.getBindingValue("?value").getValue());		
+						garbage.getBindingValue("protocol"),
+						garbage.getBindingValue("value"));		
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			// TODO Auto-generated method stub
+			
 		}
 	}
 	
@@ -86,31 +95,35 @@ class GarbageCollector {
 		private  long triplesNumber;
 		
 		public TriplesMonitor() {
-			super("ALL");
+			super(appProfile,"ALL");
 			triplesNumber = 0;
 		}
 
 		public String subscribe() {return subscribe(null);}
-		
-		@Override
-		public void notify(BindingsResults notify) {}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			triplesNumber += bindingsResults.size();
-			if (listener != null) listener.totalTriples(triplesNumber);
-			Logger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			triplesNumber += bindingsResults.size();
+			if (listener != null) listener.totalTriples(triplesNumber);
+			Logger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);
+			
+		}
+
+		@Override
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			triplesNumber -= bindingsResults.size();
 			if (listener != null) listener.totalTriples(triplesNumber);
 			Logger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 			triplesNumber = bindingsResults.size();
 			if (listener != null) listener.totalTriples(triplesNumber);
 			Logger.log(VERBOSITY.DEBUG, tag, "Initial triples: "+triplesNumber);
@@ -119,42 +132,50 @@ class GarbageCollector {
 	
 	class ResourcePendingRequestRemover extends Aggregator {
 		public ResourcePendingRequestRemover() {
-			super("RESOURCE_PENDING_REQUEST", "DELETE_RESOURCE_PENDING_REQUEST");
+			super(appProfile,"RESOURCE_PENDING_REQUEST", "DELETE_RESOURCE_PENDING_REQUEST");
 		}
-	
-		@Override
-		public void notify(BindingsResults notify) {}
-		
-		public String subscribe() {return super.subscribe(null);}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (monitor) return;
 			
 			Logger.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE PENDING REQUEST "+bindingsResults.toString());
-			for (Bindings garbage : bindingsResults) update(garbage);
+			for (Bindings garbage : bindingsResults.getBindings()) update(garbage);
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (!monitor || listener == null)  return;
 			
-			for (Bindings garbage : bindingsResults) 
+			for (Bindings garbage : bindingsResults.getBindings()) 
 				listener.removedResourcePendingRequest(
-						garbage.getBindingValue("?resource").getValue(), 
-						garbage.getBindingValue("?action").getValue(), 
-						garbage.getBindingValue("?value").getValue());	
+						garbage.getBindingValue("resource"), 
+						garbage.getBindingValue("action"), 
+						garbage.getBindingValue("value"));	
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		public String subscribe() {
+			return super.subscribe(null);
 		}
 	}
 	
 	class Eraser extends Producer{
 		public Eraser(){
-			super("DELETE_ALL");
+			super(appProfile,"DELETE_ALL");
 		}
 		
 		public boolean update() {
@@ -164,181 +185,202 @@ class GarbageCollector {
 	
 	class MPResponseRemover extends Aggregator {
 		public MPResponseRemover() {
-			super("MP_RESPONSE","DELETE_REQUEST_RESPONSE");
+			super(appProfile,"MP_RESPONSE","DELETE_REQUEST_RESPONSE");
 		}
-	
-		@Override
-		public void notify(BindingsResults notify) {}
-		
+			
 		public String subscribe() {return super.subscribe(null);}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence)  {
 			if (monitor) return;
 			
 			Logger.log(VERBOSITY.DEBUG, tag, "DELETE MP RESPONSE "+bindingsResults.toString());
 			
-			for (Bindings garbage : bindingsResults) update(garbage);
+			for (Bindings garbage : bindingsResults.getBindings()) update(garbage);
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (!monitor || listener == null) return;
 			
-			for (Bindings garbage : bindingsResults)	
+			for (Bindings garbage : bindingsResults.getBindings())	
 				listener.removedMPResponse(
-						garbage.getBindingValue("?protocol").getValue(), 
-						garbage.getBindingValue("?value").getValue());	
+						garbage.getBindingValue("protocol"), 
+						garbage.getBindingValue("value"));	
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {notifyAdded(bindingsResults);}	
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			// TODO Auto-generated method stub
+			
+		}
+
 	}
 	
 	class ResourceResponseRemover extends Aggregator {		
 		public ResourceResponseRemover() {
-			super("RESOURCE_RESPONSE", "DELETE_RESOURCE_RESPONSE");
-		}
-	
-		@Override
-		public void notify(BindingsResults notify) {}
-		
-		public String subscribe() {
-			return super.subscribe(null);
+			super(appProfile,"RESOURCE_RESPONSE", "DELETE_RESOURCE_RESPONSE");
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (monitor) return;
 			
 			Logger.log(VERBOSITY.INFO, tag, "DELETE RESOURCE RESPONSE "+bindingsResults.toString());
 			
-			for (Bindings garbage : bindingsResults) update(garbage);			
+			for (Bindings garbage : bindingsResults.getBindings()) update(garbage);	
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (!monitor || listener == null) return;
 			
-			for (Bindings garbage : bindingsResults)
+			for (Bindings garbage : bindingsResults.getBindings())
 				listener.removedResourceResponse(
-						garbage.getBindingValue("?resource").getValue(), 
-						garbage.getBindingValue("?action").getValue(), 
-						garbage.getBindingValue("?value").getValue());
+						garbage.getBindingValue("resource"), 
+						garbage.getBindingValue("action"), 
+						garbage.getBindingValue("value"));
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);			
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);	
 		}	
+		
+		public String subscribe() {
+			return super.subscribe(null);
+		}
 	}
 	
 	class ResourceRequestRemover extends Aggregator {		
 		public ResourceRequestRemover() {
-			super("RESOURCE_REQUEST", "DELETE_RESOURCE_REQUEST");
+			super(appProfile,"RESOURCE_REQUEST", "DELETE_RESOURCE_REQUEST");
 		}
-	
-		@Override
-		public void notify(BindingsResults notify) {}
 		
 		public String subscribe() {
 			return super.subscribe(null);
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (monitor) return;
 			
 			Logger.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE REQUEST "+bindingsResults.toString());
-			for (Bindings garbage : bindingsResults) update(garbage);
+			for (Bindings garbage : bindingsResults.getBindings()) update(garbage);
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if(!monitor || listener == null) return;
 			
-			for (Bindings garbage : bindingsResults)
+			for (Bindings garbage : bindingsResults.getBindings())
 				listener.removedResourceRequest(
-						garbage.getBindingValue("?resource").getValue(), 
-						garbage.getBindingValue("?action").getValue(), 
-						garbage.getBindingValue("?value").getValue());	
+						garbage.getBindingValue("resource"), 
+						garbage.getBindingValue("action"), 
+						garbage.getBindingValue("value"));	
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);			
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			// TODO Auto-generated method stub
+			
 		}		
 	}
 	
 	class MNResponseRemover extends Aggregator {		
 		public MNResponseRemover() {
-			super("MN_RESPONSE", "DELETE_MN_RESPONSE");
+			super(appProfile,"MN_RESPONSE", "DELETE_MN_RESPONSE");
 		}
-	
-		@Override
-		public void notify(BindingsResults notify) {}
 		
 		public String subscribe() {
 			return super.subscribe(null);
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			if (monitor) return;
-				
-			Logger.log(VERBOSITY.DEBUG, tag, "DELETE MN RESPONSE "+bindingsResults.toString());
-			for (Bindings garbage : bindingsResults) update(garbage);
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			if (monitor) return;
+			
+			Logger.log(VERBOSITY.DEBUG, tag, "DELETE MN RESPONSE "+bindingsResults.toString());
+			for (Bindings garbage : bindingsResults.getBindings()) update(garbage);	
+		}
+
+		@Override
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (!monitor || listener == null) return;
 			
-			for (Bindings garbage : bindingsResults)
+			for (Bindings garbage : bindingsResults.getBindings())
 				listener.removedMNResponse(
-						garbage.getBindingValue("?network").getValue(), 
-						garbage.getBindingValue("?value").getValue());
+						garbage.getBindingValue("network"), 
+						garbage.getBindingValue("value"));
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);			
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
 		}		
 	}
 	
 	class MNRequestRemover extends Aggregator {		
 		public MNRequestRemover() {
-			super("MN_REQUEST", "DELETE_MN_REQUEST");
+			super(appProfile,"MN_REQUEST", "DELETE_MN_REQUEST");
 		}
 	
 		@Override
-		public void notify(BindingsResults notify) {}
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence)  {}
 		
 		public String subscribe() {
 			return super.subscribe(null);
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (monitor) return;
 			
 			Logger.log(VERBOSITY.DEBUG, tag, "DELETE MN REQUEST "+bindingsResults.toString());
-			for (Bindings garbage : bindingsResults) update(garbage);
+			for (Bindings garbage : bindingsResults.getBindings()) update(garbage);
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			if (!monitor || listener == null) return;
 				
-			for (Bindings garbage : bindingsResults)
+			for (Bindings garbage : bindingsResults.getBindings())
 				listener.removedMNRequest(
-						garbage.getBindingValue("?network").getValue(), 
-						garbage.getBindingValue("?value").getValue());	
+						garbage.getBindingValue("network"), 
+						garbage.getBindingValue("value"));	
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);			
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);			
 		}		
 	}
 	

@@ -4,7 +4,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.ArrayList;
+
 import java.util.HashMap;
 
 import org.eclipse.californium.core.CoapResource;
@@ -14,53 +14,53 @@ import org.eclipse.californium.core.network.EndpointManager;
 import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Consumer;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Consumer;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
 import arces.unibo.gateway.adapters.protocol.COAPAdapter.COAPAdapterServer.GatewayCOAPResource.Running;
 
 public class COAPAdapter extends MPAdapter{
+	public COAPAdapter(ApplicationProfile appProfile) {
+		super(appProfile);
+	}
+
 	private COAPAdapterServer server;
 	private static HashMap<String,Running> iotHandlers = new HashMap<String,Running>();
 	private COAPResourceListener resourceListener;
 	
 	public class COAPResourceListener extends Consumer {
-		private static final String COAP_RESOURCE =
-				" SELECT ?resource "
-				+ " WHERE { "
-						+ "?mapping rdf:type iot:MP-Mapping . "
-						+ "?mapping iot:hasProtocol iot:COAP . "
-						+ "?mapping iot:hasResource ?resource "
-				+ " }";
-		
-		public COAPResourceListener() {
-			super(COAP_RESOURCE);
+
+		public COAPResourceListener(ApplicationProfile appProfile) {
+			super(appProfile, "COAP_RESOURCE");
 		}
 
 		@Override
-		public void notify(BindingsResults notify) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			for(Bindings bindings : bindingsResults) {
-				server.addCOAPResource(bindings.getBindingValue("?resource").getValue());
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for(Bindings bindings : bindingsResults.getBindings()) {
+				server.addCOAPResource(bindings.getBindingValue("resource"));
 			}
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
-			for(Bindings bindings : bindingsResults) {
-				server.removeCOAPResource(bindings.getBindingValue("?resource").getValue());
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for(Bindings bindings : bindingsResults.getBindings()) {
+				server.removeCOAPResource(bindings.getBindingValue("resource"));
 			}	
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
 		}
 		
 	}
@@ -178,10 +178,8 @@ public class COAPAdapter extends MPAdapter{
 		}
 		
 		server.start();
-		
-		
-		
-		resourceListener = new COAPResourceListener();
+				
+		resourceListener = new COAPResourceListener(appProfile);
 		
 		if (!resourceListener.join()) {
 			Logger.log(VERBOSITY.FATAL,adapterName(),"FAILED to join gateway");

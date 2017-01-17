@@ -2,13 +2,13 @@ package arces.unibo.gateway.adapters.network;
 
 import java.io.IOException;
 
-import arces.unibo.SEPA.BindingLiteralValue;
-import arces.unibo.SEPA.BindingURIValue;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Producer;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.Producer;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.RDFTermLiteral;
+import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 
 public class PingPongAdapter extends MNAdapter {
 	static String status = "INIT";
@@ -17,23 +17,33 @@ public class PingPongAdapter extends MNAdapter {
 	
 	static private void addResource(String uri,String value) {
 		Bindings bindings = new Bindings();
-		bindings.addBinding("?resource", new BindingURIValue(uri));
-		bindings.addBinding("?value", new BindingLiteralValue(value));
+		bindings.addBinding("resource", new RDFTermURI(uri));
+		bindings.addBinding("value", new RDFTermLiteral(value));
 		resourceCreator.update(bindings);	
 	}
 	
 	public static void main(String[] args) throws IOException {
 		
+		ApplicationProfile appProfile = new ApplicationProfile();
+		
+		Logger.loadSettings();
+		
+		if(!appProfile.load("GatewayProfile.xml")) {
+			Logger.log(VERBOSITY.FATAL, "DASH7", "Failed to load: "+ "GatewayProfile.xml");
+			return;
+		}
+		else Logger.log(VERBOSITY.INFO, "DASH7", "Loaded application profile "+ "GatewayProfile.xml");
+		
 		PingPongAdapter adapter;
-		adapter =new PingPongAdapter();
+		adapter =new PingPongAdapter(appProfile);
 		
 		if(adapter.start()) {
 			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Connected to gateway "+
-					SPARQLApplicationProfile.getParameters().getUrl()+":"+
-					SPARQLApplicationProfile.getParameters().getPort()+"@"+
-					SPARQLApplicationProfile.getParameters().getName());
+					appProfile.getParameters().getUrl()+":"+
+					appProfile.getParameters().getUpdatePort()+"@"+
+					appProfile.getParameters().getPath());
 			
-			resourceCreator = new Producer("INSERT_RESOURCE");
+			resourceCreator = new Producer(appProfile,"INSERT_RESOURCE");
 			if (!resourceCreator.join()) return ;
 			addResource("iot:Resource_PINGPONG",status);
 			resourceCreator.leave();
@@ -47,8 +57,8 @@ public class PingPongAdapter extends MNAdapter {
 		adapter.stop();		
 	}
 	
-	public PingPongAdapter(){
-		super();
+	public PingPongAdapter(ApplicationProfile appProfile){
+		super(appProfile);
 	}
 	
 	@Override

@@ -1,15 +1,19 @@
 package arces.unibo.gateway.adapters.network;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Semaphore;
 
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.SPARQLApplicationProfile;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
+
 import dash7Adapter.STDash7Coordinator;
 import dash7Adapter.STDash7Coordinator.BatteryNotify;
+import dash7Adapter.STDash7Coordinator.BeaconNotify;
 import dash7Adapter.STDash7Coordinator.StatusNotify;
 import dash7Adapter.STDash7Coordinator.TemperatureNotify;
 import dash7Adapter.STDash7Coordinator.ValveNotify;
@@ -22,10 +26,11 @@ import dash7Adapter.STDash7Coordinator.ValveNotify;
  * 4) BATTERY@<NODE_ID>
  * 
  * MN-Response Strings
- * 1) STATUS!<NODE_ID>&<VALUE>
- * 2) TEMPERATURE!<NODE_ID>&<VALUE>
- * 3) VALVE!<NODE_ID>&<VALUE>
- * 4) BATTERY!<NODE_ID>&<VALUE>
+ * 1) STATUS!<NODE_ID>&<VALUE>&<TIMESTAMP>
+ * 2) TEMPERATURE!<NODE_ID>&<VALUE>&<TIMESTAMP>
+ * 3) VALVE!<NODE_ID>&<VALUE>&<TIMESTAMP>
+ * 4) BATTERY!<NODE_ID>&<VALUE>&<TIMESTAMP>
+ * 5) BEACON!<NODE_ID>&<TIMESTAMP>
  *  
  * */
 
@@ -36,17 +41,30 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	private static Semaphore busy = new Semaphore(1,true);
 	
 	@Override
-	public void update(Observable o, Object arg) {		
+	public void update(Observable o, Object arg) {
+		Date date = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+		String timestamp = sdf.format(date);
+		
 		if(arg instanceof StatusNotify) 
-			response = String.format("STATUS!%s&%s",((StatusNotify) arg).id,((StatusNotify) arg).status);
+			response = String.format("STATUS!%s&%s&%s",((StatusNotify) arg).id,((StatusNotify) arg).status,timestamp);
 		if(arg instanceof TemperatureNotify) 
-			response = String.format("TEMPERATURE!%s&%.2f",((TemperatureNotify) arg).id,((TemperatureNotify) arg).temperature);
+			response = String.format("TEMPERATURE!%s&%.2f&%s",((TemperatureNotify) arg).id,((TemperatureNotify) arg).temperature,timestamp);
 		if(arg instanceof ValveNotify) 
-			response = String.format("VALVE!%s&%s",((ValveNotify) arg).id,((ValveNotify) arg).ack);
+			response = String.format("VALVE!%s&%s&%s",((ValveNotify) arg).id,((ValveNotify) arg).ack,timestamp);
 		if(arg instanceof BatteryNotify) 
-			response = String.format("BATTERY!%s&%s",((BatteryNotify) arg).id,((BatteryNotify) arg).vBatt);
-
-		if (running != null) running.interrupt();
+			response = String.format("BATTERY!%s&%s&%s",((BatteryNotify) arg).id,((BatteryNotify) arg).vBatt,timestamp);
+		if(arg instanceof BeaconNotify) 
+			response = String.format("BEACON!%s&%s",((BeaconNotify) arg).id,timestamp);
+		
+		//Wake-up waiting thread or send response (beacon)
+		if (running != null) {
+			if (running.isAlive())
+				running.interrupt();
+			else
+				mnResponse(response);
+		}
+		else mnResponse(response);
 	}
 	
 	class RequestThread extends Thread {
@@ -54,7 +72,7 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		private String req;
 		private byte[] id;
 		private byte value;
-		private long timeout = 10000;
+		private long timeout = 15000;
 		
 		public RequestThread(String req,byte[] id,byte value) {
 			this.req = req;
@@ -101,15 +119,19 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	}
 	
 	public static void main(String[] args) throws IOException {		
-
+		String path = "GatewayProfile.sap";
+		ApplicationProfile appProfile = new ApplicationProfile();
+		
+		if(!appProfile.load(path)) {
+			Logger.log(VERBOSITY.FATAL, "DASH7", "Failed to load: "+ path);
+			return;
+		}
+		else Logger.log(VERBOSITY.INFO, "DASH7", "Loaded application profile "+ path);
+		
 		DASH7Adapter adapter;
-		adapter =new DASH7Adapter();
+		adapter =new DASH7Adapter(appProfile);
 		
 		if(adapter.start()) {
-			Logger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " is connected to gateway "+
-					SPARQLApplicationProfile.getParameters().getUrl()+":"+
-					SPARQLApplicationProfile.getParameters().getPort()+"@"+
-					SPARQLApplicationProfile.getParameters().getName());
 			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
 			if(adapter.stop()) Logger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
@@ -121,8 +143,8 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		}	
 	}
 	
-	public DASH7Adapter(){
-		super();
+	public DASH7Adapter(ApplicationProfile appProfile){
+		super(appProfile);
 	}
 	
 	@Override

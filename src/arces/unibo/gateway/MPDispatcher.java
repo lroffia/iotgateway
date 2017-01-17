@@ -5,18 +5,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.UUID;
 
-import arces.unibo.SEPA.Aggregator;
-import arces.unibo.SEPA.BindingLiteralValue;
-import arces.unibo.SEPA.BindingURIValue;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Logger;
-
-import arces.unibo.SEPA.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.ResourceAction;
 import arces.unibo.gateway.mapping.mappers.protocol.COAPMapper;
 import arces.unibo.gateway.mapping.mappers.protocol.HTTPMapper;
 import arces.unibo.gateway.mapping.mappers.protocol.IProtocolMapper;
+import arces.unibo.SEPA.application.Aggregator;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.commons.RDFTermLiteral;
+import arces.unibo.SEPA.commons.RDFTermURI;
 import arces.unibo.gateway.mapping.MPMapping;
 import arces.unibo.gateway.mapping.MPRequest;
 import arces.unibo.gateway.mapping.MPResponse;
@@ -32,6 +33,8 @@ public class MPDispatcher {
 	private MPMapper mpMapper;
 	private MPMap mpMap;
 	private HashMap<ResourceAction,ArrayList<MPRequest>> requestMap = new HashMap<ResourceAction,ArrayList<MPRequest>>();
+	
+	private ApplicationProfile appProfile;
 	
 	public class MPMap extends Map {
 		private ArrayList<IProtocolMapper> mappers = new ArrayList<IProtocolMapper>();
@@ -53,16 +56,19 @@ public class MPDispatcher {
 	}
 	
 	public class MPMapper extends Mapper{
-		public MPMapper(Map map) {super("MP_MAPPING", map);}
+		public MPMapper(Map map) {super(appProfile,"MP_MAPPING", map);}
 
 		@Override
 		public String name() {return "MP MAPPER";}
-		
-		@Override
-		public void notify(BindingsResults notify) {}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindings) {
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			String protocol="";
 			String resource="";
 			String action="";
@@ -70,26 +76,26 @@ public class MPDispatcher {
 			String responsePattern="";
 			String value = "";
 			
-			for (Bindings results : bindings){
+			for (Bindings results : bindingsResults.getBindings()){
 				for(String var : results.getVariables()){
-					String bindingValue = results.getBindingValue(var).getValue();
+					String bindingValue = results.getBindingValue(var);
 					switch(var){
-						case "?protocol":
+						case "protocol":
 							protocol = bindingValue;
 							break;
-						case "?resource":
+						case "resource":
 							resource = bindingValue;
 							break;
-						case "?action":
+						case "action":
 							action = bindingValue;
 							break;
-						case "?requestPattern":
+						case "requestPattern":
 							requestPattern = bindingValue;
 							break;
-						case "?responsePattern":
+						case "responsePattern":
 							responsePattern = bindingValue;
 							break;
-						case "?value":
+						case "value":
 							value = bindingValue;
 							break;
 					}
@@ -97,10 +103,11 @@ public class MPDispatcher {
 				MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
 				if(map.addMapping(mapping)) Logger.log(VERBOSITY.INFO, name() ,"ADDED MAPPING " + mapping.toString());
 			}
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindings) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 			String protocol="";
 			String resource="";
 			String action="";
@@ -108,26 +115,26 @@ public class MPDispatcher {
 			String responsePattern="";
 			String value = "";
 			
-			for (Bindings results : bindings){
+			for (Bindings results : bindingsResults.getBindings()){
 				for(String var  : results.getVariables()){
-					String bindingValue = results.getBindingValue(var).getValue();
+					String bindingValue = results.getBindingValue(var);
 					switch(var){
-						case "?protocol":
+						case "protocol":
 							protocol = bindingValue;
 							break;
-						case "?resource":
+						case "resource":
 							resource = bindingValue;
 							break;
-						case "?action":
+						case "action":
 							action = bindingValue;
 							break;
-						case "?requestPattern":
+						case "requestPattern":
 							requestPattern = bindingValue;
 							break;
-						case "?responsePattern":
+						case "responsePattern":
 							responsePattern = bindingValue;
 							break;
-						case "?value":
+						case "value":
 							value = bindingValue;
 							break;
 					}
@@ -135,11 +142,12 @@ public class MPDispatcher {
 				MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
 				if(map.removeMapping(mapping)) Logger.log(VERBOSITY.INFO, name(),"REMOVED MAPPING " + mapping.toString());
 			}
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
 		}
 	}
 	
@@ -147,19 +155,22 @@ public class MPDispatcher {
 		private static final String tag = "MP REQUEST DISPATCHER";
 		
 		public MPRequestDispatcher(){ 
-			super("MP_REQUEST","INSERT_RESOURCE_PENDING_REQUEST");}
+			super(appProfile,"MP_REQUEST","INSERT_RESOURCE_PENDING_REQUEST");}
 		
 		public String subscribe() {return super.subscribe(null);}
-		
-		@Override
-		public void notify(BindingsResults results) {}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			for(Bindings bindings : bindingsResults){
-				String protocolURI = bindings.getBindingValue("?protocol").getValue();
-				String requestString = bindings.getBindingValue("?value").getValue();
-				String mpRequest = bindings.getBindingValue("?request").getValue();
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for(Bindings bindings : bindingsResults.getBindings()){
+				String protocolURI = bindings.getBindingValue("protocol");
+				String requestString = bindings.getBindingValue("value");
+				String mpRequest = bindings.getBindingValue("request");
 				
 				//Mapping MP-Request to Resource-Pending-Request
 				MPRequest request = new MPRequest(protocolURI, requestString,mpRequest);
@@ -173,10 +184,10 @@ public class MPDispatcher {
 					MPResponse response = new MPResponse(protocolURI,"MP-MAPPING NOT FOUND FOR "+request.toString());
 					
 					bindings = new Bindings();
-					bindings.addBinding("?request", new BindingURIValue(mpRequest));
-					bindings.addBinding("?response", new BindingURIValue(response.getURI()));
-					bindings.addBinding("?value", new BindingLiteralValue(response.getResponseString()));
-					bindings.addBinding("?protocol", new BindingURIValue(response.getProtocol()));
+					bindings.addBinding("request", new RDFTermURI(mpRequest));
+					bindings.addBinding("response", new RDFTermURI(response.getURI()));
+					bindings.addBinding("value", new RDFTermLiteral(response.getResponseString()));
+					bindings.addBinding("protocol", new RDFTermURI(response.getProtocol()));
 					
 					Logger.log(VERBOSITY.WARNING,tag,">> " + response.toString());
 					
@@ -187,10 +198,10 @@ public class MPDispatcher {
 				
 				//Dispatch Resource-Pending-Request
 				bindings = new Bindings();
-				bindings.addBinding("?request", new BindingURIValue("iot:Resource-Pending-Request_"+UUID.randomUUID().toString()));
-				bindings.addBinding("?resource", new BindingURIValue(resourceAction.getResourceURI()));
-				bindings.addBinding("?action", new BindingURIValue(resourceAction.getActionURI()));
-				bindings.addBinding("?value", new BindingLiteralValue(resourceAction.getValue()));
+				bindings.addBinding("request", new RDFTermURI("iot:Resource-Pending-Request_"+UUID.randomUUID().toString()));
+				bindings.addBinding("resource", new RDFTermURI(resourceAction.getResourceURI()));
+				bindings.addBinding("action", new RDFTermURI(resourceAction.getActionURI()));
+				bindings.addBinding("value", new RDFTermLiteral(resourceAction.getValue()));
 				
 				Logger.log(VERBOSITY.INFO,tag, ">> Resource-Pending-Request " + resourceAction.toString());
 				
@@ -209,36 +220,42 @@ public class MPDispatcher {
 					requestMap.put(resourceAction, mpRequestsList);
 				}
 			}
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {
-
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
+			
 		}
 	}
 	
 	class MPResponseDispatcher extends Aggregator {
 		private static final String tag = "MP RESPONSE DISPATCHER";
 		
-		public MPResponseDispatcher(){super("RESOURCE_RESPONSE","INSERT_MP_RESPONSE");}
+		public MPResponseDispatcher(){super(appProfile,"RESOURCE_RESPONSE","INSERT_MP_RESPONSE");}
 		
 		public String subscribe() {return super.subscribe(null);}
-		
-		@Override
-		public void notify(BindingsResults notify) {}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			for(Bindings bindings : bindingsResults){
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
 
-				ResourceAction resource = new ResourceAction(bindings.getBindingValue("?resource").getValue(), 
-						bindings.getBindingValue("?action").getValue(),  
-						bindings.getBindingValue("?value").getValue());
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for(Bindings bindings : bindingsResults.getBindings()){
+
+				ResourceAction resource = new ResourceAction(bindings.getBindingValue("resource"), 
+						bindings.getBindingValue("action"),  
+						bindings.getBindingValue("value"));
 				
 				Logger.log(VERBOSITY.INFO,tag,"<< Resource-Response " + resource.toString());
 				
@@ -258,10 +275,10 @@ public class MPDispatcher {
 					MPResponse response = new MPResponse(request.getProtocol(), responseString);
 					
 					bindings = new Bindings();
-					bindings.addBinding("?request", new BindingURIValue(request.getURI()));
-					bindings.addBinding("?response", new BindingURIValue(response.getURI()));
-					bindings.addBinding("?value", new BindingLiteralValue(response.getResponseString()));
-					bindings.addBinding("?protocol", new BindingURIValue(response.getProtocol()));
+					bindings.addBinding("request", new RDFTermURI(request.getURI()));
+					bindings.addBinding("response", new RDFTermURI(response.getURI()));
+					bindings.addBinding("value", new RDFTermLiteral(response.getResponseString()));
+					bindings.addBinding("protocol", new RDFTermURI(response.getProtocol()));
 					
 					Logger.log(VERBOSITY.INFO,tag,">> " + response.toString());
 					
@@ -273,16 +290,20 @@ public class MPDispatcher {
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindings) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
+			
 		}
 	}
 	
-	public MPDispatcher() {
+	public MPDispatcher(ApplicationProfile appProfile) {
+		this.appProfile = appProfile;
 		mpMap = new MPMap();
 		mpRequestDispatcher = new MPRequestDispatcher();
 		mpResponseDispatcher = new MPResponseDispatcher();

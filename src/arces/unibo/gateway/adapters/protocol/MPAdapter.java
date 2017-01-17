@@ -1,14 +1,14 @@
 package arces.unibo.gateway.adapters.protocol;
 
-import java.util.ArrayList;
-
-import arces.unibo.SEPA.Aggregator;
-import arces.unibo.SEPA.BindingLiteralValue;
-import arces.unibo.SEPA.BindingURIValue;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Aggregator;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.commons.RDFTermLiteral;
+import arces.unibo.SEPA.commons.RDFTermURI;
 import arces.unibo.gateway.mapping.MPRequest;
 
 public abstract class MPAdapter {
@@ -20,43 +20,52 @@ public abstract class MPAdapter {
 	
 	private MPRequestResponseDispatcher dispatcher;
 	
+	protected ApplicationProfile appProfile = new ApplicationProfile();
+	
+	public MPAdapter(ApplicationProfile appProfile){
+		this.appProfile = appProfile;
+	}
+	
 	class MPRequestResponseDispatcher extends Aggregator {
 		
 		public String subscribe() {
 			Bindings bindings = new Bindings();
-			bindings.addBinding("?protocol", new BindingURIValue(protocolURI()));
+			bindings.addBinding("protocol", new RDFTermURI(protocolURI()));
 			return super.subscribe(bindings);	
 		}
 		
 		public MPRequestResponseDispatcher(){
-			super("MP_RESPONSE","INSERT_MP_REQUEST");
-		}
-		
-		@Override
-		public void notify(BindingsResults notify) {
-			Logger.log(VERBOSITY.DEBUG,adapterName(),"MP RESPONSE NOTIFICATION");
+			super(appProfile,"MP_RESPONSE","INSERT_MP_REQUEST");
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindings) {
-			for(Bindings binding : bindings) {
-				String requestURI = binding.getBindingValue("?request").getValue();
-				String responseString = binding.getBindingValue("?value").getValue();
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for(Bindings binding : bindingsResults.getBindings()) {
+				String requestURI = binding.getBindingValue("request");
+				String responseString = binding.getBindingValue("value");
 				
 				Logger.log(VERBOSITY.INFO,adapterName(),"<< MP-Response<"+responseString+">");
 				
 				mpResponse(requestURI,responseString);
 			}
-		}
-
-		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindings) {
 			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
 		}
 	}
 	
@@ -88,9 +97,9 @@ public abstract class MPAdapter {
 		
 		MPRequest request = new MPRequest(protocolURI(), value);
 		
-		bindings.addBinding("?request", new BindingURIValue(request.getURI()));
-		bindings.addBinding("?value", new BindingLiteralValue(request.getRequestString()));
-		bindings.addBinding("?protocol", new BindingURIValue(request.getProtocol()));
+		bindings.addBinding("request", new RDFTermURI(request.getURI()));
+		bindings.addBinding("value", new RDFTermLiteral(request.getRequestString()));
+		bindings.addBinding("protocol", new RDFTermURI(request.getProtocol()));
 		
 		//SPARQL UPDATE
 		Logger.log(VERBOSITY.INFO,adapterName(),">> " + request.toString());

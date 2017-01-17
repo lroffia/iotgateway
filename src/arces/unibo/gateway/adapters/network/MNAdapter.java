@@ -1,15 +1,16 @@
 package arces.unibo.gateway.adapters.network;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
-import arces.unibo.SEPA.Aggregator;
-import arces.unibo.SEPA.BindingLiteralValue;
-import arces.unibo.SEPA.BindingURIValue;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Aggregator;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.commons.RDFTermLiteral;
+import arces.unibo.SEPA.commons.RDFTermURI;
 
 public abstract class MNAdapter {
 	private MNRequestResponseDispatcher dispatcher;
@@ -21,44 +22,47 @@ public abstract class MNAdapter {
 	protected abstract void doStop();
 	public abstract String adapterName();
 	
-	public MNAdapter() {
-		dispatcher = new MNRequestResponseDispatcher();	
+	
+	public MNAdapter(ApplicationProfile appProfile) {
+		dispatcher = new MNRequestResponseDispatcher(appProfile);	
 	}
 	
 	class MNRequestResponseDispatcher extends Aggregator {
 		
-		public MNRequestResponseDispatcher(){
-			super("MN_REQUEST","INSERT_MN_RESPONSE");
+		public MNRequestResponseDispatcher(ApplicationProfile appProfile){
+			super(appProfile,"MN_REQUEST","INSERT_MN_RESPONSE");
 		}
 		
 		public String  subscribe(){
 			//SPARQL SUBSCRIBE
 			Bindings bindings = new Bindings();
-			bindings.addBinding("?network", new BindingURIValue(networkURI()));
+			bindings.addBinding("network", new RDFTermURI(networkURI()));
 			
 			return subscribe(bindings);
 		}
-		
-		@Override
-		public void notify(BindingsResults notify) {
 
+		@Override
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
 		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindings) {
-			for (Bindings binding : bindings){
-				mnRequest(binding.getBindingValue("?value").getValue());
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for (Bindings binding : bindingsResults.getBindings()){
+				mnRequest(binding.getBindingValue("value"));
 			}
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindings) {
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
 			
 		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
 		}
 	}
 	
@@ -66,9 +70,9 @@ public abstract class MNAdapter {
 		String response = "iot:MN-Response_"+UUID.randomUUID().toString();
 		
 		Bindings bindings = new Bindings();
-		bindings.addBinding("?value", new BindingLiteralValue(value));
-		bindings.addBinding("?response", new BindingURIValue(response));
-		bindings.addBinding("?network", new BindingURIValue(networkURI()));
+		bindings.addBinding("value", new RDFTermLiteral(value));
+		bindings.addBinding("response", new RDFTermURI(response));
+		bindings.addBinding("network", new RDFTermURI(networkURI()));
 		
 		//SPARQL UPDATE
 		return dispatcher.update(bindings);

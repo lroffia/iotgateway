@@ -1,15 +1,16 @@
 package arces.unibo.gateway.mapping;
 
-import arces.unibo.SEPA.Consumer;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.Consumer;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 
 public abstract class Mapper extends Consumer {
 
 	protected Map map;
 	
-	public Mapper(String SPARQL_SUBSCRIBE,Map map) {
-		super(SPARQL_SUBSCRIBE);
+	public Mapper(ApplicationProfile appProfile,String SPARQL_SUBSCRIBE,Map map) {
+		super(appProfile,SPARQL_SUBSCRIBE);
 		this.map = map;
 	}
 

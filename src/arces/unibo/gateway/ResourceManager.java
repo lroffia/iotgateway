@@ -1,19 +1,20 @@
 package arces.unibo.gateway;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import arces.unibo.SEPA.Aggregator;
-import arces.unibo.SEPA.BindingLiteralValue;
-import arces.unibo.SEPA.BindingURIValue;
-import arces.unibo.SEPA.Bindings;
-import arces.unibo.SEPA.BindingsResults;
-import arces.unibo.SEPA.Consumer;
-import arces.unibo.SEPA.Logger;
-import arces.unibo.SEPA.Producer;
+import arces.unibo.SEPA.application.Aggregator;
+import arces.unibo.SEPA.application.Consumer;
+import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.Producer;
+import arces.unibo.SEPA.commons.ARBindingsResults;
+import arces.unibo.SEPA.commons.Bindings;
+import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.commons.RDFTermLiteral;
+import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.ApplicationProfile;
+import arces.unibo.SEPA.application.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.ResourceAction;
-import arces.unibo.SEPA.Logger.VERBOSITY;
 
 class ResourceManager {
 	static String tag ="RESOURCE MANAGER";
@@ -22,6 +23,12 @@ class ResourceManager {
 	ResourceResponseListener responsesListener;
 
 	ResourceCache cache = new ResourceCache();
+	
+	private ApplicationProfile appProfile;
+	
+	public ResourceManager(ApplicationProfile appProfile){
+		this.appProfile = appProfile;
+	}
 	
 	class ResourceCache {
 		private long expiringInterval = 10000;
@@ -80,22 +87,24 @@ class ResourceManager {
 		}
 		
 		public ResourcePendingRequestListener() {
-			super("RESOURCE_PENDING_REQUEST");
-			resourceResponse = new Producer("INSERT_RESOURCE_RESPONSE");
-			resourceRequest = new Producer("INSERT_RESOURCE_REQUEST"); 
+			super(appProfile,"RESOURCE_PENDING_REQUEST");
+			resourceResponse = new Producer(appProfile,"INSERT_RESOURCE_RESPONSE");
+			resourceRequest = new Producer(appProfile,"INSERT_RESOURCE_REQUEST"); 
 		}
 
 		@Override
-		public void notify(BindingsResults notify) {}
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {
-			
-			for (Bindings bindings : bindingsResults){
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for (Bindings bindings : bindingsResults.getBindings()){
 				ResourceAction action = new ResourceAction(
-						bindings.getBindingValue("?resource").getValue(),
-						bindings.getBindingValue("?action").getValue(), 
-						bindings.getBindingValue("?value").getValue());
+						bindings.getBindingValue("resource"),
+						bindings.getBindingValue("action"), 
+						bindings.getBindingValue("value"));
 				
 				Logger.log(VERBOSITY.INFO,tag,"<< Resource-Pending-Request " + action.toString());
 				
@@ -105,42 +114,50 @@ class ResourceManager {
 				//Response
 				if (value != null) {
 					Logger.log(VERBOSITY.INFO,tag,">> Resource-Response (HIT) " + action.toString());
-					bindings.addBinding("?response", new BindingURIValue("iot:Resource-Response_"+UUID.randomUUID().toString()));
-					bindings.addBinding("?value", new BindingLiteralValue(value));
+					bindings.addBinding("response", new RDFTermURI("iot:Resource-Response_"+UUID.randomUUID().toString()));
+					bindings.addBinding("value", new RDFTermLiteral(value));
 					resourceResponse.update(bindings);	
 				}
 				else {
 					Logger.log(VERBOSITY.INFO,tag,">> Resource-Request (MISS) " + action.toString());
-					bindings.addBinding("?request", new BindingURIValue("iot:Resource-Request_"+UUID.randomUUID().toString()));	
+					bindings.addBinding("request", new RDFTermLiteral("iot:Resource-Request_"+UUID.randomUUID().toString()));	
 					resourceRequest.update(bindings);	
 				}
 			}
+			
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {}
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
+			
 		}	
 	}
 	
 	class ResourceResponseListener extends Aggregator {		
 		public ResourceResponseListener() {
-			super("RESOURCE_RESPONSE","UPDATE_RESOURCE");
+			super(appProfile,"RESOURCE_RESPONSE","UPDATE_RESOURCE");
 		}
 
 		@Override
-		public void notify(BindingsResults notify) {}
+		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
 
 		@Override
-		public void notifyAdded(ArrayList<Bindings> bindingsResults) {			
-			for (Bindings bindings : bindingsResults){
+		public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			for (Bindings bindings : bindingsResults.getBindings()){
 				ResourceAction action = new ResourceAction(
-						bindings.getBindingValue("?resource").getValue(),
-						bindings.getBindingValue("?action").getValue(), 
-						bindings.getBindingValue("?value").getValue());
+						bindings.getBindingValue("resource"),
+						bindings.getBindingValue("action"), 
+						bindings.getBindingValue("value"));
 				
 				Logger.log(VERBOSITY.INFO,tag,"<< Resource-Response " + action.toString());
 				
@@ -152,11 +169,15 @@ class ResourceManager {
 		}
 
 		@Override
-		public void notifyRemoved(ArrayList<Bindings> bindingsResults) {}
+		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
+			// TODO Auto-generated method stub
+			
+		}
 
 		@Override
-		public void notifyFirst(ArrayList<Bindings> bindingsResults) {
-			notifyAdded(bindingsResults);
+		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
+			notifyAdded(bindingsResults,spuid,0);
+			
 		}
 	}
 	
