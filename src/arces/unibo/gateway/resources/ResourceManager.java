@@ -1,4 +1,4 @@
-package arces.unibo.gateway;
+package arces.unibo.gateway.resources;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -16,7 +16,7 @@ import arces.unibo.SEPA.application.ApplicationProfile;
 import arces.unibo.SEPA.application.Logger.VERBOSITY;
 import arces.unibo.gateway.mapping.ResourceAction;
 
-class ResourceManager {
+public class ResourceManager {
 	static String tag ="RESOURCE MANAGER";
 	
 	ResourcePendingRequestListener requestsListener;
@@ -94,8 +94,7 @@ class ResourceManager {
 
 		@Override
 		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
-			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -120,7 +119,7 @@ class ResourceManager {
 				}
 				else {
 					Logger.log(VERBOSITY.INFO,tag,">> Resource-Request (MISS) " + action.toString());
-					bindings.addBinding("request", new RDFTermLiteral("iot:Resource-Request_"+UUID.randomUUID().toString()));	
+					bindings.addBinding("request", new RDFTermURI("iot:Resource-Request_"+UUID.randomUUID().toString()));	
 					resourceRequest.update(bindings);	
 				}
 			}
@@ -129,8 +128,7 @@ class ResourceManager {
 
 		@Override
 		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
-			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -147,8 +145,7 @@ class ResourceManager {
 
 		@Override
 		public void notify(ARBindingsResults notify, String spuid, Integer sequence) {
-			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -170,14 +167,12 @@ class ResourceManager {
 
 		@Override
 		public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
-			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 			notifyAdded(bindingsResults,spuid,0);
-			
 		}
 	}
 	
@@ -195,9 +190,7 @@ class ResourceManager {
 			Logger.log(VERBOSITY.FATAL,tag,"Resource-responses listener subscription FAILED");
 			return false;
 		}
-		
-
-		
+			
 		Logger.log(VERBOSITY.INFO,tag,"Started");
 		
 		return true;

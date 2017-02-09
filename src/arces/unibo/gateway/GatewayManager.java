@@ -21,17 +21,18 @@ import javax.swing.JButton;
 import arces.unibo.SEPA.application.Logger;
 import arces.unibo.SEPA.application.ApplicationProfile;
 import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.gateway.GarbageCollector.GarbageCollectorListener;
 import arces.unibo.gateway.MappingInputDialog.MappingInputDialogListener;
-import arces.unibo.gateway.MappingManager.MappingEventListener;
+import arces.unibo.gateway.garbagecollector.GarbageCollector;
+import arces.unibo.gateway.garbagecollector.GarbageCollectorListener;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MPMapping;
+import arces.unibo.gateway.mapping.manager.MappingEventListener;
+import arces.unibo.gateway.mapping.manager.MappingManager;
 
 import java.util.ArrayList;
 import java.util.Vector;
 import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
 
 public class GatewayManager implements MappingEventListener, MappingInputDialogListener, GarbageCollectorListener {	
 	//Tables models
@@ -126,6 +127,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	private JTable table_MpRequestDeleted;
 	private JButton btnClearMpRequestDeleted;
 	private JScrollPane scrollPane_9;
+	private JLabel messageBox;
 	
 	/**
 	 * Launch the application.
@@ -156,13 +158,21 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 			return;
 		}
 		
-		mappingManager = new MappingManager(appProfile);
-		mappingManager.setMappingEventListener(this);
+		frmSemanticGatewayManager.setTitle("WoT-Gateway Manager @ "+
+				appProfile.getParameters().getUrl()+
+				appProfile.getParameters().getPath()+
+				" UPort:"+appProfile.getParameters().getUpdatePort()+
+				" SPort:"+appProfile.getParameters().getSubscribePort());
+		
+		messageBox.setText("Starting mapping manager...");
+		mappingManager = new MappingManager(appProfile,this);
 		mappingManager.start();
 		
-		garbageCollector = new GarbageCollector(appProfile);
-		garbageCollector.setListener(this);
+		messageBox.setText("Starting garbage collector...");
+		garbageCollector = new GarbageCollector(appProfile,this);
 		garbageCollector.start(false, true); 
+		
+		messageBox.setText("Gateway manager started");
 	}
 
 	/**
@@ -344,7 +354,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		MNResponsesDM.setColumnIdentifiers(MNHeader);
 		
 		frmSemanticGatewayManager = new JFrame();
-		frmSemanticGatewayManager.setTitle("Semantic Gateway Manager");
+		frmSemanticGatewayManager.setTitle("WoT Gateway Manager");
 		frmSemanticGatewayManager.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
@@ -354,12 +364,22 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		});
 		frmSemanticGatewayManager.setBounds(100, 100, 521, 578);
 		frmSemanticGatewayManager.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frmSemanticGatewayManager.getContentPane().setLayout(new BorderLayout(0, 0));
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		gridBagLayout.columnWidths = new int[]{521, 0};
+		gridBagLayout.rowHeights = new int[]{556, 0, 0};
+		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{1.0, 0.0, Double.MIN_VALUE};
+		frmSemanticGatewayManager.getContentPane().setLayout(gridBagLayout);
 		
 		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		tabbedPane.setFont(new Font("Lucida Grande", Font.PLAIN, 10));
-		frmSemanticGatewayManager.getContentPane().add(tabbedPane);
+		GridBagConstraints gbc_tabbedPane = new GridBagConstraints();
+		gbc_tabbedPane.insets = new Insets(0, 0, 5, 0);
+		gbc_tabbedPane.fill = GridBagConstraints.BOTH;
+		gbc_tabbedPane.gridx = 0;
+		gbc_tabbedPane.gridy = 0;
+		frmSemanticGatewayManager.getContentPane().add(tabbedPane, gbc_tabbedPane);
 		
 		panel = new JPanel();
 		tabbedPane.addTab("Mappings", null, panel, null);
@@ -838,7 +858,14 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		gbc_lblTotalTriples.anchor = GridBagConstraints.NORTH;
 		gbc_lblTotalTriples.gridx = 0;
 		gbc_lblTotalTriples.gridy = 16;
-		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);				
+		panel_1.add(lblTotalTriples, gbc_lblTotalTriples);
+		
+		messageBox = new JLabel("Starting...");
+		GridBagConstraints gbc_messageBox = new GridBagConstraints();
+		gbc_messageBox.anchor = GridBagConstraints.WEST;
+		gbc_messageBox.gridx = 0;
+		gbc_messageBox.gridy = 1;
+		frmSemanticGatewayManager.getContentPane().add(messageBox, gbc_messageBox);
 	}
 
 	@Override

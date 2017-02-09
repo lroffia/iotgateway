@@ -96,7 +96,7 @@ public class PingPongHTTPClient {
 	public static String doRequest(String request) throws InterruptedException, ClientProtocolException, IOException {        
         String responseBody ="ERROR";
          	
-        HttpGet httpget = new HttpGet( "http://" + server + ":8000/iot?"+request);
+        HttpGet httpget = new HttpGet( "http://" + server + ":8888/iot?"+request);
         Logger.log(VERBOSITY.INFO, tag, httpget.toString());
         
         startTime = System.currentTimeMillis();

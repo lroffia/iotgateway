@@ -12,8 +12,9 @@ import arces.unibo.SEPA.application.Logger.VERBOSITY;
 
 public class PingPongAdapter extends MNAdapter {
 	static String status = "INIT";
-	
+	static String appProfileFile = "GatewayProfile.sap";
 	static Producer resourceCreator;
+	static ApplicationProfile appProfile;
 	
 	static private void addResource(String uri,String value) {
 		Bindings bindings = new Bindings();
@@ -24,29 +25,21 @@ public class PingPongAdapter extends MNAdapter {
 	
 	public static void main(String[] args) throws IOException {
 		
-		ApplicationProfile appProfile = new ApplicationProfile();
+		appProfile = new ApplicationProfile();
 		
 		Logger.loadSettings();
 		
-		if(!appProfile.load("GatewayProfile.xml")) {
-			Logger.log(VERBOSITY.FATAL, "DASH7", "Failed to load: "+ "GatewayProfile.xml");
+		if(!appProfile.load(appProfileFile)) {
+			Logger.log(VERBOSITY.FATAL,"PINGPONG ADAPTER", "Failed to load: "+ appProfileFile);
 			return;
 		}
-		else Logger.log(VERBOSITY.INFO, "DASH7", "Loaded application profile "+ "GatewayProfile.xml");
+		else Logger.log(VERBOSITY.INFO, "PINGPONG ADAPTER", "Loaded application profile "+ appProfileFile);
 		
 		PingPongAdapter adapter;
 		adapter =new PingPongAdapter(appProfile);
 		
 		if(adapter.start()) {
-			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Connected to gateway "+
-					appProfile.getParameters().getUrl()+":"+
-					appProfile.getParameters().getUpdatePort()+"@"+
-					appProfile.getParameters().getPath());
-			
-			resourceCreator = new Producer(appProfile,"INSERT_RESOURCE");
-			if (!resourceCreator.join()) return ;
-			addResource("iot:Resource_PINGPONG",status);
-			resourceCreator.leave();
+			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Running...");
 		}
 		else{
 			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");	
@@ -82,6 +75,10 @@ public class PingPongAdapter extends MNAdapter {
 
 	@Override
 	protected boolean doStart() {
+		resourceCreator = new Producer(appProfile,"INSERT_RESOURCE");
+		if (!resourceCreator.join()) return false;
+		addResource("iot:Resource_PINGPONG",status);
+		resourceCreator.leave();
 		Logger.log(VERBOSITY.INFO,adapterName(),"Started");
 		return true;
 	}

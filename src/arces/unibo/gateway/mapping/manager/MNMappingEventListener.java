@@ -1,4 +1,4 @@
-package arces.unibo.gateway;
+package arces.unibo.gateway.mapping.manager;
 
 import java.util.ArrayList;
 
