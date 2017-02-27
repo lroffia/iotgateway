@@ -1,8 +1,8 @@
 package arces.unibo.gateway.mapping.manager;
 
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 public class MNMappingManager {
 	static final String tag = "MN MAPPING";
@@ -44,13 +44,13 @@ public class MNMappingManager {
 		String subID = listener.subscribe(null);
 		
 		if (subID == null) {
-			Logger.log(VERBOSITY.FATAL, tag, "Subscription FAILED");
+			SEPALogger.log(VERBOSITY.FATAL, tag, "Subscription FAILED");
 			return false;
 		}
 		
-		Logger.log(VERBOSITY.DEBUG, tag,"Subscription\t"+subID); 
+		SEPALogger.log(VERBOSITY.DEBUG, tag,"Subscription\t"+subID); 
 		
-		Logger.log(VERBOSITY.INFO, tag, "Started");
+		SEPALogger.log(VERBOSITY.INFO, tag, "Started");
 		
 		return true;
 	}

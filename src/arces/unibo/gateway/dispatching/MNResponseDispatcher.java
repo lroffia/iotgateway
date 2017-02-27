@@ -4,13 +4,13 @@ import java.util.UUID;
 
 import arces.unibo.SEPA.application.Aggregator;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
-import arces.unibo.SEPA.commons.RDFTermLiteral;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 import arces.unibo.gateway.mapping.MNResponse;
 import arces.unibo.gateway.mapping.ResourceAction;
 
@@ -35,16 +35,16 @@ public class MNResponseDispatcher extends Aggregator {
 
 			MNResponse response = new MNResponse(bindings.getBindingValue("network"), bindings.getBindingValue("value"));
 			
-			Logger.log(VERBOSITY.INFO, tag,"<< "+response.toString());
+			SEPALogger.log(VERBOSITY.INFO, tag,"<< "+response.toString());
 			
 			//Mapping MN Response to Resource Response
 			ResourceAction resourceAction = mnMap.mnResponse2ResourceAction(response);
 			
 			if (resourceAction == null) {
 				resourceAction = new ResourceAction("iot:NULL","iot:NULL","MN-MAPPING NOT FOUND FOR "+response.toString());
-				Logger.log(VERBOSITY.WARNING, tag,">> Resource-Response "+resourceAction.toString());
+				SEPALogger.log(VERBOSITY.WARNING, tag,">> Resource-Response "+resourceAction.toString());
 			}
-			else Logger.log(VERBOSITY.INFO, tag,">> Resource-Response "+resourceAction.toString());
+			else SEPALogger.log(VERBOSITY.INFO, tag,">> Resource-Response "+resourceAction.toString());
 			
 			bindings = new Bindings();
 			bindings.addBinding("response", new RDFTermURI("iot:Resource-Response_"+UUID.randomUUID().toString()));						
@@ -66,6 +66,12 @@ public class MNResponseDispatcher extends Aggregator {
 	@Override
 	public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 		notifyAdded(bindingsResults,spuid,0);	
+		
+	}
+
+	@Override
+	public void brokenSubscription() {
+		// TODO Auto-generated method stub
 		
 	}
 }

@@ -15,12 +15,12 @@ import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
 import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 import arces.unibo.gateway.adapters.protocol.COAPAdapter.COAPAdapterServer.GatewayCOAPResource.Running;
 
 public class COAPAdapter extends MPAdapter{
@@ -61,6 +61,12 @@ public class COAPAdapter extends MPAdapter{
 		@Override
 		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 			notifyAdded(bindingsResults,spuid,0);
+		}
+
+		@Override
+		public void brokenSubscription() {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}
@@ -173,7 +179,7 @@ public class COAPAdapter extends MPAdapter{
 			server = new COAPAdapterServer();
 		} 
 		catch (SocketException e) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"FAILED to start "+e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"FAILED to start "+e.getMessage());
 			return false;
 		}
 		
@@ -182,20 +188,20 @@ public class COAPAdapter extends MPAdapter{
 		resourceListener = new COAPResourceListener(appProfile);
 		
 		if (!resourceListener.join()) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"FAILED to join gateway");
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"FAILED to join gateway");
 			return false;
 		}
 		
 		String subID = resourceListener.subscribe(null);
 		
 		if (subID == null) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"FAILED to subscribe");
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"FAILED to subscribe");
 			return false;
 		}
 		
-		Logger.log(VERBOSITY.DEBUG,adapterName(),"Resource subscription "+subID);
+		SEPALogger.log(VERBOSITY.DEBUG,adapterName(),"Resource subscription "+subID);
 		
-		Logger.log(VERBOSITY.INFO,adapterName(),"COAP server is running on port "+ server.COAP_PORT + " and Resource Listener subscribed");
+		SEPALogger.log(VERBOSITY.INFO,adapterName(),"COAP server is running on port "+ server.COAP_PORT + " and Resource Listener subscribed");
 		
 		return true;
 	}

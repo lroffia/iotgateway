@@ -6,8 +6,8 @@ import java.net.URISyntaxException;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
 
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 public class PingPongCOAPClient {
 	
@@ -30,10 +30,10 @@ public class PingPongCOAPClient {
 			
 			if (response!=null) {
 				String responseString = response.getResponseText();
-				Logger.log(VERBOSITY.INFO, "PINGPONG", pingPong +" --> " + responseString);
+				SEPALogger.log(VERBOSITY.INFO, "PINGPONG", pingPong +" --> " + responseString);
 				if (!responseString.equals("TIMEOUT")) pingPong = response.getResponseText();
 			} else {
-				Logger.log(VERBOSITY.INFO, "PINGPONG","No response received");
+				SEPALogger.log(VERBOSITY.INFO, "PINGPONG","No response received");
 			}
 		}
 	}

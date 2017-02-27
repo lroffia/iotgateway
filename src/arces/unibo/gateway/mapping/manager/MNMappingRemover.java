@@ -2,8 +2,8 @@ package arces.unibo.gateway.mapping.manager;
 
 import arces.unibo.SEPA.application.ApplicationProfile;
 import arces.unibo.SEPA.application.Producer;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 
 public class MNMappingRemover extends Producer {
 	public MNMappingRemover(ApplicationProfile appProfile) {super(appProfile,"DELETE_MN_MAPPING");}

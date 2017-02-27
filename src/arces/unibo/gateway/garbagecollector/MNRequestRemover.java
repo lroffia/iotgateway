@@ -2,11 +2,11 @@ package arces.unibo.gateway.garbagecollector;
 
 import arces.unibo.SEPA.application.Aggregator;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 
 public class MNRequestRemover extends Aggregator {		
 	boolean monitor;
@@ -30,7 +30,7 @@ public class MNRequestRemover extends Aggregator {
 	public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 		if (monitor) return;
 		
-		Logger.log(VERBOSITY.DEBUG, tag, "DELETE MN REQUEST "+bindingsResults.toString());
+		SEPALogger.log(VERBOSITY.DEBUG, tag, "DELETE MN REQUEST "+bindingsResults.toString());
 		for (Bindings garbage : bindingsResults.getBindings()) update(garbage);
 	}
 
@@ -47,5 +47,11 @@ public class MNRequestRemover extends Aggregator {
 	@Override
 	public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 		notifyAdded(bindingsResults,spuid,0);			
+	}
+
+	@Override
+	public void brokenSubscription() {
+		// TODO Auto-generated method stub
+		
 	}		
 }

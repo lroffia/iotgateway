@@ -1,9 +1,9 @@
 package arces.unibo.gateway.mapping;
 
 import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 public abstract class Mapper extends Consumer {
 
@@ -17,7 +17,7 @@ public abstract class Mapper extends Consumer {
 	public abstract String name();
 	
 	public boolean join(){
-		Logger.log(VERBOSITY.DEBUG, name(), "Join");
+		SEPALogger.log(VERBOSITY.DEBUG, name(), "Join");
 		return super.join();
 	}
 	

@@ -3,14 +3,14 @@ package arces.unibo.gateway.adapters.network;
 import java.util.UUID;
 
 import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
-import arces.unibo.SEPA.commons.RDFTermLiteral;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 
 public abstract class MNAdapter {
 	private MNRequestResponseDispatcher dispatcher;
@@ -64,6 +64,12 @@ public abstract class MNAdapter {
 		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 			notifyAdded(bindingsResults,spuid,0);
 		}
+
+		@Override
+		public void brokenSubscription() {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	
 	protected final boolean mnResponse(String value) {
@@ -80,18 +86,18 @@ public abstract class MNAdapter {
 	
 	public boolean start(){
 		if (!dispatcher.join()) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"Join FAILED");
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Join FAILED");
 			return false;
 		}
 		
 		String subID = dispatcher.subscribe();
 		
 		if (subID == null) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
 			return false;
 		}
 		
-		Logger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
+		SEPALogger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
 		
 		return doStart();
 	}

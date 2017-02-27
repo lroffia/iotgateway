@@ -5,15 +5,15 @@ import java.util.UUID;
 
 import arces.unibo.SEPA.application.Aggregator;
 import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.Producer;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
-import arces.unibo.SEPA.commons.RDFTermLiteral;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class ResourceManager {
@@ -105,20 +105,20 @@ public class ResourceManager {
 						bindings.getBindingValue("action"), 
 						bindings.getBindingValue("value"));
 				
-				Logger.log(VERBOSITY.INFO,tag,"<< Resource-Pending-Request " + action.toString());
+				SEPALogger.log(VERBOSITY.INFO,tag,"<< Resource-Pending-Request " + action.toString());
 				
 				//Cache matching
 				String value = cache.get(action);
 				
 				//Response
 				if (value != null) {
-					Logger.log(VERBOSITY.INFO,tag,">> Resource-Response (HIT) " + action.toString());
+					SEPALogger.log(VERBOSITY.INFO,tag,">> Resource-Response (HIT) " + action.toString());
 					bindings.addBinding("response", new RDFTermURI("iot:Resource-Response_"+UUID.randomUUID().toString()));
 					bindings.addBinding("value", new RDFTermLiteral(value));
 					resourceResponse.update(bindings);	
 				}
 				else {
-					Logger.log(VERBOSITY.INFO,tag,">> Resource-Request (MISS) " + action.toString());
+					SEPALogger.log(VERBOSITY.INFO,tag,">> Resource-Request (MISS) " + action.toString());
 					bindings.addBinding("request", new RDFTermURI("iot:Resource-Request_"+UUID.randomUUID().toString()));	
 					resourceRequest.update(bindings);	
 				}
@@ -134,6 +134,12 @@ public class ResourceManager {
 		@Override
 		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 			notifyAdded(bindingsResults,spuid,0);
+			
+		}
+
+		@Override
+		public void brokenSubscription() {
+			// TODO Auto-generated method stub
 			
 		}	
 	}
@@ -156,10 +162,10 @@ public class ResourceManager {
 						bindings.getBindingValue("action"), 
 						bindings.getBindingValue("value"));
 				
-				Logger.log(VERBOSITY.INFO,tag,"<< Resource-Response " + action.toString());
+				SEPALogger.log(VERBOSITY.INFO,tag,"<< Resource-Response " + action.toString());
 				
 				if(update(bindings)) {
-					Logger.log(VERBOSITY.INFO,tag,"UPDATE RESOURCE & ADD TO CACHE " + action.toString());
+					SEPALogger.log(VERBOSITY.INFO,tag,"UPDATE RESOURCE & ADD TO CACHE " + action.toString());
 					cache.put(action);
 				}
 			}
@@ -174,24 +180,30 @@ public class ResourceManager {
 		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 			notifyAdded(bindingsResults,spuid,0);
 		}
+
+		@Override
+		public void brokenSubscription() {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	
 	public boolean start() {
 		requestsListener = new ResourcePendingRequestListener();
 		if(!requestsListener.join()) return false;
 		if (requestsListener.subscribe(null) == null) {
-			Logger.log(VERBOSITY.FATAL,tag,"Resource-pending-requests listener subscription FAILED");
+			SEPALogger.log(VERBOSITY.FATAL,tag,"Resource-pending-requests listener subscription FAILED");
 			return false;
 		}
 		
 		responsesListener = new ResourceResponseListener();
 		if(!responsesListener.join()) return false;		
 		if (responsesListener.subscribe(null) == null) {
-			Logger.log(VERBOSITY.FATAL,tag,"Resource-responses listener subscription FAILED");
+			SEPALogger.log(VERBOSITY.FATAL,tag,"Resource-responses listener subscription FAILED");
 			return false;
 		}
 			
-		Logger.log(VERBOSITY.INFO,tag,"Started");
+		SEPALogger.log(VERBOSITY.INFO,tag,"Started");
 		
 		return true;
 	}

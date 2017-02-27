@@ -13,8 +13,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 public class PingPongHTTPClient {
 	private static String server = "127.0.0.1";
@@ -31,8 +31,6 @@ public class PingPongHTTPClient {
 	private static long pingAvg = 0;
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Logger.registerTag("HTTP PingPong Client");
-		Logger.enableConsoleLog();
 				
 		responseHandler = new ResponseHandler<String>() {
 	        @Override
@@ -45,7 +43,7 @@ public class PingPongHTTPClient {
 	            } 
 	            else 
 	            {
-	            	Logger.log(VERBOSITY.ERROR, tag, "Unexpected response status: " + status);
+	            	SEPALogger.log(VERBOSITY.ERROR, tag, "Unexpected response status: " + status);
 	            	return "ERROR";
 	            }
 	        }
@@ -97,7 +95,7 @@ public class PingPongHTTPClient {
         String responseBody ="ERROR";
          	
         HttpGet httpget = new HttpGet( "http://" + server + ":8888/iot?"+request);
-        Logger.log(VERBOSITY.INFO, tag, httpget.toString());
+        SEPALogger.log(VERBOSITY.INFO, tag, httpget.toString());
         
         startTime = System.currentTimeMillis();
         
@@ -105,7 +103,7 @@ public class PingPongHTTPClient {
         responseBody = httpclient.execute(httpget, responseHandler);
         }
         catch(java.net.ConnectException e) {
-        	 Logger.log(VERBOSITY.ERROR, tag, "Server " + server + " is down or cannot be reached");	
+        	 SEPALogger.log(VERBOSITY.ERROR, tag, "Server " + server + " is down or cannot be reached");	
         }
         pingTime = System.currentTimeMillis() - startTime;
         
@@ -119,7 +117,7 @@ public class PingPongHTTPClient {
         pingAvg += pingTime;
         
         String message = String.format("Current: %d Min: %d Avg: %d Max: %d Response:%s", pingTime,pingMin,pingAvg/nRequest,pingMax,responseBody);
-        Logger.log(VERBOSITY.INFO, tag,message);
+        SEPALogger.log(VERBOSITY.INFO, tag,message);
         
         return responseBody;
 	}

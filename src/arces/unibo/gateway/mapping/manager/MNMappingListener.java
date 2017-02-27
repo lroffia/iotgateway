@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 import arces.unibo.SEPA.application.ApplicationProfile;
 import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.ResourceAction;
 
@@ -58,6 +58,12 @@ public class MNMappingListener extends Consumer {
 	@Override
 	public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 		notifyAdded(bindingsResults,spuid,0);
+	}
+
+	@Override
+	public void brokenSubscription() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -2,10 +2,10 @@ package arces.unibo.gateway.garbagecollector;
 
 import arces.unibo.SEPA.application.ApplicationProfile;
 import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 
 public class TriplesMonitor extends Consumer {
 	long triplesNumber;
@@ -29,20 +29,26 @@ public class TriplesMonitor extends Consumer {
 	public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 		triplesNumber += bindingsResults.size();
 		if (listener != null) listener.totalTriples(triplesNumber);
-		Logger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);	
+		SEPALogger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);	
 	}
 
 	@Override
 	public void notifyRemoved(BindingsResults bindingsResults, String spuid, Integer sequence) {
 		triplesNumber -= bindingsResults.size();
 		if (listener != null) listener.totalTriples(triplesNumber);
-		Logger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);
+		SEPALogger.log(VERBOSITY.DEBUG, tag, "Total triples: "+triplesNumber);
 	}
 
 	@Override
 	public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 		triplesNumber = bindingsResults.size();
 		if (listener != null) listener.totalTriples(triplesNumber);
-		Logger.log(VERBOSITY.DEBUG, tag, "Initial triples: "+triplesNumber);
+		SEPALogger.log(VERBOSITY.DEBUG, tag, "Initial triples: "+triplesNumber);
+	}
+
+	@Override
+	public void brokenSubscription() {
+		// TODO Auto-generated method stub
+		
 	}
 }

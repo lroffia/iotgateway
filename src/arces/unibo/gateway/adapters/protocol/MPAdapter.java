@@ -1,14 +1,14 @@
 package arces.unibo.gateway.adapters.protocol;
 
 import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
-import arces.unibo.SEPA.commons.RDFTermLiteral;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 import arces.unibo.gateway.mapping.MPRequest;
 
 public abstract class MPAdapter {
@@ -50,7 +50,7 @@ public abstract class MPAdapter {
 				String requestURI = binding.getBindingValue("request");
 				String responseString = binding.getBindingValue("value");
 				
-				Logger.log(VERBOSITY.INFO,adapterName(),"<< MP-Response<"+responseString+">");
+				SEPALogger.log(VERBOSITY.INFO,adapterName(),"<< MP-Response<"+responseString+">");
 				
 				mpResponse(requestURI,responseString);
 			}
@@ -67,6 +67,12 @@ public abstract class MPAdapter {
 		public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 			notifyAdded(bindingsResults,spuid,0);
 		}
+
+		@Override
+		public void brokenSubscription() {
+			// TODO Auto-generated method stub
+			
+		}
 	}
 	
 	public boolean start(){
@@ -76,11 +82,11 @@ public abstract class MPAdapter {
 		String subID = dispatcher.subscribe();
 		
 		if (subID == null) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
 			return false;
 		}
 		
-		Logger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
+		SEPALogger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
 		
 		return doStart();
 	}
@@ -102,10 +108,10 @@ public abstract class MPAdapter {
 		bindings.addBinding("protocol", new RDFTermURI(request.getProtocol()));
 		
 		//SPARQL UPDATE
-		Logger.log(VERBOSITY.INFO,adapterName(),">> " + request.toString());
+		SEPALogger.log(VERBOSITY.INFO,adapterName(),">> " + request.toString());
 		
 		if(!dispatcher.update(bindings)) {
-			Logger.log(VERBOSITY.ERROR,adapterName(),"***RDF STORE UPDATE FAILED***");
+			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"***RDF STORE UPDATE FAILED***");
 			return null;
 		}
 		

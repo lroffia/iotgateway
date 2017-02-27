@@ -1,11 +1,11 @@
 package arces.unibo.gateway.dispatching;
 
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 import arces.unibo.gateway.mapping.MPMapping;
 import arces.unibo.gateway.mapping.Map;
 import arces.unibo.gateway.mapping.Mapper;
@@ -56,7 +56,7 @@ public class MPMapper extends Mapper{
 				}
 			}
 			MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
-			if(map.addMapping(mapping)) Logger.log(VERBOSITY.INFO, name() ,"ADDED MAPPING " + mapping.toString());
+			if(map.addMapping(mapping)) SEPALogger.log(VERBOSITY.INFO, name() ,"ADDED MAPPING " + mapping.toString());
 		}
 		
 	}
@@ -95,7 +95,7 @@ public class MPMapper extends Mapper{
 				}
 			}
 			MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
-			if(map.removeMapping(mapping)) Logger.log(VERBOSITY.INFO, name(),"REMOVED MAPPING " + mapping.toString());
+			if(map.removeMapping(mapping)) SEPALogger.log(VERBOSITY.INFO, name(),"REMOVED MAPPING " + mapping.toString());
 		}
 		
 	}
@@ -103,6 +103,12 @@ public class MPMapper extends Mapper{
 	@Override
 	public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 		notifyAdded(bindingsResults,spuid,0);
+	}
+
+	@Override
+	public void brokenSubscription() {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

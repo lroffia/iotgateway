@@ -2,8 +2,8 @@ package arces.unibo.gateway.dispatching;
 
 import java.util.ArrayList;
 
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 import arces.unibo.gateway.mapping.Map;
 import arces.unibo.gateway.mapping.Mappings;
 import arces.unibo.gateway.mapping.mappers.protocol.COAPMapper;
@@ -20,7 +20,7 @@ public class MPMap extends Map {
 		
 		for(IProtocolMapper mapper : mappers) {
 			addMapper(mapper.getMapperURI(), mapper);
-			Logger.log(VERBOSITY.INFO, "MP MAP",mapper.getMapperURI() + "\tmapper added");
+			SEPALogger.log(VERBOSITY.INFO, "MP MAP",mapper.getMapperURI() + "\tmapper added");
 		}
 	}
 	

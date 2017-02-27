@@ -6,13 +6,13 @@ import java.util.UUID;
 
 import arces.unibo.SEPA.application.Aggregator;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
-import arces.unibo.SEPA.commons.RDFTermLiteral;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.SEPALogger;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 import arces.unibo.gateway.mapping.MNRequest;
 import arces.unibo.gateway.mapping.ResourceAction;
 
@@ -48,7 +48,7 @@ public class MNRequestDispatcher extends Aggregator {
 			String resource = bindings.getBindingValue("resource");
 			ResourceAction resourceRequest= new ResourceAction(resource, action, value);
 			
-			Logger.log(VERBOSITY.INFO, tag, "<< Resource-Request "+resourceRequest.toString());
+			SEPALogger.log(VERBOSITY.INFO, tag, "<< Resource-Request "+resourceRequest.toString());
 			
 			//Mapping Resource Request to MN Request List
 			ArrayList<MNRequest> mnRequestList = mnMap.resourceAction2MNRequestList(resourceRequest);
@@ -78,7 +78,7 @@ public class MNRequestDispatcher extends Aggregator {
 				bindings.addBinding("network", new RDFTermURI(mnRequest.getNetwork()));
 				bindings.addBinding("value", new RDFTermLiteral(mnRequest.getRequestString()));
 				
-				Logger.log(VERBOSITY.INFO, tag,">> "+mnRequest.toString());
+				SEPALogger.log(VERBOSITY.INFO, tag,">> "+mnRequest.toString());
 				
 				update(bindings);
 			}
@@ -100,6 +100,12 @@ public class MNRequestDispatcher extends Aggregator {
 	@Override
 	public void onSubscribe(BindingsResults bindingsResults, String spuid) {
 		notifyAdded(bindingsResults,spuid,0);	
+		
+	}
+
+	@Override
+	public void brokenSubscription() {
+		// TODO Auto-generated method stub
 		
 	}
 }

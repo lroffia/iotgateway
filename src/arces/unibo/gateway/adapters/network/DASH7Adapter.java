@@ -7,9 +7,9 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Semaphore;
 
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 import dash7Adapter.STDash7Coordinator;
 import dash7Adapter.STDash7Coordinator.BatteryNotify;
@@ -30,7 +30,7 @@ import dash7Adapter.STDash7Coordinator.ValveNotify;
  * 2) TEMPERATURE!<NODE_ID>&<VALUE>&<TIMESTAMP>
  * 3) VALVE!<NODE_ID>&<VALUE>&<TIMESTAMP>
  * 4) BATTERY!<NODE_ID>&<VALUE>&<TIMESTAMP>
- * 5) BEACON!<NODE_ID>&<TIMESTAMP>
+ * 5) BEACON!<NODE_ID>&<STATUS>&<TIMESTAMP>
  *  
  * */
 
@@ -39,6 +39,7 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	private RequestThread running = null;
 	private String response = "";
 	private static Semaphore busy = new Semaphore(1,true);
+	private static String path = "GatewayProfile.sap";
 	
 	@Override
 	public void update(Observable o, Object arg) {
@@ -55,7 +56,9 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		if(arg instanceof BatteryNotify) 
 			response = String.format("BATTERY!%s&%s&%s",((BatteryNotify) arg).id,((BatteryNotify) arg).vBatt,timestamp);
 		if(arg instanceof BeaconNotify) 
-			response = String.format("BEACON!%s&%s",((BeaconNotify) arg).id,timestamp);
+			response = String.format("BEACON!%s&%s&%s",((BeaconNotify) arg).id,((BeaconNotify) arg).status,timestamp);
+		
+		SEPALogger.log(VERBOSITY.INFO, adapterName(), "Send >> "+response);
 		
 		//Wake-up waiting thread or send response (beacon)
 		if (running != null) {
@@ -118,27 +121,27 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {		
-		String path = "GatewayProfile.sap";
+	public static void main(String[] args) throws IOException {	
+		
 		ApplicationProfile appProfile = new ApplicationProfile();
 		
 		if(!appProfile.load(path)) {
-			Logger.log(VERBOSITY.FATAL, "DASH7", "Failed to load: "+ path);
+			SEPALogger.log(VERBOSITY.FATAL, "DASH7", "Failed to load: "+ path);
 			return;
 		}
-		else Logger.log(VERBOSITY.INFO, "DASH7", "Loaded application profile "+ path);
+		else SEPALogger.log(VERBOSITY.INFO, "DASH7", "Loaded application profile "+ path);
 		
 		DASH7Adapter adapter;
 		adapter =new DASH7Adapter(appProfile);
 		
 		if(adapter.start()) {
-			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
+			SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
-			if(adapter.stop()) Logger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
+			if(adapter.stop()) SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
 		}
 		else {
-			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
-			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
+			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
+			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
 		}	
 	}
@@ -149,7 +152,7 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	
 	@Override
 	public boolean doStart() {
-		Logger.log(VERBOSITY.INFO,this.adapterName(),"Starting...");
+		SEPALogger.log(VERBOSITY.INFO,this.adapterName(),"Starting...");
 		
 		dash7Coordinator = new STDash7Coordinator();
 		dash7Coordinator.addObserver(this);
@@ -159,17 +162,17 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 			dash7Coordinator.startRunning();
 		} 
 		catch (IOException e) {
-			Logger.log(VERBOSITY.FATAL,this.adapterName(),e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,this.adapterName(),e.getMessage());
 			return false;
 		}
 		
-		Logger.log(VERBOSITY.INFO,this.adapterName(),"Started");
+		SEPALogger.log(VERBOSITY.INFO,this.adapterName(),"Started");
 		
 		return true;
 	}
 
 	public void mnRequest(String request) {
-		
+		SEPALogger.log(VERBOSITY.INFO, adapterName(), "Received << "+request);
 		String id = "";
 		String value = "0";
 		

@@ -11,13 +11,13 @@ import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 
 import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
-import arces.unibo.SEPA.commons.ARBindingsResults;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.BindingsResults;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 
 public class WebSocketAdapter extends MPAdapter {
 	private int PORT = 8989;
@@ -68,6 +68,12 @@ public class WebSocketAdapter extends MPAdapter {
 			for (WebSocket socket : subscriptions.get(resourceURI)) {
 				socket.send(response);
 			}
+		}
+
+		@Override
+		public void brokenSubscription() {
+			// TODO Auto-generated method stub
+			
 		}
 		
 	}
@@ -163,11 +169,11 @@ public class WebSocketAdapter extends MPAdapter {
         try {
 			server.start();
 		} catch (IOException e) {
-			Logger.log(VERBOSITY.INFO, adapterName(), "Failed to start WebSocket gate on port "+PORT+ " "+e.getMessage());
+			SEPALogger.log(VERBOSITY.INFO, adapterName(), "Failed to start WebSocket gate on port "+PORT+ " "+e.getMessage());
 			return false;
 		}
 		
-		Logger.log(VERBOSITY.INFO, adapterName(), "Started on port "+PORT);
+		SEPALogger.log(VERBOSITY.INFO, adapterName(), "Started on port "+PORT);
 		return true;
 	}
 

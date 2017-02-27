@@ -8,9 +8,9 @@ import java.util.HashMap;
 
 import com.sun.net.httpserver.*;
 
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 public class HTTPAdapter extends MPAdapter {
 	private static int HTTP_PORT = 8888; 
@@ -28,7 +28,7 @@ public class HTTPAdapter extends MPAdapter {
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
-			Logger.log(VERBOSITY.FATAL,adapterName(),e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),e.getMessage());
 			return false;
 		}
 		
@@ -37,7 +37,7 @@ public class HTTPAdapter extends MPAdapter {
 	    server.setExecutor(null);
 	    server.start();
 	    
-	    Logger.log(VERBOSITY.INFO,adapterName(),"Started on port "+HTTP_PORT);
+	    SEPALogger.log(VERBOSITY.INFO,adapterName(),"Started on port "+HTTP_PORT);
 	    
 	    return true;
 	}
@@ -102,7 +102,7 @@ public class HTTPAdapter extends MPAdapter {
 					os.close();
 				} 
 				catch (IOException e) {
-					Logger.log(VERBOSITY.FATAL,adapterName(),"Send HTTP Response failed");
+					SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Send HTTP Response failed");
 				}
 			}
 		}

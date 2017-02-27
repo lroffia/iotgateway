@@ -18,9 +18,9 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 import arces.unibo.gateway.MappingInputDialog.MappingInputDialogListener;
 import arces.unibo.gateway.garbagecollector.GarbageCollector;
 import arces.unibo.gateway.garbagecollector.GarbageCollectorListener;
@@ -151,10 +151,8 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 	public GatewayManager() {
 		initialize();
 		
-		Logger.loadSettings();
-		
 		if(!appProfile.load(APP_PROFILE)) {
-			Logger.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ APP_PROFILE);
+			SEPALogger.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ APP_PROFILE);
 			return;
 		}
 		

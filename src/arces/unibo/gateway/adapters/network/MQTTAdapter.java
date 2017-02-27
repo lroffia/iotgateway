@@ -7,9 +7,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -136,7 +136,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 	            return context.getSocketFactory();
 
 	        } catch (Exception e) {
-	            Logger.log(VERBOSITY.ERROR, clientID, e.getMessage());
+	        	SEPALogger.log(VERBOSITY.ERROR, clientID, e.getMessage());
 	        }
 
 	        return null;
@@ -175,7 +175,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 
 	@Override
 	public void messageArrived(String topic, MqttMessage value) throws Exception {
-		Logger.log(VERBOSITY.DEBUG,clientID,topic+ " "+value.toString());
+		SEPALogger.log(VERBOSITY.DEBUG,clientID,topic+ " "+value.toString());
 		
 		mnResponse(topic+"&"+value.toString());
 		
@@ -183,7 +183,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 		
 		if (debugHash.containsKey(topic)) {
 			if (!debugHash.get(topic).equals(value.toString())) {
-				Logger.log(VERBOSITY.DEBUG,clientID,topic+ " "+debugHash.get(topic)+"-->"+value.toString());	
+				SEPALogger.log(VERBOSITY.DEBUG,clientID,topic+ " "+debugHash.get(topic)+"-->"+value.toString());	
 			}
 		}
 		
@@ -193,16 +193,14 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 	//Secure: -url giove.mars -port 8883 -topics arces/servers/# -cacrt /usr/local/mosquitto-certs/ca.crt -crt /usr/local/mosquitto-certs/mml.crt -key /usr/local/mosquitto-certs/mml.key
 	//Not secure: -url giove.mars -port 1883 -topics #
 	public static void main(String[] args) throws IOException {		
-		Logger.loadSettings();
-		
 		String path = "GatewayProfile.sap";
 		ApplicationProfile appProfile = new ApplicationProfile();
 		
 		if(!appProfile.load(path)) {
-			Logger.log(VERBOSITY.FATAL, "MQTT", "Failed to load: "+ path);
+			SEPALogger.log(VERBOSITY.FATAL, "MQTT", "Failed to load: "+ path);
 			return;
 		}
-		else Logger.log(VERBOSITY.INFO, "MQTT", "Loaded application profile "+ path);
+		else SEPALogger.log(VERBOSITY.INFO, "MQTT", "Loaded application profile "+ path);
 		
 		MQTTAdapter adapter;
 		String url = null;
@@ -237,25 +235,25 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 		
 		if (caCrtFile != null && crtFile != null && keyFile != null){
 			adapter = new MQTTAdapter(appProfile,url,Integer.parseInt(port),topics,caCrtFile,crtFile,keyFile);
-			Logger.log(VERBOSITY.DEBUG,adapter.adapterName(),"caCrtFile="+caCrtFile);
-			Logger.log(VERBOSITY.DEBUG,adapter.adapterName(),"crtFile="+crtFile);
-			Logger.log(VERBOSITY.DEBUG,adapter.adapterName(),"keyFile="+keyFile);
+			SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"caCrtFile="+caCrtFile);
+			SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"crtFile="+crtFile);
+			SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"keyFile="+keyFile);
 		}
 		else
 			adapter = new MQTTAdapter(appProfile,url,Integer.parseInt(port),topics);
 		
-		Logger.log(VERBOSITY.DEBUG,adapter.adapterName(),"url="+url);
-		Logger.log(VERBOSITY.DEBUG,adapter.adapterName(),"port="+port);
-		Logger.log(VERBOSITY.DEBUG,adapter.adapterName(),"topics="+topics);
+		SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"url="+url);
+		SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"port="+port);
+		SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"topics="+topics);
 		
 		if(adapter.start()) {
-			Logger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
+			SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
-			if(adapter.stop()) Logger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
+			if(adapter.stop()) SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
 		}
 		else {
-			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
-			Logger.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
+			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
+			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
 			System.in.read();
 		}	
 	}
@@ -264,7 +262,6 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 	public String networkURI() {
 		return "iot:MQTT";
 	}
-
 
 	@Override
 	protected void mnRequest(String request) {
@@ -279,7 +276,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient = new MqttClient(serverURI,clientID);
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.FATAL,clientID,"Failed to create MQTT client "+e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,clientID,"Failed to create MQTT client "+e.getMessage());
 			return created;
 		}
 		
@@ -289,14 +286,14 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			if (sslEnabled) {
 				SSLSocketFactory ssl = SslUtil.getSocketFactory(caCrtFile, crtFile, keyFile, "");
 				if (ssl == null) {
-					Logger.log(VERBOSITY.ERROR, clientID, "SSL security option creation failed");
+					SEPALogger.log(VERBOSITY.ERROR, clientID, "SSL security option creation failed");
 				}
 				else options.setSocketFactory(ssl);												
 			}
 			mqttClient.connect(options);
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.FATAL,clientID,"Failed to connect "+e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,clientID,"Failed to connect "+e.getMessage());
 			return created;
 		}
 		
@@ -307,14 +304,14 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.subscribe(topicsFilter);
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.FATAL,clientID,"Failed to subscribe "+e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,clientID,"Failed to subscribe "+e.getMessage());
 			return created;
 		}
 		
 		String topics = "";
 		for (int i=0; i < topicsFilter.length;i++) topics += "\""+ topicsFilter[i] + "\" ";
 		
-		Logger.log(VERBOSITY.INFO,clientID,"MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
+		SEPALogger.log(VERBOSITY.INFO,clientID,"MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
 	
 		created = true;
 		
@@ -328,7 +325,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			if (topicsFilter != null) mqttClient.unsubscribe(topicsFilter);
 		} 
 		catch (MqttException e1) {
-			Logger.log(VERBOSITY.ERROR,adapterName(),"Failed to unsubscribe "+e1.getMessage());
+			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"Failed to unsubscribe "+e1.getMessage());
 		}
 		
 		try 
@@ -336,7 +333,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.disconnect();
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.ERROR,adapterName(),"Failed to disconnect "+e.getMessage());
+			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"Failed to disconnect "+e.getMessage());
 		}
 		
 	}
@@ -357,9 +354,9 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 
 public class MQTTAdapter extends MNAdapter implements MqttCallback {
@@ -393,7 +390,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient = new MqttClient(serverURI,clientID);
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"Failed to create MQTT client "+e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Failed to create MQTT client "+e.getMessage());
 			return false;
 		}
 		
@@ -402,7 +399,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.connect();
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"Failed to connect "+e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Failed to connect "+e.getMessage());
 			return false;
 		}
 		
@@ -413,14 +410,14 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.subscribe(topicsFilter);
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.FATAL,adapterName(),"Failed to subscribe "+e.getMessage());
+			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Failed to subscribe "+e.getMessage());
 			return false;
 		}
 		
 		String topics = "";
 		for (int i=0; i < topicsFilter.length;i++) topics += "\""+ topicsFilter[i] + "\" ";
 		
-		Logger.log(VERBOSITY.INFO,adapterName(),"MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
+		SEPALogger.log(VERBOSITY.INFO,adapterName(),"MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
 		
 		return true;
 	}
@@ -432,7 +429,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			if (topicsFilter != null) mqttClient.unsubscribe(topicsFilter);
 		} 
 		catch (MqttException e1) {
-			Logger.log(VERBOSITY.ERROR,adapterName(),"Failed to unsubscribe "+e1.getMessage());
+			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"Failed to unsubscribe "+e1.getMessage());
 		}
 		
 		try 
@@ -440,7 +437,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.disconnect();
 		} 
 		catch (MqttException e) {
-			Logger.log(VERBOSITY.ERROR,adapterName(),"Failed to disconnect "+e.getMessage());
+			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"Failed to disconnect "+e.getMessage());
 		}
 	}
 

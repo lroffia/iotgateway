@@ -2,9 +2,9 @@ package arces.unibo.gateway.mapping.manager;
 
 import java.util.ArrayList;
 
-import arces.unibo.SEPA.application.Logger;
+import arces.unibo.SEPA.application.SEPALogger;
 import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Logger.VERBOSITY;
+import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MPMapping;
 
@@ -26,7 +26,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 
 	private boolean addDefaultProtocolMapping() {
 		//Protocols default mappings
-		Logger.log(VERBOSITY.INFO, tag,"Adding default protocol mappings");
+		SEPALogger.log(VERBOSITY.INFO, tag,"Adding default protocol mappings");
 		
 		// TODO add default mapping here
 		if(!addProtocolMapping("iot:HTTP", "action=GET&resource=PINGPONG", "*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
@@ -74,7 +74,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	private boolean addDefaultNetworkMapping() {
 				
 		//Networks default mappings
-		Logger.log(VERBOSITY.INFO, tag,"Adding default network mappings");
+		SEPALogger.log(VERBOSITY.INFO, tag,"Adding default network mappings");
 		
 		// TODO add default mapping here
 		if(!addNetworkMapping("iot:PINGPONG", "GET", "GET&*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
@@ -169,7 +169,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!mnMappingManager.start()) return false;
 		if(!mpMappingManager.start()) return false;
 			
-		Logger.log(VERBOSITY.INFO, tag,"Started");
+		SEPALogger.log(VERBOSITY.INFO, tag,"Started");
 		
 		removeAllMapping();
 		addDefaultMapping();

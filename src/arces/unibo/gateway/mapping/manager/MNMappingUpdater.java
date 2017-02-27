@@ -2,9 +2,9 @@ package arces.unibo.gateway.mapping.manager;
 
 import arces.unibo.SEPA.application.ApplicationProfile;
 import arces.unibo.SEPA.application.Producer;
-import arces.unibo.SEPA.commons.Bindings;
-import arces.unibo.SEPA.commons.RDFTermLiteral;
-import arces.unibo.SEPA.commons.RDFTermURI;
+import arces.unibo.SEPA.commons.SPARQL.Bindings;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
+import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 
 public class MNMappingUpdater extends Producer {
 	public MNMappingUpdater(ApplicationProfile appProfile) {super(appProfile,"UPDATE_MN_MAPPING");}
