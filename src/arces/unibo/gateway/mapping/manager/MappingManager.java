@@ -29,8 +29,8 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		SEPALogger.log(VERBOSITY.INFO, tag,"Adding default protocol mappings");
 		
 		// TODO add default mapping here
-		if(!addProtocolMapping("iot:HTTP", "action=GET&resource=PINGPONG", "*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
-		if(!addProtocolMapping("iot:HTTP", "action=SET&resource=PINGPONG&value=*", "*", "iot:Resource_PINGPONG", "iot:SET", "*")) return false;
+		//if(!addProtocolMapping("iot:HTTP", "action=GET&resource=PINGPONG", "*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
+		//if(!addProtocolMapping("iot:HTTP", "action=SET&resource=PINGPONG&value=*", "*", "iot:Resource_PINGPONG", "iot:SET", "*")) return false;
 
 		/*
 		if(!addProtocolMapping("iot:HTTP", "action=GET&location=ROOM1&resource=TEMPERATURE", "Room1 temperature * Celsius degree", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
@@ -77,9 +77,9 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		SEPALogger.log(VERBOSITY.INFO, tag,"Adding default network mappings");
 		
 		// TODO add default mapping here
-		if(!addNetworkMapping("iot:PINGPONG", "GET", "GET&*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
-		if(!addNetworkMapping("iot:PINGPONG", "SET=*", "SET&*", "iot:Resource_PINGPONG", "iot:SET", "*")) return false;
-/*
+		//if(!addNetworkMapping("iot:PINGPONG", "GET", "GET&*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
+		//if(!addNetworkMapping("iot:PINGPONG", "SET=*", "SET&*", "iot:Resource_PINGPONG", "iot:SET", "*")) return false;
+
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/mars/mml/cpu/core-1/temperature&*", "iot:Resource_MARS_MML_CPU_1", "iot:SET", "*")) return false;
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/mars/mml/cpu/core-2/temperature&*", "iot:Resource_MARS_MML_CPU_2", "iot:SET", "*")) return false;
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/mars/mml/cpu/core-3/temperature&*", "iot:Resource_MARS_MML_CPU_3", "iot:SET", "*")) return false;
@@ -90,22 +90,22 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/mars/mml/hd/sda/temperature&*", "iot:Resource_MARS_MML_HDD_SDA", "iot:SET", "*")) return false;
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/mars/mml/hd/sdb/temperature&*", "iot:Resource_MARS_MML_HDD_SDB", "iot:SET", "*")) return false;
 	
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-1/temperature&*", "iot:Resource_STAR_AVANA_CPU_1", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-2/temperature&*", "iot:Resource_STAR_AVANA_CPU_2", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-3/temperature&*", "iot:Resource_STAR_AVANA_CPU_3", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-4/temperature&*", "iot:Resource_STAR_AVANA_CPU_4", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-5/temperature&*", "iot:Resource_STAR_AVANA_CPU_5", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-6/temperature&*", "iot:Resource_STAR_AVANA_CPU_6", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-7/temperature&*", "iot:Resource_STAR_AVANA_CPU_7", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-8/temperature&*", "iot:Resource_STAR_AVANA_CPU_8", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-9/temperature&*", "iot:Resource_STAR_AVANA_CPU_9", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-10/temperature&*", "iot:Resource_STAR_AVANA_CPU_10", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-11/temperature&*", "iot:Resource_STAR_AVANA_CPU_11", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-12/temperature&*", "iot:Resource_STAR_AVANA_CPU_12", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-13/temperature&*", "iot:Resource_STAR_AVANA_CPU_13", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-14/temperature&*", "iot:Resource_STAR_AVANA_CPU_14", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-15/temperature&*", "iot:Resource_STAR_AVANA_CPU_15", "iot:SET", "*")) return false;
-		if(!addNetworkMapping("MQTT", "*", "rces/servers/star/avana/cpu/core-16/temperature&*", "iot:Resource_STAR_AVANA_CPU_16", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-1/temperature&*", "iot:Resource_STAR_AVANA_CPU_1", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-2/temperature&*", "iot:Resource_STAR_AVANA_CPU_2", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-3/temperature&*", "iot:Resource_STAR_AVANA_CPU_3", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-4/temperature&*", "iot:Resource_STAR_AVANA_CPU_4", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-5/temperature&*", "iot:Resource_STAR_AVANA_CPU_5", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-6/temperature&*", "iot:Resource_STAR_AVANA_CPU_6", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-7/temperature&*", "iot:Resource_STAR_AVANA_CPU_7", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-8/temperature&*", "iot:Resource_STAR_AVANA_CPU_8", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-9/temperature&*", "iot:Resource_STAR_AVANA_CPU_9", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-10/temperature&*", "iot:Resource_STAR_AVANA_CPU_10", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-11/temperature&*", "iot:Resource_STAR_AVANA_CPU_11", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-12/temperature&*", "iot:Resource_STAR_AVANA_CPU_12", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-13/temperature&*", "iot:Resource_STAR_AVANA_CPU_13", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-14/temperature&*", "iot:Resource_STAR_AVANA_CPU_14", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-15/temperature&*", "iot:Resource_STAR_AVANA_CPU_15", "iot:SET", "*")) return false;
+		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/cpu/core-16/temperature&*", "iot:Resource_STAR_AVANA_CPU_16", "iot:SET", "*")) return false;
 		
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/hd/sda/temperature&*", "iot:Resource_STAR_AVANA_HDD_SDA", "iot:SET", "*")) return false;
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/star/avana/hd/sdb/temperature&*", "iot:Resource_STAR_AVANA_HDD_SDB", "iot:SET", "*")) return false;
@@ -135,7 +135,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/ares/ercole/hd/sdb/temperature&*", "iot:Resource_ARES_ERCOLE_HDD_SDB", "iot:SET", "*")) return false;
 		
 		if(!addNetworkMapping("MQTT", "*", "arces/servers/mars/marsamba/hd/sda/temperature&*", "iot:Resource_MARS_SAMBA_HDD_SDA", "iot:SET", "*")) return false;
-		
+/*		
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO1", "TEMPERATURE!NODO1&*", "iot:Resource_TEMPERATURE_1", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO2", "TEMPERATURE!NODO2&*", "iot:Resource_TEMPERATURE_2", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:DASH7", "TEMPERATURE@NODO3", "TEMPERATURE!NODO3&*", "iot:Resource_TEMPERATURE_3", "iot:GET", "*")) return false;
@@ -155,7 +155,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core3/temperature", "toffano/mml/Core3/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_3", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core4/temperature", "toffano/mml/Core4/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_4", "iot:GET", "*")) return false;
 		if(!addNetworkMapping("iot:MQTT", "toffano/mml/Core5/temperature", "toffano/mml/Core5/temperature&*", "iot:Resource_SERVER_MML_TEMPERATURE_5", "iot:GET", "*")) return false;
-**/	
+*/
 		return true;
 	}
 	
