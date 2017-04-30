@@ -1,11 +1,12 @@
 package arces.unibo.gateway.garbagecollector;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
 
 public class GarbageCollector {
-	static String tag = "GARBAGE COLLECTOR";
+	private static final Logger logger = LogManager.getLogger("GarbageCollector");
 
 	private ApplicationProfile appProfile;
 	private GarbageCollectorListener listener;
@@ -65,7 +66,7 @@ public class GarbageCollector {
 		if (!mpRequestMonitor.join()) return false;
 		if(mpRequestMonitor.subscribe() == null) return false;
 
-		SEPALogger.log(VERBOSITY.INFO, tag,"Started");
+		logger.info("Started");
 		return true;
 	}
 	

@@ -1,8 +1,10 @@
 package arces.unibo.gateway.dispatching;
 
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -13,7 +15,8 @@ import arces.unibo.gateway.mapping.ResourceAction;
 
 public class MNMapper extends Mapper {	
 	public MNMapper(ApplicationProfile appProfile,Map map) {super(appProfile,"MN_MAPPING", map);}
-
+	private static final Logger logger = LogManager.getLogger("MNMapper");
+	
 	@Override
 	public String name() {return "MN MAPPER";}
 
@@ -31,7 +34,7 @@ public class MNMapper extends Mapper {
 		String responsePattern="";
 		String value = "";
 		
-		SEPALogger.log(VERBOSITY.INFO, name(), "ADDED MAPPINGS");
+		logger.info("ADDED MAPPINGS");
 		for (Bindings results : bindingsResults.getBindings()){
 			for(String var : results.getVariables()){
 				String bindingValue = results.getBindingValue(var);
@@ -58,7 +61,7 @@ public class MNMapper extends Mapper {
 			}
 			MNMapping mapping = new MNMapping(network,requestPattern,responsePattern,new ResourceAction(resource,action,value));
 			if (map.addMapping(mapping)) 
-				SEPALogger.log(VERBOSITY.INFO, name(), mapping.toString());
+				logger.info( mapping.toString());
 		}
 		
 	}
@@ -72,7 +75,7 @@ public class MNMapper extends Mapper {
 		String responsePattern="";
 		String value = "";
 		
-		SEPALogger.log(VERBOSITY.INFO, name(), "REMOVED MAPPINGS");
+		logger.info("REMOVED MAPPINGS");
 		for (Bindings results : bindingsResults.getBindings()){
 			for(String var : results.getVariables()){
 				String bindingValue = results.getBindingValue(var);
@@ -98,7 +101,7 @@ public class MNMapper extends Mapper {
 				}
 			}
 			MNMapping mapping = new MNMapping(network,requestPattern,responsePattern,new ResourceAction(resource,action,value));
-			if (map.removeMapping(mapping)) SEPALogger.log(VERBOSITY.INFO, name(), mapping.toString());
+			if (map.removeMapping(mapping)) logger.info(mapping.toString());
 		}
 		
 	}

@@ -2,10 +2,12 @@ package arces.unibo.gateway.adapters.network;
 
 import java.util.UUID;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -13,6 +15,8 @@ import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 
 public abstract class MNAdapter {
+	private static final Logger logger = LogManager.getLogger("MNAdapter");
+	
 	private MNRequestResponseDispatcher dispatcher;
 	
 	//Abstract methods
@@ -86,18 +90,18 @@ public abstract class MNAdapter {
 	
 	public boolean start(){
 		if (!dispatcher.join()) {
-			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Join FAILED");
+			logger.fatal("Join FAILED");
 			return false;
 		}
 		
 		String subID = dispatcher.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
+			logger.fatal("Subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
+		logger.debug("Subscription "+subID);
 		
 		return doStart();
 	}

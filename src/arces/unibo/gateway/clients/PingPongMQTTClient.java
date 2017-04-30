@@ -1,17 +1,18 @@
 package arces.unibo.gateway.clients;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
-
 public class PingPongMQTTClient {
 	private static MqttClient client;
 	private static String serverURI = "tcp://iot.eclipse.org:1883";
-	private static String clientID = "MQTTPingPongClient";
+	private static String clientID = "PingPongMQTTClient";
+	
+	private static final Logger logger = LogManager.getLogger("PingPongMQTTClient");
 	
 	public static void main(String[] args){
 		String tmpDir = System.getProperty("java.io.tmpdir");
@@ -22,7 +23,7 @@ public class PingPongMQTTClient {
 			client = new MqttClient(serverURI,clientID,dataStore);
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			logger.error( e.getMessage());
 			return;
 		}
 		
@@ -31,7 +32,7 @@ public class PingPongMQTTClient {
 			client.connect();
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			logger.fatal(e.getMessage());
 			return;
 		}
 		
@@ -41,7 +42,7 @@ public class PingPongMQTTClient {
 			client.publish("PONG", new MqttMessage(new byte[]{'P','O','N','G'}));
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			logger.fatal( e.getMessage());
 			return;
 		}
 		
@@ -50,7 +51,7 @@ public class PingPongMQTTClient {
 			client.disconnect();
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.FATAL, "MQTT CLIENT", e.getMessage());
+			logger.fatal(e.getMessage());
 			return;
 		}
 	}

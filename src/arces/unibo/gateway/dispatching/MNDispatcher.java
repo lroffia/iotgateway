@@ -1,18 +1,19 @@
 package arces.unibo.gateway.dispatching;
 
-import arces.unibo.SEPA.application.SEPALogger;
-
 import java.util.UUID;
 
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class MNDispatcher implements MNMappingNotFoundListener {
-	private static String tag = "MN DISPATCHER";
+	private static final Logger logger = LogManager.getLogger("MNDispatcher");
 	
 	private MNRequestDispatcher mnRequestDispatcher;
 	private MNResponseDispatcher mnResponseDispatcher;
@@ -34,31 +35,31 @@ public class MNDispatcher implements MNMappingNotFoundListener {
 		String subID = mnMapper.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL, tag,"Mapper subscription FAILED");
+			logger.fatal("Mapper subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG, tag,"Mapper subscription\t"+subID);
+		logger.debug("Mapper subscription\t"+subID);
 		
 		subID = mnRequestDispatcher.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL, tag,"Request dispatcher subscription FAILED");
+			logger.fatal("Request dispatcher subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG, tag,"Request dispatcher subscription\t"+subID);
+		logger.debug("Request dispatcher subscription\t"+subID);
 		
 		subID = mnResponseDispatcher.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL, tag,"Response dispatcher subscription FAILED");
+			logger.fatal("Response dispatcher subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG, tag,"Response dispatcher subscription\t"+subID);
+		logger.debug("Response dispatcher subscription\t"+subID);
 		
-		SEPALogger.log(VERBOSITY.INFO, tag,"Started");
+		logger.info("Started");
 		
 		return true;
 	}
@@ -78,7 +79,7 @@ public class MNDispatcher implements MNMappingNotFoundListener {
 		bindings.addBinding("action", new RDFTermURI(response.getActionURI()));
 		bindings.addBinding("value", new RDFTermLiteral(response.getValue()));
 
-		SEPALogger.log(VERBOSITY.WARNING, tag, ">> Resource-Response "+response.toString());
+		logger.warn( ">> Resource-Response "+response.toString());
 		
 		mnResponseDispatcher.update(bindings);
 		

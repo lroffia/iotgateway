@@ -2,14 +2,16 @@ package arces.unibo.gateway.mapping.manager;
 
 import java.util.ArrayList;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.MPMapping;
 
 public class MappingManager implements MPMappingEventListener, MNMappingEventListener {
-	static String tag = "MAPPING MANAGER";
+	private static final Logger logger = LogManager.getLogger("MappingManager");
 	
 	private MPMappingManager mpMappingManager;
 	private MNMappingManager mnMappingManager;
@@ -26,7 +28,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 
 	private boolean addDefaultProtocolMapping() {
 		//Protocols default mappings
-		SEPALogger.log(VERBOSITY.INFO, tag,"Adding default protocol mappings");
+		logger.info("Adding default protocol mappings");
 		
 		// TODO add default mapping here
 		//if(!addProtocolMapping("iot:HTTP", "action=GET&resource=PINGPONG", "*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
@@ -74,7 +76,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 	private boolean addDefaultNetworkMapping() {
 				
 		//Networks default mappings
-		SEPALogger.log(VERBOSITY.INFO, tag,"Adding default network mappings");
+		logger.info("Adding default network mappings");
 		
 		// TODO add default mapping here
 		//if(!addNetworkMapping("iot:PINGPONG", "GET", "GET&*", "iot:Resource_PINGPONG", "iot:GET", "*")) return false;
@@ -169,7 +171,7 @@ public class MappingManager implements MPMappingEventListener, MNMappingEventLis
 		if(!mnMappingManager.start()) return false;
 		if(!mpMappingManager.start()) return false;
 			
-		SEPALogger.log(VERBOSITY.INFO, tag,"Started");
+		logger.info("Started");
 		
 		removeAllMapping();
 		addDefaultMapping();

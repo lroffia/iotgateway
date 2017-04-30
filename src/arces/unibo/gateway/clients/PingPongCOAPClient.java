@@ -3,13 +3,13 @@ package arces.unibo.gateway.clients;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapResponse;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
-
 public class PingPongCOAPClient {
+	private static final Logger logger = LogManager.getLogger("PingPongCOAPClient");
 	
 	public static void main(String args[]) {
 
@@ -30,10 +30,10 @@ public class PingPongCOAPClient {
 			
 			if (response!=null) {
 				String responseString = response.getResponseText();
-				SEPALogger.log(VERBOSITY.INFO, "PINGPONG", pingPong +" --> " + responseString);
+				logger.info( pingPong +" --> " + responseString);
 				if (!responseString.equals("TIMEOUT")) pingPong = response.getResponseText();
 			} else {
-				SEPALogger.log(VERBOSITY.INFO, "PINGPONG","No response received");
+				logger.info("No response received");
 			}
 		}
 	}

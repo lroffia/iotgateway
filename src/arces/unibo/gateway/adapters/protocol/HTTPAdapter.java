@@ -6,16 +6,19 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import com.sun.net.httpserver.*;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 
 public class HTTPAdapter extends MPAdapter {
 	private static int HTTP_PORT = 8888; 
 	private static HttpServer server = null;
 	private static HashMap<String,IoTHandler.Running> iotHandlers = new HashMap<String,IoTHandler.Running>();
+	private static final Logger logger = LogManager.getLogger("HTTPAdapter");
 	
 	public HTTPAdapter(ApplicationProfile appProfile) {
 		super(appProfile);
@@ -28,7 +31,7 @@ public class HTTPAdapter extends MPAdapter {
 		} 
 		catch (IOException e) {
 			e.printStackTrace();
-			SEPALogger.log(VERBOSITY.FATAL,adapterName(),e.getMessage());
+			logger.fatal(e.getMessage());
 			return false;
 		}
 		
@@ -37,7 +40,7 @@ public class HTTPAdapter extends MPAdapter {
 	    server.setExecutor(null);
 	    server.start();
 	    
-	    SEPALogger.log(VERBOSITY.INFO,adapterName(),"Started on port "+HTTP_PORT);
+	    logger.info("Started on port "+HTTP_PORT);
 	    
 	    return true;
 	}
@@ -102,7 +105,7 @@ public class HTTPAdapter extends MPAdapter {
 					os.close();
 				} 
 				catch (IOException e) {
-					SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Send HTTP Response failed");
+					logger.fatal("Send HTTP Response failed");
 				}
 			}
 		}

@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -17,7 +19,7 @@ import arces.unibo.gateway.mapping.MNRequest;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class MNRequestDispatcher extends Aggregator {	
-	private static final String tag = "MN REQUEST DISPATCHER";
+	private static final Logger logger = LogManager.getLogger("MNRequestDispatcher");
 	
 	private HashMap<ResourceAction,ArrayList<MNRequest>> requestMap = new HashMap<ResourceAction,ArrayList<MNRequest>>();
 	private MNMap mnMap;
@@ -48,7 +50,7 @@ public class MNRequestDispatcher extends Aggregator {
 			String resource = bindings.getBindingValue("resource");
 			ResourceAction resourceRequest= new ResourceAction(resource, action, value);
 			
-			SEPALogger.log(VERBOSITY.INFO, tag, "<< Resource-Request "+resourceRequest.toString());
+			logger.info("<< Resource-Request "+resourceRequest.toString());
 			
 			//Mapping Resource Request to MN Request List
 			ArrayList<MNRequest> mnRequestList = mnMap.resourceAction2MNRequestList(resourceRequest);
@@ -78,7 +80,7 @@ public class MNRequestDispatcher extends Aggregator {
 				bindings.addBinding("network", new RDFTermURI(mnRequest.getNetwork()));
 				bindings.addBinding("value", new RDFTermLiteral(mnRequest.getRequestString()));
 				
-				SEPALogger.log(VERBOSITY.INFO, tag,">> "+mnRequest.toString());
+				logger.info(">> "+mnRequest.toString());
 				
 				update(bindings);
 			}

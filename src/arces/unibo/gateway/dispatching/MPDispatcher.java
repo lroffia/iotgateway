@@ -3,10 +3,12 @@ package arces.unibo.gateway.dispatching;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import arces.unibo.gateway.mapping.ResourceAction;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
@@ -14,7 +16,7 @@ import arces.unibo.gateway.mapping.MPRequest;
 import arces.unibo.gateway.mapping.MPResponse;
 
 public class MPDispatcher implements MPMappingNotFoundListener {
-	private static String tag = "MP DISPATCHER";
+	private static final Logger logger = LogManager.getLogger("MPDispatcher");
 	
 	private MPRequestDispatcher mpRequestDispatcher;
 	private MPResponseDispatcher mpResponseDispatcher;
@@ -37,31 +39,31 @@ public class MPDispatcher implements MPMappingNotFoundListener {
 		String subID = mpMapper.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL,tag,"Mapper subscription FAILED");
+			logger.fatal("Mapper subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG,tag,"Mapper subscription\t"+subID);
+		logger.debug("Mapper subscription\t"+subID);
 		
 		subID = mpRequestDispatcher.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL,tag,"Request dispatcher subscription FAILED");
+			logger.fatal("Request dispatcher subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG,tag,"Request dispatcher subscription\t"+subID);
+		logger.debug("Request dispatcher subscription\t"+subID);
 		
 		subID = mpResponseDispatcher.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL,tag,"Response dispatcher subscription FAILED");
+			logger.fatal("Response dispatcher subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG,tag,"Response dispatcher subscription\t"+subID);
+		logger.debug("Response dispatcher subscription\t"+subID);
 		
-		SEPALogger.log(VERBOSITY.INFO,tag,"Started");
+		logger.info("Started");
 		
 		return true;
 	}
@@ -80,7 +82,7 @@ public class MPDispatcher implements MPMappingNotFoundListener {
 		bindings.addBinding("value", new RDFTermLiteral(response.getResponseString()));
 		bindings.addBinding("protocol", new RDFTermURI(response.getProtocol()));
 		
-		SEPALogger.log(VERBOSITY.WARNING,tag,">> " + response.toString());
+		logger.warn(">> " + response.toString());
 		
 		mpResponseDispatcher.update(bindings);
 		

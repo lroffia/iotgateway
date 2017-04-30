@@ -10,6 +10,7 @@
 	<classpathentry kind="lib" path="grizzly-websockets-server-2.3.28.jar"/>
 	<classpathentry kind="lib" path="bcpkix-jdk15on-156.jar"/>
 	<classpathentry kind="lib" path="bcprov-jdk15on-156.jar"/>
+	<classpathentry kind="lib" path="log4j-1.2.17.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SEPATools"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/STDash7"/>
 	<classpathentry kind="output" path="bin"/>

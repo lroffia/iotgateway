@@ -7,6 +7,8 @@ import java.net.SocketException;
 
 import java.util.HashMap;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.eclipse.californium.core.CoapResource;
 import org.eclipse.californium.core.CoapServer;
 import org.eclipse.californium.core.network.CoapEndpoint;
@@ -14,16 +16,17 @@ import org.eclipse.californium.core.network.EndpointManager;
 import org.eclipse.californium.core.network.config.NetworkConfig;
 import org.eclipse.californium.core.server.resources.CoapExchange;
 
-import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Consumer;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 import arces.unibo.gateway.adapters.protocol.COAPAdapter.COAPAdapterServer.GatewayCOAPResource.Running;
 
 public class COAPAdapter extends MPAdapter{
+	private static final Logger logger = LogManager.getLogger("COAPAdapter");
+	
 	public COAPAdapter(ApplicationProfile appProfile) {
 		super(appProfile);
 	}
@@ -179,7 +182,7 @@ public class COAPAdapter extends MPAdapter{
 			server = new COAPAdapterServer();
 		} 
 		catch (SocketException e) {
-			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"FAILED to start "+e.getMessage());
+			logger.fatal("FAILED to start "+e.getMessage());
 			return false;
 		}
 		
@@ -188,20 +191,20 @@ public class COAPAdapter extends MPAdapter{
 		resourceListener = new COAPResourceListener(appProfile);
 		
 		if (!resourceListener.join()) {
-			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"FAILED to join gateway");
+			logger.fatal("FAILED to join gateway");
 			return false;
 		}
 		
 		String subID = resourceListener.subscribe(null);
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"FAILED to subscribe");
+			logger.fatal("FAILED to subscribe");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG,adapterName(),"Resource subscription "+subID);
+		logger.debug("Resource subscription "+subID);
 		
-		SEPALogger.log(VERBOSITY.INFO,adapterName(),"COAP server is running on port "+ server.COAP_PORT + " and Resource Listener subscribed");
+		logger.info("COAP server is running on port "+ server.COAP_PORT + " and Resource Listener subscribed");
 		
 		return true;
 	}

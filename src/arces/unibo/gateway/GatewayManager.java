@@ -15,12 +15,13 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
 import arces.unibo.gateway.MappingInputDialog.MappingInputDialogListener;
 import arces.unibo.gateway.garbagecollector.GarbageCollector;
 import arces.unibo.gateway.garbagecollector.GarbageCollectorListener;
@@ -35,6 +36,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 
 public class GatewayManager implements MappingEventListener, MappingInputDialogListener, GarbageCollectorListener {	
+	private static final Logger logger = LogManager.getLogger("GatewayManager");
+	
 	//Tables models
 	private DefaultTableModel protocolMappingDataModel;
 	private DefaultTableModel networkMappingDataModel;
@@ -152,7 +155,7 @@ public class GatewayManager implements MappingEventListener, MappingInputDialogL
 		initialize();
 		
 		if(!appProfile.load(APP_PROFILE)) {
-			SEPALogger.log(VERBOSITY.FATAL, "GW MANAGER", "Failed to load: "+ APP_PROFILE);
+			logger.fatal("Failed to load: "+ APP_PROFILE);
 			return;
 		}
 		

@@ -1,9 +1,11 @@
 package arces.unibo.gateway.adapters.protocol;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -18,6 +20,8 @@ public abstract class MPAdapter {
 	protected abstract boolean doStart();
 	protected abstract void doStop();
 	
+	private static final Logger logger = LogManager.getLogger("MPAdapter");
+	
 	private MPRequestResponseDispatcher dispatcher;
 	
 	protected ApplicationProfile appProfile = new ApplicationProfile();
@@ -27,6 +31,7 @@ public abstract class MPAdapter {
 	}
 	
 	class MPRequestResponseDispatcher extends Aggregator {
+		private final Logger logger = LogManager.getLogger("MPRequestResponseDispatcher");
 		
 		public String subscribe() {
 			Bindings bindings = new Bindings();
@@ -50,7 +55,7 @@ public abstract class MPAdapter {
 				String requestURI = binding.getBindingValue("request");
 				String responseString = binding.getBindingValue("value");
 				
-				SEPALogger.log(VERBOSITY.INFO,adapterName(),"<< MP-Response<"+responseString+">");
+				logger.info("<< MP-Response<"+responseString+">");
 				
 				mpResponse(requestURI,responseString);
 			}
@@ -82,11 +87,11 @@ public abstract class MPAdapter {
 		String subID = dispatcher.subscribe();
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL,adapterName(),"Subscription FAILED");
+			logger.fatal("Subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG,adapterName(),"Subscription "+subID);
+		logger.debug("Subscription "+subID);
 		
 		return doStart();
 	}
@@ -108,10 +113,10 @@ public abstract class MPAdapter {
 		bindings.addBinding("protocol", new RDFTermURI(request.getProtocol()));
 		
 		//SPARQL UPDATE
-		SEPALogger.log(VERBOSITY.INFO,adapterName(),">> " + request.toString());
+		logger.info(">> " + request.toString());
 		
 		if(!dispatcher.update(bindings)) {
-			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"***RDF STORE UPDATE FAILED***");
+			logger.error("***RDF STORE UPDATE FAILED***");
 			return null;
 		}
 		

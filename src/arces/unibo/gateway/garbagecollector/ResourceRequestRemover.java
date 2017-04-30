@@ -1,16 +1,18 @@
 package arces.unibo.gateway.garbagecollector;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 
 public class ResourceRequestRemover extends Aggregator {		
 	GarbageCollectorListener listener;
-	String tag = "ResourceRequestRemover";
+	private static final Logger logger = LogManager.getLogger("ResourceRequestRemover");
 	boolean monitor;
 	
 	public ResourceRequestRemover(ApplicationProfile appProfile,boolean monitor,GarbageCollectorListener listener) {
@@ -33,7 +35,7 @@ public class ResourceRequestRemover extends Aggregator {
 	public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 		if (monitor) return;
 		
-		SEPALogger.log(VERBOSITY.DEBUG, tag, "DELETE RESOURCE REQUEST "+bindingsResults.toString());
+		logger.debug("DELETE RESOURCE REQUEST "+bindingsResults.toString());
 		for (Bindings garbage : bindingsResults.getBindings()) update(garbage);
 		
 	}

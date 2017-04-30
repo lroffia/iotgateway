@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -18,7 +20,7 @@ import arces.unibo.gateway.mapping.MPResponse;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class MPResponseDispatcher extends Aggregator {
-	private static final String tag = "MP RESPONSE DISPATCHER";
+	private static final Logger logger = LogManager.getLogger("MPResponseDispatcher");
 	private HashMap<ResourceAction,ArrayList<MPRequest>> requestMap;
 	private MPMap mpMap;
 	
@@ -43,12 +45,12 @@ public class MPResponseDispatcher extends Aggregator {
 					bindings.getBindingValue("action"),  
 					bindings.getBindingValue("value"));
 			
-			SEPALogger.log(VERBOSITY.INFO,tag,"<< Resource-Response " + resource.toString());
+			logger.info("<< Resource-Response " + resource.toString());
 			
 			ArrayList<MPRequest> requests = getRequests(resource);
 			
 			if (requests == null) {
-				SEPALogger.log(VERBOSITY.WARNING,tag,"MP-REQUEST NOT FOUND FOR "+resource.toString());
+				logger.warn("MP-REQUEST NOT FOUND FOR "+resource.toString());
 				return;
 			}
 			
@@ -66,7 +68,7 @@ public class MPResponseDispatcher extends Aggregator {
 				bindings.addBinding("value", new RDFTermLiteral(response.getResponseString()));
 				bindings.addBinding("protocol", new RDFTermURI(response.getProtocol()));
 				
-				SEPALogger.log(VERBOSITY.INFO,tag,">> " + response.toString());
+				logger.info(">> " + response.toString());
 				
 				update(bindings);
 			}

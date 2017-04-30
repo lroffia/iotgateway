@@ -1,12 +1,13 @@
 package arces.unibo.gateway.mapping;
 
-import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Consumer;
 
 public abstract class Mapper extends Consumer {
-
+	private static final Logger logger = LogManager.getLogger("Mapper");
 	protected Map map;
 	
 	public Mapper(ApplicationProfile appProfile,String SPARQL_SUBSCRIBE,Map map) {
@@ -17,7 +18,7 @@ public abstract class Mapper extends Consumer {
 	public abstract String name();
 	
 	public boolean join(){
-		SEPALogger.log(VERBOSITY.DEBUG, name(), "Join");
+		logger.info("Join: "+name());
 		return super.join();
 	}
 	

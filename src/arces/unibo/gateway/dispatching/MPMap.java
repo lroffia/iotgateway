@@ -2,8 +2,9 @@ package arces.unibo.gateway.dispatching;
 
 import java.util.ArrayList;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import arces.unibo.gateway.mapping.Map;
 import arces.unibo.gateway.mapping.Mappings;
 import arces.unibo.gateway.mapping.mappers.protocol.COAPMapper;
@@ -12,6 +13,7 @@ import arces.unibo.gateway.mapping.mappers.protocol.IProtocolMapper;
 
 public class MPMap extends Map {
 	private ArrayList<IProtocolMapper> mappers = new ArrayList<IProtocolMapper>();
+	private static final Logger logger = LogManager.getLogger("MPMap");
 	
 	public MPMap(){
 		//TODO: add all supported mappings here
@@ -20,7 +22,7 @@ public class MPMap extends Map {
 		
 		for(IProtocolMapper mapper : mappers) {
 			addMapper(mapper.getMapperURI(), mapper);
-			SEPALogger.log(VERBOSITY.INFO, "MP MAP",mapper.getMapperURI() + "\tmapper added");
+			logger.info(mapper.getMapperURI() + "\tmapper added");
 		}
 	}
 	

@@ -1,7 +1,7 @@
 package arces.unibo.gateway.garbagecollector;
 
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Consumer;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Consumer;
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;

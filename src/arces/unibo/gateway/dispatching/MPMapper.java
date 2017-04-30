@@ -1,8 +1,10 @@
 package arces.unibo.gateway.dispatching;
 
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -12,6 +14,8 @@ import arces.unibo.gateway.mapping.Mapper;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class MPMapper extends Mapper{
+	private static final Logger logger = LogManager.getLogger("MPMapper");
+	
 	public MPMapper(ApplicationProfile appProfile,Map map) {super(appProfile,"MP_MAPPING", map);}
 
 	@Override
@@ -56,7 +60,7 @@ public class MPMapper extends Mapper{
 				}
 			}
 			MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
-			if(map.addMapping(mapping)) SEPALogger.log(VERBOSITY.INFO, name() ,"ADDED MAPPING " + mapping.toString());
+			if(map.addMapping(mapping)) logger.info("ADDED MAPPING " + mapping.toString());
 		}
 		
 	}
@@ -95,7 +99,7 @@ public class MPMapper extends Mapper{
 				}
 			}
 			MPMapping mapping = new MPMapping(protocol,requestPattern,responsePattern,new ResourceAction(resource,action,value));
-			if(map.removeMapping(mapping)) SEPALogger.log(VERBOSITY.INFO, name(),"REMOVED MAPPING " + mapping.toString());
+			if(map.removeMapping(mapping)) logger.info("REMOVED MAPPING " + mapping.toString());
 		}
 		
 	}

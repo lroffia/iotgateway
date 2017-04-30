@@ -3,22 +3,23 @@ package arces.unibo.gateway.resources;
 import java.util.HashMap;
 import java.util.UUID;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.Producer;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Consumer;
+import arces.unibo.SEPA.client.pattern.Producer;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class ResourceManager {
-	static String tag ="RESOURCE MANAGER";
-	
+	private final Logger logger = LogManager.getLogger("ResourceManager");
 	ResourcePendingRequestListener requestsListener;
 	ResourceResponseListener responsesListener;
 
@@ -72,6 +73,8 @@ public class ResourceManager {
 	}
 	
 	class ResourcePendingRequestListener extends Consumer {	
+		private final Logger logger = LogManager.getLogger("ResourcePendingRequestListener");
+		
 		Producer resourceResponse;
 		Producer resourceRequest;
 		
@@ -105,20 +108,20 @@ public class ResourceManager {
 						bindings.getBindingValue("action"), 
 						bindings.getBindingValue("value"));
 				
-				SEPALogger.log(VERBOSITY.INFO,tag,"<< Resource-Pending-Request " + action.toString());
+				logger.info("<< Resource-Pending-Request " + action.toString());
 				
 				//Cache matching
 				String value = cache.get(action);
 				
 				//Response
 				if (value != null) {
-					SEPALogger.log(VERBOSITY.INFO,tag,">> Resource-Response (HIT) " + action.toString());
+					logger.info(">> Resource-Response (HIT) " + action.toString());
 					bindings.addBinding("response", new RDFTermURI("iot:Resource-Response_"+UUID.randomUUID().toString()));
 					bindings.addBinding("value", new RDFTermLiteral(value));
 					resourceResponse.update(bindings);	
 				}
 				else {
-					SEPALogger.log(VERBOSITY.INFO,tag,">> Resource-Request (MISS) " + action.toString());
+					logger.info(">> Resource-Request (MISS) " + action.toString());
 					bindings.addBinding("request", new RDFTermURI("iot:Resource-Request_"+UUID.randomUUID().toString()));	
 					resourceRequest.update(bindings);	
 				}
@@ -144,7 +147,9 @@ public class ResourceManager {
 		}	
 	}
 	
-	class ResourceResponseListener extends Aggregator {		
+	class ResourceResponseListener extends Aggregator {	
+		private final Logger logger = LogManager.getLogger("ResourceResponseListener");
+		
 		public ResourceResponseListener() {
 			super(appProfile,"RESOURCE_RESPONSE","UPDATE_RESOURCE");
 		}
@@ -162,10 +167,10 @@ public class ResourceManager {
 						bindings.getBindingValue("action"), 
 						bindings.getBindingValue("value"));
 				
-				SEPALogger.log(VERBOSITY.INFO,tag,"<< Resource-Response " + action.toString());
+				logger.info("<< Resource-Response " + action.toString());
 				
 				if(update(bindings)) {
-					SEPALogger.log(VERBOSITY.INFO,tag,"UPDATE RESOURCE & ADD TO CACHE " + action.toString());
+					logger.info("UPDATE RESOURCE & ADD TO CACHE " + action.toString());
 					cache.put(action);
 				}
 			}
@@ -192,18 +197,18 @@ public class ResourceManager {
 		requestsListener = new ResourcePendingRequestListener();
 		if(!requestsListener.join()) return false;
 		if (requestsListener.subscribe(null) == null) {
-			SEPALogger.log(VERBOSITY.FATAL,tag,"Resource-pending-requests listener subscription FAILED");
+			logger.fatal("Resource-pending-requests listener subscription FAILED");
 			return false;
 		}
 		
 		responsesListener = new ResourceResponseListener();
 		if(!responsesListener.join()) return false;		
 		if (responsesListener.subscribe(null) == null) {
-			SEPALogger.log(VERBOSITY.FATAL,tag,"Resource-responses listener subscription FAILED");
+			logger.fatal("Resource-responses listener subscription FAILED");
 			return false;
 		}
 			
-		SEPALogger.log(VERBOSITY.INFO,tag,"Started");
+		logger.info("Started");
 		
 		return true;
 	}

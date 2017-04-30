@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -17,7 +19,7 @@ import arces.unibo.gateway.mapping.MPRequest;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class MPRequestDispatcher extends Aggregator {
-	private static final String tag = "MP REQUEST DISPATCHER";
+	private static final Logger logger = LogManager.getLogger("MPRequestDispatcher");
 	private MPMap mpMap;
 	MPMappingNotFoundListener listener;
 	private HashMap<ResourceAction,ArrayList<MPRequest>> requestMap;
@@ -46,7 +48,7 @@ public class MPRequestDispatcher extends Aggregator {
 			//Mapping MP-Request to Resource-Pending-Request
 			MPRequest request = new MPRequest(protocolURI, requestString,mpRequest);
 			
-			SEPALogger.log(VERBOSITY.INFO,tag,"<< " + request.toString());
+			logger.info("<< " + request.toString());
 			
 			ResourceAction resourceAction = mpMap.mpRequest2ResourceAction(request);
 			
@@ -63,7 +65,7 @@ public class MPRequestDispatcher extends Aggregator {
 			bindings.addBinding("action", new RDFTermURI(resourceAction.getActionURI()));
 			bindings.addBinding("value", new RDFTermLiteral(resourceAction.getValue()));
 			
-			SEPALogger.log(VERBOSITY.INFO,tag, ">> Resource-Pending-Request " + resourceAction.toString());
+			logger.info(">> Resource-Pending-Request " + resourceAction.toString());
 			
 			if(update(bindings)) {		
 				//MP-Request cache matching

@@ -4,22 +4,24 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 
-import arces.unibo.SEPA.application.Consumer;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Consumer;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 
 public class WebSocketAdapter extends MPAdapter {
+	private static final Logger logger = LogManager.getLogger("WebSocketAdapter");
 	private int PORT = 8989;
 	
 	private HashMap<String,HashSet<WebSocket>> subscriptions = new HashMap<String,HashSet<WebSocket>>();
@@ -169,11 +171,11 @@ public class WebSocketAdapter extends MPAdapter {
         try {
 			server.start();
 		} catch (IOException e) {
-			SEPALogger.log(VERBOSITY.INFO, adapterName(), "Failed to start WebSocket gate on port "+PORT+ " "+e.getMessage());
+			logger.info("Failed to start WebSocket gate on port "+PORT+ " "+e.getMessage());
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.INFO, adapterName(), "Started on port "+PORT);
+		logger.info( "Started on port "+PORT);
 		return true;
 	}
 

@@ -12,13 +12,13 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class PingPongHTTPClient {
 	private static String server = "127.0.0.1";
-	private static String tag = "HTTP PingPong Client";
+	
+	private static final Logger logger = LogManager.getLogger("PingPongHTTPClient");
 	
 	private static ResponseHandler<String> responseHandler;
 	private static CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -43,7 +43,7 @@ public class PingPongHTTPClient {
 	            } 
 	            else 
 	            {
-	            	SEPALogger.log(VERBOSITY.ERROR, tag, "Unexpected response status: " + status);
+	            	logger.error("Unexpected response status: " + status);
 	            	return "ERROR";
 	            }
 	        }
@@ -95,7 +95,7 @@ public class PingPongHTTPClient {
         String responseBody ="ERROR";
          	
         HttpGet httpget = new HttpGet( "http://" + server + ":8888/iot?"+request);
-        SEPALogger.log(VERBOSITY.INFO, tag, httpget.toString());
+		logger.info( httpget.toString());
         
         startTime = System.currentTimeMillis();
         
@@ -103,7 +103,7 @@ public class PingPongHTTPClient {
         responseBody = httpclient.execute(httpget, responseHandler);
         }
         catch(java.net.ConnectException e) {
-        	 SEPALogger.log(VERBOSITY.ERROR, tag, "Server " + server + " is down or cannot be reached");	
+			logger.info("Server " + server + " is down or cannot be reached");	
         }
         pingTime = System.currentTimeMillis() - startTime;
         
@@ -117,7 +117,7 @@ public class PingPongHTTPClient {
         pingAvg += pingTime;
         
         String message = String.format("Current: %d Min: %d Avg: %d Max: %d Response:%s", pingTime,pingMin,pingAvg/nRequest,pingMax,responseBody);
-        SEPALogger.log(VERBOSITY.INFO, tag,message);
+        logger.info(message);
         
         return responseBody;
 	}

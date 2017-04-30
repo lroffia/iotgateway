@@ -7,9 +7,10 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Semaphore;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
 
 import dash7Adapter.STDash7Coordinator;
 import dash7Adapter.STDash7Coordinator.BatteryNotify;
@@ -35,6 +36,8 @@ import dash7Adapter.STDash7Coordinator.ValveNotify;
  * */
 
 public class DASH7Adapter extends MNAdapter implements Observer{
+	private static final Logger logger = LogManager.getLogger("DASH7Adapter");
+	
 	STDash7Coordinator dash7Coordinator = null;
 	private RequestThread running = null;
 	private String response = "";
@@ -58,7 +61,7 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		if(arg instanceof BeaconNotify) 
 			response = String.format("BEACON!%s&%s&%s",((BeaconNotify) arg).id,((BeaconNotify) arg).status,timestamp);
 		
-		SEPALogger.log(VERBOSITY.INFO, adapterName(), "Send >> "+response);
+		logger.info("Send >> "+response);
 		
 		//Wake-up waiting thread or send response (beacon)
 		if (running != null) {
@@ -126,22 +129,22 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 		ApplicationProfile appProfile = new ApplicationProfile();
 		
 		if(!appProfile.load(path)) {
-			SEPALogger.log(VERBOSITY.FATAL, "DASH7", "Failed to load: "+ path);
+			logger.fatal("Failed to load: "+ path);
 			return;
 		}
-		else SEPALogger.log(VERBOSITY.INFO, "DASH7", "Loaded application profile "+ path);
+		else logger.info("Loaded application profile "+ path);
 		
 		DASH7Adapter adapter;
 		adapter =new DASH7Adapter(appProfile);
 		
 		if(adapter.start()) {
-			SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
+			logger.info("Press any key to exit...");
 			System.in.read();
-			if(adapter.stop()) SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
+			if(adapter.stop()) logger.info("Stopped");
 		}
 		else {
-			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
-			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
+			logger.fatal("NOT running");
+			logger.info("Press any key to exit...");
 			System.in.read();
 		}	
 	}
@@ -152,7 +155,7 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 	
 	@Override
 	public boolean doStart() {
-		SEPALogger.log(VERBOSITY.INFO,this.adapterName(),"Starting...");
+		logger.info("Starting...");
 		
 		dash7Coordinator = new STDash7Coordinator();
 		dash7Coordinator.addObserver(this);
@@ -162,17 +165,17 @@ public class DASH7Adapter extends MNAdapter implements Observer{
 			dash7Coordinator.startRunning();
 		} 
 		catch (IOException e) {
-			SEPALogger.log(VERBOSITY.FATAL,this.adapterName(),e.getMessage());
+			logger.fatal(e.getMessage());
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.INFO,this.adapterName(),"Started");
+		logger.info("Started");
 		
 		return true;
 	}
 
 	public void mnRequest(String request) {
-		SEPALogger.log(VERBOSITY.INFO, adapterName(), "Received << "+request);
+		logger.info("Received << "+request);
 		String id = "";
 		String value = "0";
 		

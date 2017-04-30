@@ -1,9 +1,11 @@
 package arces.unibo.gateway.garbagecollector;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -11,7 +13,7 @@ import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 public class MNRequestRemover extends Aggregator {		
 	boolean monitor;
 	GarbageCollectorListener listener;
-	String tag ="MNRequestRemover";
+	private static final Logger logger = LogManager.getLogger("MNRequestRemover");
 	
 	public MNRequestRemover(ApplicationProfile appProfile,boolean monitor,GarbageCollectorListener listener) {
 		super(appProfile,"MN_REQUEST", "DELETE_MN_REQUEST");
@@ -30,7 +32,7 @@ public class MNRequestRemover extends Aggregator {
 	public void notifyAdded(BindingsResults bindingsResults, String spuid, Integer sequence) {
 		if (monitor) return;
 		
-		SEPALogger.log(VERBOSITY.DEBUG, tag, "DELETE MN REQUEST "+bindingsResults.toString());
+		logger.debug("DELETE MN REQUEST "+bindingsResults.toString());
 		for (Bindings garbage : bindingsResults.getBindings()) update(garbage);
 	}
 

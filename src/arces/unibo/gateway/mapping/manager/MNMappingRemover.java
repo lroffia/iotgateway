@@ -1,7 +1,7 @@
 package arces.unibo.gateway.mapping.manager;
 
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Producer;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Producer;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
 

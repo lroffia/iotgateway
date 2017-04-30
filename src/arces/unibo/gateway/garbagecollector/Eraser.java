@@ -1,7 +1,7 @@
 package arces.unibo.gateway.garbagecollector;
 
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.Producer;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Producer;
 
 public 	class Eraser extends Producer{
 	public Eraser(ApplicationProfile appProfile){

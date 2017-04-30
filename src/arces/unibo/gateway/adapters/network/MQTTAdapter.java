@@ -7,9 +7,7 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -24,6 +22,8 @@ import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -37,7 +37,7 @@ import org.bouncycastle.openssl.jcajce.JcePEMDecryptorProviderBuilder;
 public class MQTTAdapter extends MNAdapter implements MqttCallback {
 	private MqttClient mqttClient;
 	
-	private static String clientID = "MQTTAdapter";
+	private static final Logger logger = LogManager.getLogger("MQTTAdapter");
 	
 	private boolean created = false;
 	
@@ -50,6 +50,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 	private String crtFile = "/usr/local/mosquitto-certs/mml.crt";
 	private String keyFile = "/usr/local/mosquitto-certs/mml.key" ;
 	private boolean sslEnabled = false;
+	private String clientID = "SEPAMQTTClient";
 	
 	public static class SslUtil {
 
@@ -136,7 +137,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 	            return context.getSocketFactory();
 
 	        } catch (Exception e) {
-	        	SEPALogger.log(VERBOSITY.ERROR, clientID, e.getMessage());
+	        	logger.error(e.getMessage());
 	        }
 
 	        return null;
@@ -175,7 +176,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 
 	@Override
 	public void messageArrived(String topic, MqttMessage value) throws Exception {
-		SEPALogger.log(VERBOSITY.DEBUG,clientID,topic+ " "+value.toString());
+		logger.debug(topic+ " "+value.toString());
 		
 		mnResponse(topic+"&"+value.toString());
 		
@@ -183,7 +184,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 		
 		if (debugHash.containsKey(topic)) {
 			if (!debugHash.get(topic).equals(value.toString())) {
-				SEPALogger.log(VERBOSITY.DEBUG,clientID,topic+ " "+debugHash.get(topic)+"-->"+value.toString());	
+				logger.debug(topic+ " "+debugHash.get(topic)+"-->"+value.toString());	
 			}
 		}
 		
@@ -197,10 +198,10 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 		ApplicationProfile appProfile = new ApplicationProfile();
 		
 		if(!appProfile.load(path)) {
-			SEPALogger.log(VERBOSITY.FATAL, "MQTT", "Failed to load: "+ path);
+			logger.fatal("Failed to load: "+ path);
 			return;
 		}
-		else SEPALogger.log(VERBOSITY.INFO, "MQTT", "Loaded application profile "+ path);
+		else logger.info("Loaded application profile "+ path);
 		
 		MQTTAdapter adapter;
 		String url = null;
@@ -235,25 +236,25 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 		
 		if (caCrtFile != null && crtFile != null && keyFile != null){
 			adapter = new MQTTAdapter(appProfile,url,Integer.parseInt(port),topics,caCrtFile,crtFile,keyFile);
-			SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"caCrtFile="+caCrtFile);
-			SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"crtFile="+crtFile);
-			SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"keyFile="+keyFile);
+			logger.debug("caCrtFile="+caCrtFile);
+			logger.debug("crtFile="+crtFile);
+			logger.debug("keyFile="+keyFile);
 		}
 		else
 			adapter = new MQTTAdapter(appProfile,url,Integer.parseInt(port),topics);
 		
-		SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"url="+url);
-		SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"port="+port);
-		SEPALogger.log(VERBOSITY.DEBUG,adapter.adapterName(),"topics="+topics);
+		logger.debug("url="+url);
+		logger.debug("port="+port);
+		logger.debug("topics="+topics);
 		
 		if(adapter.start()) {
-			SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
+			logger.info("Press any key to exit...");
 			System.in.read();
-			if(adapter.stop()) SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),adapter.adapterName() + " stopped");
+			if(adapter.stop()) logger.info("Stopped");
 		}
 		else {
-			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");
-			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),"Press any key to exit...");
+			logger.fatal("NOT running");
+			logger.info("Press any key to exit...");
 			System.in.read();
 		}	
 	}
@@ -276,7 +277,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient = new MqttClient(serverURI,clientID);
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.FATAL,clientID,"Failed to create MQTT client "+e.getMessage());
+			logger.fatal("Failed to create MQTT client "+e.getMessage());
 			return created;
 		}
 		
@@ -286,14 +287,14 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			if (sslEnabled) {
 				SSLSocketFactory ssl = SslUtil.getSocketFactory(caCrtFile, crtFile, keyFile, "");
 				if (ssl == null) {
-					SEPALogger.log(VERBOSITY.ERROR, clientID, "SSL security option creation failed");
+					logger.fatal("SSL security option creation failed");
 				}
 				else options.setSocketFactory(ssl);												
 			}
 			mqttClient.connect(options);
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.FATAL,clientID,"Failed to connect "+e.getMessage());
+			logger.fatal("Failed to connect "+e.getMessage());
 			return created;
 		}
 		
@@ -304,14 +305,14 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.subscribe(topicsFilter);
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.FATAL,clientID,"Failed to subscribe "+e.getMessage());
+			logger.fatal("Failed to subscribe "+e.getMessage());
 			return created;
 		}
 		
 		String topics = "";
 		for (int i=0; i < topicsFilter.length;i++) topics += "\""+ topicsFilter[i] + "\" ";
 		
-		SEPALogger.log(VERBOSITY.INFO,clientID,"MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
+		logger.info("MQTT client "+clientID+" subscribed to "+serverURI+" Topic filter "+topics);
 	
 		created = true;
 		
@@ -325,7 +326,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			if (topicsFilter != null) mqttClient.unsubscribe(topicsFilter);
 		} 
 		catch (MqttException e1) {
-			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"Failed to unsubscribe "+e1.getMessage());
+			logger.error("Failed to unsubscribe "+e1.getMessage());
 		}
 		
 		try 
@@ -333,7 +334,7 @@ public class MQTTAdapter extends MNAdapter implements MqttCallback {
 			mqttClient.disconnect();
 		} 
 		catch (MqttException e) {
-			SEPALogger.log(VERBOSITY.ERROR,adapterName(),"Failed to disconnect "+e.getMessage());
+			logger.error("Failed to disconnect "+e.getMessage());
 		}
 		
 	}

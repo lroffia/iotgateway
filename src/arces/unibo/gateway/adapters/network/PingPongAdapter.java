@@ -2,19 +2,23 @@ package arces.unibo.gateway.adapters.network;
 
 import java.io.IOException;
 
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.Producer;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+import arces.unibo.SEPA.client.pattern.Producer;
+
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
 
 public class PingPongAdapter extends MNAdapter {
 	static String status = "INIT";
 	static String appProfileFile = "GatewayProfile.sap";
 	static Producer resourceCreator;
 	static ApplicationProfile appProfile;
+	
+	private static final Logger logger = LogManager.getLogger("PingPongAdapter");
 	
 	static private void addResource(String uri,String value) {
 		Bindings bindings = new Bindings();
@@ -28,21 +32,21 @@ public class PingPongAdapter extends MNAdapter {
 		appProfile = new ApplicationProfile();
 		
 		if(!appProfile.load(appProfileFile)) {
-			SEPALogger.log(VERBOSITY.FATAL,"PINGPONG ADAPTER", "Failed to load: "+ appProfileFile);
+			logger.fatal("Failed to load: "+ appProfileFile);
 			return;
 		}
-		else SEPALogger.log(VERBOSITY.INFO, "PINGPONG ADAPTER", "Loaded application profile "+ appProfileFile);
+		else logger.info("Loaded application profile "+ appProfileFile);
 		
 		PingPongAdapter adapter;
 		adapter =new PingPongAdapter(appProfile);
 		
 		if(adapter.start()) {
-			SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),"Running...");
+			logger.info("Running...");
 		}
 		else{
-			SEPALogger.log(VERBOSITY.FATAL,adapter.adapterName(),adapter.adapterName() + " is NOT running");	
+			logger.fatal(" is NOT running");	
 		}
-		SEPALogger.log(VERBOSITY.INFO,adapter.adapterName(),"Press any key to exit...");
+		logger.info("Press any key to exit...");
 		System.in.read();
 		
 		adapter.stop();		
@@ -59,7 +63,7 @@ public class PingPongAdapter extends MNAdapter {
 
 	@Override
 	public void mnRequest(String request) {
-		SEPALogger.log(VERBOSITY.INFO,adapterName(),"<< Request<"+request+">");
+		logger.info("<< Request<"+request+">");
 		String response = "GET&"+status;
 		if(request.contains("SET")) {
 			String[] values = request.split("=");
@@ -67,7 +71,7 @@ public class PingPongAdapter extends MNAdapter {
 			response = "SET&"+status;
 		}
 	
-		SEPALogger.log(VERBOSITY.INFO,adapterName(),">> Response<"+response+">");
+		logger.info(">> Response<"+response+">");
 		mnResponse(response);
 	}
 
@@ -77,7 +81,7 @@ public class PingPongAdapter extends MNAdapter {
 		if (!resourceCreator.join()) return false;
 		addResource("iot:Resource_PINGPONG",status);
 		resourceCreator.leave();
-		SEPALogger.log(VERBOSITY.INFO,adapterName(),"Started");
+		logger.info("Started");
 		return true;
 	}
 

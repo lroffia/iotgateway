@@ -2,10 +2,12 @@ package arces.unibo.gateway.dispatching;
 
 import java.util.UUID;
 
-import arces.unibo.SEPA.application.Aggregator;
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.Aggregator;
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;
+
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
@@ -15,7 +17,7 @@ import arces.unibo.gateway.mapping.MNResponse;
 import arces.unibo.gateway.mapping.ResourceAction;
 
 public class MNResponseDispatcher extends Aggregator {		
-	private static final String tag = "MN RESPONSE DISPATCHER";
+	private static final Logger logger = LogManager.getLogger("MNResponseDispatcher");
 	private MNMap mnMap;
 	
 	public MNResponseDispatcher(ApplicationProfile appProfile,MNMap mnMap) {
@@ -35,16 +37,16 @@ public class MNResponseDispatcher extends Aggregator {
 
 			MNResponse response = new MNResponse(bindings.getBindingValue("network"), bindings.getBindingValue("value"));
 			
-			SEPALogger.log(VERBOSITY.INFO, tag,"<< "+response.toString());
+			logger.info("<< "+response.toString());
 			
 			//Mapping MN Response to Resource Response
 			ResourceAction resourceAction = mnMap.mnResponse2ResourceAction(response);
 			
 			if (resourceAction == null) {
 				resourceAction = new ResourceAction("iot:NULL","iot:NULL","MN-MAPPING NOT FOUND FOR "+response.toString());
-				SEPALogger.log(VERBOSITY.WARNING, tag,">> Resource-Response "+resourceAction.toString());
+				logger.warn(">> Resource-Response "+resourceAction.toString());
 			}
-			else SEPALogger.log(VERBOSITY.INFO, tag,">> Resource-Response "+resourceAction.toString());
+			else logger.info(">> Resource-Response "+resourceAction.toString());
 			
 			bindings = new Bindings();
 			bindings.addBinding("response", new RDFTermURI("iot:Resource-Response_"+UUID.randomUUID().toString()));						

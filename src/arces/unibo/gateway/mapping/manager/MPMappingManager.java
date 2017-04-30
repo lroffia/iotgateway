@@ -1,12 +1,12 @@
 package arces.unibo.gateway.mapping.manager;
 
-import arces.unibo.SEPA.application.ApplicationProfile;
-import arces.unibo.SEPA.application.SEPALogger;
-import arces.unibo.SEPA.application.SEPALogger.VERBOSITY;
-											
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import arces.unibo.SEPA.client.pattern.ApplicationProfile;										
 
 public class MPMappingManager {
-	static final String tag = "MP MAPPING";
+	private static final Logger logger = LogManager.getLogger("MPMappingManager");
 
 	private MPMappingCreator creator;
 	private MPMappingRemover remover;
@@ -45,13 +45,13 @@ public class MPMappingManager {
 		String subID = listener.subscribe(null);
 		
 		if (subID == null) {
-			SEPALogger.log(VERBOSITY.FATAL, tag,"Subscription FAILED");
+			logger.fatal("Subscription FAILED");
 			return false;
 		}
 		
-		SEPALogger.log(VERBOSITY.DEBUG, tag,"Subscription\t"+subID);
+		logger.debug("Subscription\t"+subID);
 		
-		SEPALogger.log(VERBOSITY.INFO, tag, "Started");
+		logger.info( "Started");
 		
 		return true;
 	}
