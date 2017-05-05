@@ -1,194 +1,209 @@
-<applicationProfile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ApplicationProfile.xsd">
-    <parameters path="/sparql" subscribePort="9000" updatePort="8000" url="mml.arces.unibo.it"/>
- 	<namespaces>
-  		<namespace prefix="rdf" suffix="http://www.w3.org/1999/02/22-rdf-syntax-ns#"/>
-  		<namespace prefix="iot" suffix="http://www.arces.unibo.it/IoTGateway#"/>
-  		<namespace prefix="rdfs" suffix="http://www.w3.org/2000/01/rdf-schema#"/>
-  	</namespaces>
-  	<updates>
-  		<update id="DELETE_ALL" ><sparql><![CDATA[DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }]]></sparql></update>
-  		<update id="DELETE_MP_MAPPING" ><sparql><![CDATA[DELETE { ?mapping ?p ?o } WHERE { ?mapping ?p ?o . ?mapping rdf:type iot:MP-Mapping }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="mapping" type="uri" value=""/>
-  		</forcedBindings></update>
-  		<update id="DELETE_MN_MAPPING" ><sparql><![CDATA[DELETE { ?mapping ?p ?o } WHERE { ?mapping ?p ?o . ?mapping rdf:type iot:MN-Mapping }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="mapping" type="uri" value=""/>
-  		</forcedBindings></update>
-  		<update id="DELETE_RESOURCE_PENDING_REQUEST" ><sparql><![CDATA[DELETE { ?request ?p ?o } WHERE { ?request ?p ?o . ?request rdf:type iot:Resource-Pending-Request }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="request" type="uri" value=""/>
-  		</forcedBindings></update>
-  		<update id="DELETE_RESOURCE_REQUEST" ><sparql><![CDATA[DELETE { ?request ?p ?o } WHERE { ?request ?p ?o . ?request rdf:type iot:Resource-Request }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="request" type="uri" value=""/>
-  		</forcedBindings></update>
-  		<update id="DELETE_MN_REQUEST" ><sparql><![CDATA[DELETE { ?request ?p ?o } WHERE { ?request ?p ?o . ?request rdf:type iot:MN-Request }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="request" type="uri" value=""/>
-  		</forcedBindings></update>
-  		<update id="DELETE_RESOURCE_RESPONSE" ><sparql><![CDATA[DELETE { ?response ?p ?o } WHERE { ?reponse ?p ?o . ?response rdf:type iot:Resource-Response }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="response" type="uri" value=""/>
-  		</forcedBindings></update>
-  		<update id="DELETE_MN_RESPONSE" ><sparql><![CDATA[DELETE { ?response ?p ?o } WHERE { ?reponse ?p ?o . ?response rdf:type iot:MN-Response }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="response" type="uri" value=""/>
-  		</forcedBindings></update>
-  		<update id="DELETE_REQUEST_RESPONSE" ><sparql><![CDATA[DELETE { ?request ?p ?o . ?response ?p1 ?o1} WHERE { ?request ?p ?o . ?response ?p1 ?o1 . ?request rdf:type iot:MP-Request . ?response rdf:type iot:MP-Response }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="request" type="uri" value=""/>
-  			<binding variable="response" type="uri" value=""/>
-  		</forcedBindings></update>
-  		
-  		<update id="INSERT_RESOURCE"><sparql>
-  		<![CDATA[INSERT DATA { 
-  		?resource rdf:type iot:Resource .
-  		?resource iot:hasValue ?value }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings></update>
-    	
-    	<update id="INSERT_MP_MAPPING">
-    	<sparql>
-    	<![CDATA[INSERT DATA { 
+{
+  "parameters": {
+    "path": "/sparql",
+    "subscribeSecurePort": 9443,
+    "subscribePort": 9000,
+    "updateSecurePort": 8443,
+    "updatePort": 8000,
+    "host": "localhost"
+  },
+  "namespaces": {
+    "iot": "http://wot.arces.unibo.it/IoTGateway#",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+  },
+  "updates": {
+    "DELETE_ALL": {
+      "sparql": "DELETE { ?s ?p ?o } WHERE { ?s ?p ?o }"
+      }
+    },
+    "DELETE_MP_MAPPING": {
+      "sparql": "DELETE { ?mapping ?p ?o } WHERE { ?mapping ?p ?o . ?mapping rdf:type iot:MP-Mapping }",
+      "forcedBindings": {
+        "mapping": {"type": "uri","value": ""}
+      }
+    },
+     "DELETE_MN_MAPPING": {
+      "sparql": "DELETE { ?mapping ?p ?o } WHERE { ?mapping ?p ?o . ?mapping rdf:type iot:MN-Mapping }",
+      "forcedBindings": {
+        "mapping": {"type": "uri","value": ""}
+      }
+    },
+     "DELETE_RESOURCE_PENDING_REQUEST": {
+      "sparql": "DELETE { ?request ?p ?o } WHERE { ?request ?p ?o . ?request rdf:type iot:Resource-Pending-Request }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""}
+      }
+    },
+    "DELETE_RESOURCE_REQUEST": {
+      "sparql": "DELETE { ?request ?p ?o } WHERE { ?request ?p ?o . ?request rdf:type iot:Resource-Request }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""}
+      }
+    },
+    "DELETE_MN_REQUEST": {
+      "sparql": "DELETE { ?request ?p ?o } WHERE { ?request ?p ?o . ?request rdf:type iot:MN-Request }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""}
+      }
+    },
+     "DELETE_RESOURCE_RESPONSE": {
+      "sparql": "DELETE { ?response ?p ?o } WHERE { ?reponse ?p ?o . ?response rdf:type iot:Resource-Response }",
+      "forcedBindings": {
+        "response": {"type": "uri","value": ""}
+      }
+    },
+    "DELETE_MN_RESPONSE": {
+      "sparql": "DELETE { ?response ?p ?o } WHERE { ?reponse ?p ?o . ?response rdf:type iot:MN-Response }",
+      "forcedBindings": {
+        "response": {"type": "uri","value": ""}
+      }
+    },
+  "DELETE_REQUEST_RESPONSE": {
+      "sparql": "DELETE { ?request ?p ?o . ?response ?p1 ?o1} WHERE { ?request ?p ?o . ?response ?p1 ?o1 . ?request rdf:type iot:MP-Request . ?response rdf:type iot:MP-Response }",
+      "forcedBindings": {
+        "response": {"type": "uri","value": ""},
+        "request": {"type": "uri","value": ""}
+      }
+    },
+   "INSERT_RESOURCE": {
+      "sparql": "INSERT DATA {?resource rdf:type iot:Resource . ?resource iot:hasValue ?value}",
+      "forcedBindings": {
+        "resource": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_MP_MAPPING": {
+      "sparql": "INSERT DATA { 
     	?mapping rdf:type iot:MP-Mapping . 
      	?mapping iot:hasProtocol ?protocol . 
      	?mapping iot:hasResource ?resource . 
      	?mapping iot:hasAction ?action . 
      	?mapping iot:hasValue ?value . 
      	?mapping iot:hasMPRequestPattern ?requestPattern . 
-     	?mapping iot:hasMPResponsePattern ?responsePattern }]]></sparql>
-     	<forcedBindings>
-  			<binding variable="mapping" type="uri" value=""/>
-  			<binding variable="protocol" type="uri" value=""/>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="action" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  			<binding variable="requestPattern" type="literal" value=""/>
-  			<binding variable="responsePattern" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>	
-     	
-     	<update id="INSERT_MP_REQUEST"><sparql>
-    	<![CDATA[INSERT DATA { 
+     	?mapping iot:hasMPResponsePattern ?responsePattern }",
+      "forcedBindings": {
+        "mapping": {"type": "uri","value": ""},
+        "protocol": {"type": "uri","value": ""},
+        "resource": {"type": "uri","value": ""},
+        "action": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""},
+        "requestPattern": {"type": "literal","value": ""},
+        "responsePattern": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_MP_REQUEST": {
+      "sparql": "INSERT DATA { 
     	?request rdf:type iot:MP-Request . 
     	?request iot:hasProtocol ?protocol . 
-    	?request iot:hasMPRequestString ?value }]]></sparql>
-    	<forcedBindings>
-  			<binding variable="request" type="uri" value=""/>
-  			<binding variable="protocol" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>
-     	
-     	<update id="INSERT_MP_RESPONSE"><sparql><![CDATA[INSERT DATA { 
+    	?request iot:hasMPRequestString ?value }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""},
+        "protocol": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_MP_RESPONSE": {
+      "sparql": "INSERT DATA { 
       	?response iot:generatedBy ?request . 
       	?response rdf:type iot:MP-Response . 
-      	?response iot:hasMPResponseString ?value }]]></sparql>
-      	<forcedBindings>
-      		<binding variable="response" type="uri" value=""/>
-  			<binding variable="request" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>	
-      	   
-      	<update id="INSERT_MN_REQUEST"><sparql><![CDATA[INSERT DATA { 
+      	?response iot:hasMPResponseString ?value }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""},
+        "response": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_MN_REQUEST": {
+      "sparql": "INSERT DATA { 
       	?request rdf:type iot:MN-Request . 
       	?request iot:hasNetwork ?network . 
-      	?request iot:hasMNRequestString ?value }]]></sparql>
-      	<forcedBindings>
-      		<binding variable="request" type="uri" value=""/>
-  			<binding variable="network" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>
-      		
-    	<update id="INSERT_MN_RESPONSE"><sparql>
-    	<![CDATA[INSERT DATA { 
+      	?request iot:hasMNRequestString ?value }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""},
+        "network": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_MN_RESPONSE": {
+      "sparql": "INSERT DATA { 
     	?response rdf:type iot:MN-Response . 
     	?response iot:hasNetwork ?network . 
-    	?response iot:hasMNResponseString ?value }]]></sparql>
-    	<forcedBindings>
-      		<binding variable="response" type="uri" value=""/>
-  			<binding variable="network" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>
-    	
-    	<update id="INSERT_MN_MAPPING"><sparql>
-    	<![CDATA[INSERT DATA { 
+    	?response iot:hasMNResponseString ?value }",
+      "forcedBindings": {
+        "response": {"type": "uri","value": ""},
+        "network": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_MN_MAPPING": {
+      "sparql": "INSERT DATA { 
     	?mapping rdf:type iot:MN-Mapping . 
     	?mapping iot:hasNetwork ?network . 
     	?mapping iot:hasResource ?resource . 
       	?mapping iot:hasAction ?action . 
       	?mapping iot:hasValue ?value . 
       	?mapping iot:hasMNRequestPattern ?requestPattern . 
-      	?mapping iot:hasMNResponsePattern ?responsePattern }]]></sparql>
-      	<forcedBindings>
-  			<binding variable="mapping" type="uri" value=""/>
-  			<binding variable="network" type="uri" value=""/>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="action" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  			<binding variable="requestPattern" type="literal" value=""/>
-  			<binding variable="responsePattern" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>	
-    	  	
-    	<update id="INSERT_RESOURCE_PENDING_REQUEST"><sparql><![CDATA[INSERT DATA { 
+      	?mapping iot:hasMNResponsePattern ?responsePattern }",
+      "forcedBindings": {
+        "mapping": {"type": "uri","value": ""},
+        "network": {"type": "uri","value": ""},
+        "resource": {"type": "uri","value": ""},
+        "action": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""},
+        "requestPattern": {"type": "literal","value": ""},
+        "responsePattern": {"type": "literal","value": ""}
+      }
+    },
+     "INSERT_RESOURCE_PENDING_REQUEST": {
+      "sparql": "INSERT DATA { 
       	?request rdf:type iot:Resource-Pending-Request . 
       	?request iot:hasValue ?value . 
       	?request iot:hasAction ?action . 
-      	?request iot:hasResource ?resource }]]></sparql>
-      	<forcedBindings>
-      		<binding variable="request" type="uri" value=""/>
-  			<binding variable="action" type="uri" value=""/>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>
-    	       
-        <update id="INSERT_RESOURCE_RESPONSE"><sparql><![CDATA[INSERT DATA { 
+      	?request iot:hasResource ?resource }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""},
+        "action": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_RESOURCE_RESPONSE": {
+      "sparql": "INSERT DATA { 
       	?response rdf:type iot:Resource-Response . 
       	?response iot:hasAction ?action . 
       	?response iot:hasResource ?resource . 
-      	?response iot:hasValue ?value }]]></sparql>
-      	<forcedBindings>
-      		<binding variable="response" type="uri" value=""/>
-  			<binding variable="action" type="uri" value=""/>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings></update>
-    	
-    	<update id="INSERT_RESOURCE_REQUEST"><sparql><![CDATA[INSERT DATA { 
+      	?response iot:hasValue ?value }",
+      "forcedBindings": {
+        "response": {"type": "uri","value": ""},
+        "action": {"type": "uri","value": ""},
+         "resource": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "INSERT_RESOURCE_REQUEST": {
+      "sparql": "INSERT DATA { 
       	?request rdf:type iot:Resource-Request . 
       	?request iot:hasValue ?value . 
       	?request iot:hasAction ?action . 
-      	?request iot:hasResource ?resource }]]></sparql>
-      	<forcedBindings>
-      		<binding variable="request" type="uri" value=""/>
-  			<binding variable="action" type="uri" value=""/>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>
-      	
-      	<update id="UPDATE_RESOURCE"><sparql>
-  		<![CDATA[
-  		DELETE { ?resource iot:hasValue ?oldValue }
+      	?request iot:hasResource ?resource }",
+      "forcedBindings": {
+        "request": {"type": "uri","value": ""},
+        "action": {"type": "uri","value": ""},
+         "resource": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+    "UPDATE_RESOURCE": {
+      "sparql": "DELETE { ?resource iot:hasValue ?oldValue }
   		INSERT { ?resource iot:hasValue ?value }
-  		WHERE { ?resource iot:hasValue ?oldValue . ?resource rdf:type iot:Resource }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>
-  		
-  		<update id="UPDATE_MN_MAPPING"><sparql>
-  		<![CDATA[
-  		DELETE { ?mapping ?pred ?obj }
+  		WHERE { ?resource iot:hasValue ?oldValue . ?resource rdf:type iot:Resource }",
+      "forcedBindings": {
+         "resource": {"type": "uri","value": ""},
+        "value": {"type": "literal","value": ""}
+      }
+    },
+     "UPDATE_MN_MAPPING": {
+      "sparql": "DELETE { ?mapping ?pred ?obj }
   		INSERT { ?mapping rdf:type iot:MN-Mapping . 
       	?mapping iot:hasNetwork ?network . 
       	?mapping iot:hasResource ?resource . 
@@ -196,11 +211,13 @@
       	?mapping iot:hasValue ?value . 
       	?mapping iot:hasMNRequestPattern ?requestPattern . 
       	?mapping iot:hasMNResponsePattern ?responsePattern }
-  		WHERE { ?mapping ?pred ?obj . ?mapping rdf:type iot:MN-Mapping }]]></sparql></update>
-  		
-  		<update id="UPDATE_MP_MAPPING"><sparql>
-  		<![CDATA[
-  		DELETE { ?mapping ?pred ?obj }
+  		WHERE { ?mapping ?pred ?obj . ?mapping rdf:type iot:MN-Mapping }",
+      "forcedBindings": {
+         "mapping": {"type": "uri","value": ""}
+      }
+    },
+     "UPDATE_MP_MAPPING": {
+      "sparql": "DELETE { ?mapping ?pred ?obj }
   		INSERT { ?mapping rdf:type iot:MP-Mapping . 
       	?mapping iot:hasProtocol ?protocol . 
       	?mapping iot:hasResource ?resource . 
@@ -208,89 +225,101 @@
       	?mapping iot:hasValue ?value . 
       	?mapping iot:hasMPRequestPattern ?requestPattern . 
       	?mapping iot:hasMPResponsePattern ?responsePattern }
-  		WHERE { ?mapping ?pred ?obj . ?mapping rdf:type iot:MP-Mapping }]]></sparql>
-  		<forcedBindings>
-  			<binding variable="mapping" type="uri" value=""/>
-  			<binding variable="protocol" type="uri" value=""/>
-  			<binding variable="resource" type="uri" value=""/>
-  			<binding variable="action" type="uri" value=""/>
-  			<binding variable="value" type="literal" value=""/>
-  			<binding variable="requestPattern" type="literal" value=""/>
-  			<binding variable="responsePattern" type="literal" value=""/>
-  		</forcedBindings>
-  		</update>
-    </updates>
-  	<subscribes>
-    	<subscribe id="MP_REQUEST"><sparql><![CDATA[SELECT ?request ?protocol ?value WHERE { 
+  		WHERE { ?mapping ?pred ?obj . ?mapping rdf:type iot:MP-Mapping }",
+      "forcedBindings": {
+         "mapping": {"type": "uri","value": ""}
+      }
+    }
+  },
+  "subscribes": {
+    "MP_REQUEST": {
+      "sparql": "SELECT ?request ?protocol ?value WHERE { 
     	?request rdf:type iot:MP-Request . 
     	?request iot:hasProtocol ?protocol . 
-    	?request iot:hasMPRequestString ?value }]]></sparql>
-		</subscribe>
-    	
-    	<subscribe id="MP_RESPONSE"><sparql><![CDATA[SELECT ?response ?request ?value ?protocol WHERE { 
+    	?request iot:hasMPRequestString ?value }",
+      "forcedBindings": {}
+    },
+    "MP_RESPONSE": {
+      "sparql": "SELECT ?response ?request ?value ?protocol WHERE { 
       	?response rdf:type iot:MP-Response . 
       	?response iot:generatedBy ?request . 
       	?response iot:hasMPResponseString ?value . 
-      	?request iot:hasProtocol ?protocol }]]></sparql>
-  		</subscribe>
-    	
-    	<subscribe id="MP_MAPPING"><sparql><![CDATA[SELECT ?mapping ?protocol ?requestPattern ?responsePattern ?resource ?action ?value WHERE { 
+      	?request iot:hasProtocol ?protocol }",
+      "forcedBindings": {}
+    },
+    "MP_MAPPING": {
+      "sparql": "SELECT ?mapping ?protocol ?requestPattern ?responsePattern ?resource ?action ?value WHERE { 
       	?mapping rdf:type iot:MP-Mapping . 
       	?mapping iot:hasProtocol ?protocol . 
       	?mapping iot:hasResource ?resource . 
       	?mapping iot:hasAction ?action . 
       	?mapping iot:hasValue ?value . 
       	?mapping iot:hasMPRequestPattern ?requestPattern . 
-      	?mapping iot:hasMPResponsePattern ?responsePattern }]]></sparql></subscribe>
-      	      	
-      	<subscribe id="MN_REQUEST"><sparql><![CDATA[SELECT ?request ?value ?network WHERE { 
+      	?mapping iot:hasMPResponsePattern ?responsePattern }",
+      "forcedBindings": {}
+    }.
+    "MN_REQUEST": {
+      "sparql": "SELECT ?request ?value ?network WHERE { 
       	?request rdf:type iot:MN-Request . 
       	?request iot:hasNetwork ?network . 
-      	?request iot:hasMNRequestString ?value }]]></sparql></subscribe>
-	    
-	    <subscribe id="MN_RESPONSE"><sparql><![CDATA[SELECT ?response ?network ?value WHERE { 
+      	?request iot:hasMNRequestString ?value }",
+      "forcedBindings": {}
+    },
+    "MN_RESPONSE": {
+      "sparql": "SELECT ?response ?network ?value WHERE { 
 	    ?response rdf:type iot:MN-Response . 
 	    ?response iot:hasNetwork ?network . 
-	    ?response iot:hasMNResponseString ?value }]]></sparql></subscribe>
-      		          	
-      	<subscribe id="MN_MAPPING"><sparql><![CDATA[SELECT ?mapping ?network ?requestPattern ?responsePattern ?resource ?action ?value WHERE { 
+	    ?response iot:hasMNResponseString ?value }",
+      "forcedBindings": {}
+    },
+    "MN_MAPPING": {
+      "sparql": "SELECT ?mapping ?network ?requestPattern ?responsePattern ?resource ?action ?value WHERE { 
       	?mapping rdf:type iot:MN-Mapping . 
       	?mapping iot:hasNetwork ?network . 
       	?mapping iot:hasResource ?resource . 
       	?mapping iot:hasAction ?action . 
       	?mapping iot:hasValue ?value . 
       	?mapping iot:hasMNRequestPattern ?requestPattern . 
-      	?mapping iot:hasMNResponsePattern ?responsePattern }]]></sparql></subscribe>
-    	
- 		<subscribe id="RESOURCE_REQUEST"><sparql><![CDATA[SELECT ?request ?value ?action ?resource WHERE { 
+      	?mapping iot:hasMNResponsePattern ?responsePattern }",
+      "forcedBindings": {}
+    },
+    "RESOURCE_REQUEST": {
+      "sparql": "SELECT ?request ?value ?action ?resource WHERE { 
 	   	?request rdf:type iot:Resource-Request . 
 	   	?request iot:hasValue ?value . 
 	    ?request iot:hasAction ?action . 
-	    ?request iot:hasResource ?resource }]]></sparql></subscribe>
-	       	
-	    <subscribe id="RESOURCE_RESPONSE"><sparql><![CDATA[SELECT ?response ?action ?resource ?value WHERE { 
+	    ?request iot:hasResource ?resource }",
+      "forcedBindings": {}
+    },
+    "RESOURCE_RESPONSE": {
+      "sparql": "SELECT ?response ?action ?resource ?value WHERE { 
 	    ?response rdf:type iot:Resource-Response . 
 	    ?response iot:hasAction ?action . 
 	    ?response iot:hasResource ?resource . 
-	    ?response iot:hasValue ?value }]]></sparql></subscribe>
-			    
-	    <subscribe id="RESOURCE_PENDING_REQUEST"><sparql><![CDATA[SELECT ?request ?resource ?action ?value WHERE { 
+	    ?response iot:hasValue ?value }",
+      "forcedBindings": {}
+    },
+    "RESOURCE_PENDING_REQUEST": {
+      "sparql": "SELECT ?request ?resource ?action ?value WHERE { 
 	    ?request rdf:type iot:Resource-Pending-Request . 
 	    ?request iot:hasValue ?value . 
 	    ?request iot:hasAction ?action . 
-	    ?request iot:hasResource ?resource }]]></sparql></subscribe>
-			
-		<subscribe id="RESOURCE"><sparql><![CDATA[SELECT ?value WHERE {
+	    ?request iot:hasResource ?resource }",
+      "forcedBindings": {}
+    },
+    "RESOURCE": {
+      "sparql": "SELECT ?resource ?value WHERE {
 			?resource rdf:type iot:Resource .
-			?resource iot:hasValue ?value }]]></sparql>
-		<forcedBindings>
-			<binding variable="resource" type="uri" value=""/>
-		</forcedBindings>
-		</subscribe>
-			
-      	<subscribe id="ALL"><sparql><![CDATA[SELECT ?s ?p ?o WHERE { ?s ?p ?o }]]></sparql></subscribe>
-      	
-      	<subscribe id="COAP_RESOURCE"><sparql><![CDATA[SELECT ?resource WHERE { ?mapping rdf:type iot:MP-Mapping . ?mapping iot:hasProtocol iot:COAP . ?mapping iot:hasResource ?resource }]]></sparql></subscribe>
-				
-  	</subscribes>
-</applicationProfile>
+			?resource iot:hasValue ?value }",
+      "forcedBindings": {}
+    },
+    "ALL": {
+      "sparql": "SELECT ?s ?p ?o WHERE { ?s ?p ?o }",
+      "forcedBindings": {}
+    },
+    "COAP_RESOURCE": {
+      "sparql": "SELECT ?resource WHERE { ?mapping rdf:type iot:MP-Mapping . ?mapping iot:hasProtocol iot:COAP . ?mapping iot:hasResource ?resource }",
+      "forcedBindings": {}
+    }
+  }
+}
