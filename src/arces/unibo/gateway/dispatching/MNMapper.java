@@ -8,6 +8,7 @@ import arces.unibo.SEPA.client.pattern.ApplicationProfile;
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.response.ErrorResponse;
 import arces.unibo.gateway.mapping.MNMapping;
 import arces.unibo.gateway.mapping.Map;
 import arces.unibo.gateway.mapping.Mapper;
@@ -113,6 +114,12 @@ public class MNMapper extends Mapper {
 
 	@Override
 	public void brokenSubscription() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onError(ErrorResponse errorResponse) {
 		// TODO Auto-generated method stub
 		
 	}

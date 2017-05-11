@@ -22,6 +22,7 @@ import arces.unibo.SEPA.client.pattern.Consumer;
 import arces.unibo.SEPA.commons.SPARQL.ARBindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
+import arces.unibo.SEPA.commons.response.ErrorResponse;
 import arces.unibo.gateway.adapters.protocol.COAPAdapter.COAPAdapterServer.GatewayCOAPResource.Running;
 
 public class COAPAdapter extends MPAdapter{
@@ -68,6 +69,12 @@ public class COAPAdapter extends MPAdapter{
 
 		@Override
 		public void brokenSubscription() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onError(ErrorResponse errorResponse) {
 			// TODO Auto-generated method stub
 			
 		}

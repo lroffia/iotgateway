@@ -13,6 +13,7 @@ import arces.unibo.SEPA.commons.SPARQL.Bindings;
 import arces.unibo.SEPA.commons.SPARQL.BindingsResults;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermLiteral;
 import arces.unibo.SEPA.commons.SPARQL.RDFTermURI;
+import arces.unibo.SEPA.commons.response.ErrorResponse;
 
 public abstract class MNAdapter {
 	private static final Logger logger = LogManager.getLogger("MNAdapter");
@@ -71,6 +72,12 @@ public abstract class MNAdapter {
 
 		@Override
 		public void brokenSubscription() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void onError(ErrorResponse errorResponse) {
 			// TODO Auto-generated method stub
 			
 		}
